@@ -96,3 +96,7 @@ The shipped skills carry no 10xDevs / cohort / certification references. `/10x-a
 Skills must not write to `context/archive/`. Archived changes are immutable; if a resolved target path starts with `context/archive/`, abort with: "This change is archived. Open a new change with `/10x-new` instead."
 
 <!-- END @przeprogramowani/10x-cli -->
+
+<!-- Project guidance below is hand-maintained and lives outside the 10x-cli block above. -->
+
+@AGENTS.md
