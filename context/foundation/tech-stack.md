@@ -5,7 +5,7 @@ project_name: 10x-cards
 hints:
   language_family: js
   team_size: solo
-  deployment_target: cloudflare-pages
+  deployment_target: cloudflare-workers
   ci_provider: github-actions
   ci_default_flow: auto-deploy-on-merge
   bootstrapper_confidence: first-class
@@ -28,7 +28,7 @@ security, directly satisfying the per-user isolation and no-loss guardrails (FR-
 access control); Astro API routes are a natural home for the LLM generation call
 (FR-003/004), with TypeScript and Zod giving typed boundaries for candidate-card
 payloads. One opinionated stack across UI, data, auth, and deploy minimizes integration
-work, which suits the tight after-hours timeline. Cloudflare Pages is the starter's
+work, which suits the tight after-hours timeline. Cloudflare Workers is the starter's
 default deploy target; GitHub Actions auto-deploys on merge to main. The only caveat:
 the Cloudflare edge runtime constrains long-running tasks, but generation is
 request/response (with visible progress per the >2s NFR) and the MVP has no background

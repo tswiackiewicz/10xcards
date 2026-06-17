@@ -8,10 +8,8 @@ Astro 6 (server-first, `output: server` on Cloudflare) · React 19 islands · Ty
 
 ## Commands
 
-- `npm run dev` — Astro dev server on the Cloudflare workerd runtime.
-- `npm run lint` / `npm run lint:fix` — ESLint over the repo.
-- `npm run format` — Prettier write.
-- `npm run build` — `astro build` → `./dist`.
+Standard scripts (`dev`, `lint`, `lint:fix`, `format`, `build`): see `@package.json`. The non-obvious ones:
+
 - **`npx astro sync`** — regenerate `.astro/` types after touching `astro.config.mjs`, content collections, or env schema. CI runs this before lint; run it locally if types look stale. (Or `/verify` to mirror CI: sync → lint → build.)
 - `npx wrangler deploy` — ship `./dist` to Cloudflare Workers (manual; CI does not auto-deploy).
 
@@ -23,11 +21,11 @@ No `test` script exists yet — there is no test framework wired up.
 - **Formatting (enforced, do not fight it):** double quotes, 2-space indent, `printWidth: 120`, semicolons, `trailingComma: "all"`. Config: `@.prettierrc.json`.
 - **ESLint is strict + type-checked** (`typescript-eslint` strict + stylistic, react-compiler as error, astro plugin). `no-console` warns. Unused vars error unless prefixed `_`. Config: `@eslint.config.js`.
 - shadcn/ui components live in `src/components/ui/`; add new ones via the shadcn CLI, don't hand-roll. Auth UI in `src/components/auth/`.
-- Astro pages are server-rendered by default; make React interactive only with explicit `client:*` directives.
+- Make React interactive only with explicit `client:*` directives.
 
 ## Architecture notes
 
-- **Routing is file-based** under `src/pages/`; API endpoints under `src/pages/api/` (e.g. `auth/signin.ts`).
+- API endpoints live under `src/pages/api/` (e.g. `auth/signin.ts`).
 - **Auth & route protection:** `src/middleware.ts` guards routes listed in its `PROTECTED_ROUTES` array and attaches the user to `context.locals.user`. Supabase SSR client (cookie-based, `@supabase/ssr`) lives in `src/lib/supabase.ts`.
 - **No DB migrations.** The app uses only Supabase's built-in `auth.users` table — don't scaffold a schema or migrations unless a feature explicitly requires it.
 
