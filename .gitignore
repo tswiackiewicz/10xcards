@@ -21,6 +21,9 @@ pnpm-debug.log*
 .dev.vars
 .wrangler/
 
+# playwright mcp scratch output (console logs, page snapshots)
+.playwright-mcp/
+
 # macOS-specific files
 .DS_Store
 
