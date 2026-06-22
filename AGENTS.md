@@ -4,7 +4,7 @@ Project onboarding for AI coding agents. This is the source of truth; `CLAUDE.md
 
 ## Stack
 
-Astro 6 (server-first, `output: server` on Cloudflare) · React 19 islands · TypeScript 5.9 (strict) · Tailwind 4 · shadcn/ui (new-york) · Supabase (auth + Postgres) · deploys to Cloudflare Workers via Wrangler. Package manager: **npm**. Node: **22.14.0** (`.nvmrc`) — `type: module` (ESM).
+Astro 6 (server-first, `output: server` on Cloudflare) · React 19 islands · TypeScript 5.9 (strict) · Tailwind 4 · shadcn/ui (new-york) · Supabase (auth + Postgres) · deploys to Cloudflare Workers via Wrangler. Package manager: **npm**. Node: **24.17.0** (`.nvmrc`) — `type: module` (ESM).
 
 ## Commands
 
