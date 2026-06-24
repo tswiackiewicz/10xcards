@@ -374,19 +374,19 @@ indexed column.
 
 #### Automated
 
-- [x] 3.1 `supabase gen types` produces `src/db/database.types.ts` referencing `flashcards`
-- [x] 3.2 `npx astro sync` passes
-- [x] 3.3 `npm run lint` passes
-- [x] 3.4 `npm run build` passes
+- [x] 3.1 `supabase gen types` produces `src/db/database.types.ts` referencing `flashcards` — f112f16
+- [x] 3.2 `npx astro sync` passes — f112f16
+- [x] 3.3 `npm run lint` passes — f112f16
+- [x] 3.4 `npm run build` passes — f112f16
 
 #### Manual
 
-- [x] 3.5 `supabase.from("flashcards")` autocompletes typed columns in editor
+- [x] 3.5 `supabase.from("flashcards")` autocompletes typed columns in editor — f112f16
 
 ### Phase 4: Production Rollout (Manual Gate)
 
 #### Manual
 
-- [ ] 4.1 `supabase db push` applies the flashcards migration to prod
-- [ ] 4.2 Prod `flashcards` shows `relrowsecurity = true` and four policies
-- [ ] 4.3 Isolation smoke check confirms RLS holds in prod
+- [x] 4.1 `supabase db push` applies the flashcards migration to prod
+- [x] 4.2 Prod `flashcards` shows `relrowsecurity = true` and four policies
+- [x] 4.3 Isolation smoke check confirms RLS holds in prod
