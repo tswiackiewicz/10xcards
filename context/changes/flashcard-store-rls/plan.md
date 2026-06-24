@@ -348,27 +348,27 @@ indexed column.
 
 #### Automated
 
-- [x] 1.1 Migration applies with no error (`npx supabase db reset`)
-- [x] 1.2 Table exists with RLS on (`relrowsecurity = true` for `public.flashcards`)
-- [x] 1.3 Four policies present (`pg_policies` count = 4)
+- [x] 1.1 Migration applies with no error (`npx supabase db reset`) — 400dba5
+- [x] 1.2 Table exists with RLS on (`relrowsecurity = true` for `public.flashcards`) — 400dba5
+- [x] 1.3 Four policies present (`pg_policies` count = 4) — 400dba5
 
 #### Manual
 
-- [x] 1.4 SQL review: policies pin `auth.uid() = user_id`; UPDATE has USING + WITH CHECK
-- [x] 1.5 Column/constraint review: source CHECK, NOT NULLs, length caps match contract
+- [x] 1.4 SQL review: policies pin `auth.uid() = user_id`; UPDATE has USING + WITH CHECK — 400dba5
+- [x] 1.5 Column/constraint review: source CHECK, NOT NULLs, length caps match contract — 400dba5
 
 ### Phase 2: RLS Isolation Verification
 
 #### Automated
 
-- [ ] 2.1 `node scripts/verify-rls.mjs` exits 0
-- [ ] 2.2 Cross-user select/update/delete/insert-as-other assertions all hold
-- [ ] 2.3 Unauthenticated (anon, signed-out) client reads zero flashcards
+- [x] 2.1 `node scripts/verify-rls.mjs` exits 0
+- [x] 2.2 Cross-user select/update/delete/insert-as-other assertions all hold
+- [x] 2.3 Unauthenticated (anon, signed-out) client reads zero flashcards
 
 #### Manual
 
-- [ ] 2.4 Review: isolation checks use anon clients, not the service-role key
-- [ ] 2.5 Negative cases fail loudly when a policy is dropped (spot-check, then restore)
+- [x] 2.4 Review: isolation checks use anon clients, not the service-role key
+- [x] 2.5 Negative cases fail loudly when a policy is dropped (spot-check, then restore)
 
 ### Phase 3: Typed Supabase Client
 
