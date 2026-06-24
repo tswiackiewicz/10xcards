@@ -387,6 +387,6 @@ indexed column.
 
 #### Manual
 
-- [x] 4.1 `supabase db push` applies the flashcards migration to prod
-- [x] 4.2 Prod `flashcards` shows `relrowsecurity = true` and four policies
-- [x] 4.3 Isolation smoke check confirms RLS holds in prod
+- [x] 4.1 `supabase db push` applies the flashcards migration to prod — bb8792e
+- [x] 4.2 Prod `flashcards` shows `relrowsecurity = true` and four policies — bb8792e
+- [x] 4.3 Isolation smoke check confirms RLS holds in prod — bb8792e
