@@ -361,27 +361,27 @@ indexed column.
 
 #### Automated
 
-- [x] 2.1 `node scripts/verify-rls.mjs` exits 0
-- [x] 2.2 Cross-user select/update/delete/insert-as-other assertions all hold
-- [x] 2.3 Unauthenticated (anon, signed-out) client reads zero flashcards
+- [x] 2.1 `node scripts/verify-rls.mjs` exits 0 — e2d0d07
+- [x] 2.2 Cross-user select/update/delete/insert-as-other assertions all hold — e2d0d07
+- [x] 2.3 Unauthenticated (anon, signed-out) client reads zero flashcards — e2d0d07
 
 #### Manual
 
-- [x] 2.4 Review: isolation checks use anon clients, not the service-role key
-- [x] 2.5 Negative cases fail loudly when a policy is dropped (spot-check, then restore)
+- [x] 2.4 Review: isolation checks use anon clients, not the service-role key — e2d0d07
+- [x] 2.5 Negative cases fail loudly when a policy is dropped (spot-check, then restore) — e2d0d07
 
 ### Phase 3: Typed Supabase Client
 
 #### Automated
 
-- [ ] 3.1 `supabase gen types` produces `src/db/database.types.ts` referencing `flashcards`
-- [ ] 3.2 `npx astro sync` passes
-- [ ] 3.3 `npm run lint` passes
-- [ ] 3.4 `npm run build` passes
+- [x] 3.1 `supabase gen types` produces `src/db/database.types.ts` referencing `flashcards`
+- [x] 3.2 `npx astro sync` passes
+- [x] 3.3 `npm run lint` passes
+- [x] 3.4 `npm run build` passes
 
 #### Manual
 
-- [ ] 3.5 `supabase.from("flashcards")` autocompletes typed columns in editor
+- [x] 3.5 `supabase.from("flashcards")` autocompletes typed columns in editor
 
 ### Phase 4: Production Rollout (Manual Gate)
 
