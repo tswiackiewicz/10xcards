@@ -434,30 +434,30 @@ These limits are production-only — verify the deployed Worker, not just `astro
 
 #### Automated
 
-- [x] 1.1 Type sync passes (`npx astro sync`)
-- [x] 1.2 Lint passes (`npm run lint`)
-- [x] 1.3 Build passes (`npm run build`)
-- [x] 1.4 `zod` resolves as a dependency (`npm ls zod`)
+- [x] 1.1 Type sync passes (`npx astro sync`) — df3969f
+- [x] 1.2 Lint passes (`npm run lint`) — df3969f
+- [x] 1.3 Build passes (`npm run build`) — df3969f
+- [x] 1.4 `zod` resolves as a dependency (`npm ls zod`) — df3969f
 
 #### Manual
 
-- [x] 1.5 With a local key, `generateCandidates` returns valid `Candidate[]` within length caps
-- [x] 1.6 `config-status.ts` reports OpenRouter not-configured when the key is unset
+- [x] 1.5 With a local key, `generateCandidates` returns valid `Candidate[]` within length caps — df3969f
+- [x] 1.6 `config-status.ts` reports OpenRouter not-configured when the key is unset — df3969f
 
 ### Phase 2: Generate API Endpoint
 
 #### Automated
 
-- [ ] 2.1 Type sync passes (`npx astro sync`)
-- [ ] 2.2 Lint passes (`npm run lint`)
-- [ ] 2.3 Build passes (`npm run build`)
+- [x] 2.1 Type sync passes (`npx astro sync`)
+- [x] 2.2 Lint passes (`npm run lint`)
+- [x] 2.3 Build passes (`npm run build`)
 
 #### Manual
 
-- [ ] 2.4 Authed + valid text + local key → `200` with `candidates` array
-- [ ] 2.5 Empty text → `400 empty_input`; >10k chars → `400 too_long`
-- [ ] 2.6 No session cookie → `401 unauthorized`
-- [ ] 2.7 Key unset → `503 ai_unavailable`
+- [x] 2.4 Authed + valid text + local key → `200` with `candidates` array
+- [x] 2.5 Empty text → `400 empty_input`; >10k chars → `400 too_long`
+- [x] 2.6 No session cookie → `401 unauthorized`
+- [x] 2.7 Key unset → `503 ai_unavailable`
 
 ### Phase 3: Save API Endpoint & Persistence
 
