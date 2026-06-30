@@ -477,14 +477,14 @@ These limits are production-only — verify the deployed Worker, not just `astro
 
 #### Automated
 
-- [x] 4.1 Type sync passes (`npx astro sync`)
-- [x] 4.2 Lint passes (`npm run lint`)
-- [x] 4.3 Build passes (`npm run build`)
+- [x] 4.1 Type sync passes (`npx astro sync`) — 31c0bfb
+- [x] 4.2 Lint passes (`npm run lint`) — 31c0bfb
+- [x] 4.3 Build passes (`npm run build`) — 31c0bfb
 
 #### Manual
 
-- [x] 4.4 Signed-out `/generate` → redirect to `/auth/signin`
-- [x] 4.5 Signed-in end-to-end: paste → loading → candidates → edit/accept/reject → save accepted → confirmation
-- [x] 4.6 Empty / over-length / unusable-result each show a specific friendly message; pasted text preserved
-- [x] 4.7 Key unset → graceful "AI not configured" path
-- [x] 4.8 Rejected candidates leave no DB trace; only accepted cards saved (human-gating)
+- [x] 4.4 Signed-out `/generate` → redirect to `/auth/signin` — 31c0bfb
+- [x] 4.5 Signed-in end-to-end: paste → loading → candidates → edit/accept/reject → save accepted → confirmation — 31c0bfb
+- [x] 4.6 Empty / over-length / unusable-result each show a specific friendly message; pasted text preserved — 31c0bfb
+- [x] 4.7 Key unset → graceful "AI not configured" path — 31c0bfb
+- [x] 4.8 Rejected candidates leave no DB trace; only accepted cards saved (human-gating) — 31c0bfb
