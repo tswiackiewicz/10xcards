@@ -46,10 +46,10 @@ export const POST: APIRoute = async (context) => {
     user_id: user.id,
   }));
 
-  const { data, error } = await supabase.from("flashcards").insert(rows).select();
+  const { error } = await supabase.from("flashcards").insert(rows);
   if (error) {
     return fail(500, "save_failed");
   }
 
-  return json(200, { saved: data.length });
+  return json(200, { saved: rows.length });
 };

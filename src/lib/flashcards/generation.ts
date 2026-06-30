@@ -81,6 +81,7 @@ export async function generateCandidates(text: string, apiKey: string): Promise<
         ],
         response_format: RESPONSE_FORMAT,
       }),
+      signal: AbortSignal.timeout(20000),
     });
   } catch {
     throw new GenerationError("OpenRouter request failed");

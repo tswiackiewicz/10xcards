@@ -39,7 +39,8 @@ export default function GenerateView() {
   const [error, setError] = useState<ApiErrorCode | null>(null);
   const [savedCount, setSavedCount] = useState<number | null>(null);
 
-  const overLimit = text.length > MAX_INPUT_CHARS;
+  const trimmedLength = text.trim().length;
+  const overLimit = trimmedLength > MAX_INPUT_CHARS;
   const acceptedCount = cards.filter((c) => c.status === "accepted").length;
   const generating = status === "generating";
   const saving = status === "saving";
@@ -117,7 +118,7 @@ export default function GenerateView() {
         />
         <div className="mt-1 flex items-center justify-between text-xs">
           <span className={overLimit ? "text-red-300" : "text-blue-100/50"}>
-            {text.length.toLocaleString()} / {MAX_INPUT_CHARS.toLocaleString()}
+            {trimmedLength.toLocaleString()} / {MAX_INPUT_CHARS.toLocaleString()}
           </span>
           <Button type="button" onClick={handleGenerate} disabled={generating || text.trim().length === 0 || overLimit}>
             {generating ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
