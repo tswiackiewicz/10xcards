@@ -463,28 +463,28 @@ These limits are production-only — verify the deployed Worker, not just `astro
 
 #### Automated
 
-- [x] 3.1 Type sync passes (`npx astro sync`)
-- [x] 3.2 Lint passes (`npm run lint`)
-- [x] 3.3 Build passes (`npm run build`)
+- [x] 3.1 Type sync passes (`npx astro sync`) — 7c2e63a
+- [x] 3.2 Lint passes (`npm run lint`) — 7c2e63a
+- [x] 3.3 Build passes (`npm run build`) — 7c2e63a
 
 #### Manual
 
-- [x] 3.4 Authed save of valid cards → `200 { saved: N }`; rows in DB with correct `user_id`, `source='ai'`
-- [x] 3.5 Over-length card → `400 invalid_input`; nothing inserted
-- [x] 3.6 Unauthenticated → `401`; saved rows remain owner-isolated (F-01 path)
+- [x] 3.4 Authed save of valid cards → `200 { saved: N }`; rows in DB with correct `user_id`, `source='ai'` — 7c2e63a
+- [x] 3.5 Over-length card → `400 invalid_input`; nothing inserted — 7c2e63a
+- [x] 3.6 Unauthenticated → `401`; saved rows remain owner-isolated (F-01 path) — 7c2e63a
 
 ### Phase 4: /generate Page & Review Island
 
 #### Automated
 
-- [ ] 4.1 Type sync passes (`npx astro sync`)
-- [ ] 4.2 Lint passes (`npm run lint`)
-- [ ] 4.3 Build passes (`npm run build`)
+- [x] 4.1 Type sync passes (`npx astro sync`)
+- [x] 4.2 Lint passes (`npm run lint`)
+- [x] 4.3 Build passes (`npm run build`)
 
 #### Manual
 
-- [ ] 4.4 Signed-out `/generate` → redirect to `/auth/signin`
-- [ ] 4.5 Signed-in end-to-end: paste → loading → candidates → edit/accept/reject → save accepted → confirmation
-- [ ] 4.6 Empty / over-length / unusable-result each show a specific friendly message; pasted text preserved
-- [ ] 4.7 Key unset → graceful "AI not configured" path
-- [ ] 4.8 Rejected candidates leave no DB trace; only accepted cards saved (human-gating)
+- [x] 4.4 Signed-out `/generate` → redirect to `/auth/signin`
+- [x] 4.5 Signed-in end-to-end: paste → loading → candidates → edit/accept/reject → save accepted → confirmation
+- [x] 4.6 Empty / over-length / unusable-result each show a specific friendly message; pasted text preserved
+- [x] 4.7 Key unset → graceful "AI not configured" path
+- [x] 4.8 Rejected candidates leave no DB trace; only accepted cards saved (human-gating)
