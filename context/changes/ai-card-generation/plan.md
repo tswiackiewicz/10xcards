@@ -448,30 +448,30 @@ These limits are production-only — verify the deployed Worker, not just `astro
 
 #### Automated
 
-- [x] 2.1 Type sync passes (`npx astro sync`)
-- [x] 2.2 Lint passes (`npm run lint`)
-- [x] 2.3 Build passes (`npm run build`)
+- [x] 2.1 Type sync passes (`npx astro sync`) — 0a18843
+- [x] 2.2 Lint passes (`npm run lint`) — 0a18843
+- [x] 2.3 Build passes (`npm run build`) — 0a18843
 
 #### Manual
 
-- [x] 2.4 Authed + valid text + local key → `200` with `candidates` array
-- [x] 2.5 Empty text → `400 empty_input`; >10k chars → `400 too_long`
-- [x] 2.6 No session cookie → `401 unauthorized`
-- [x] 2.7 Key unset → `503 ai_unavailable`
+- [x] 2.4 Authed + valid text + local key → `200` with `candidates` array — 0a18843
+- [x] 2.5 Empty text → `400 empty_input`; >10k chars → `400 too_long` — 0a18843
+- [x] 2.6 No session cookie → `401 unauthorized` — 0a18843
+- [x] 2.7 Key unset → `503 ai_unavailable` — 0a18843
 
 ### Phase 3: Save API Endpoint & Persistence
 
 #### Automated
 
-- [ ] 3.1 Type sync passes (`npx astro sync`)
-- [ ] 3.2 Lint passes (`npm run lint`)
-- [ ] 3.3 Build passes (`npm run build`)
+- [x] 3.1 Type sync passes (`npx astro sync`)
+- [x] 3.2 Lint passes (`npm run lint`)
+- [x] 3.3 Build passes (`npm run build`)
 
 #### Manual
 
-- [ ] 3.4 Authed save of valid cards → `200 { saved: N }`; rows in DB with correct `user_id`, `source='ai'`
-- [ ] 3.5 Over-length card → `400 invalid_input`; nothing inserted
-- [ ] 3.6 Unauthenticated → `401`; saved rows remain owner-isolated (F-01 path)
+- [x] 3.4 Authed save of valid cards → `200 { saved: N }`; rows in DB with correct `user_id`, `source='ai'`
+- [x] 3.5 Over-length card → `400 invalid_input`; nothing inserted
+- [x] 3.6 Unauthenticated → `401`; saved rows remain owner-isolated (F-01 path)
 
 ### Phase 4: /generate Page & Review Island
 
