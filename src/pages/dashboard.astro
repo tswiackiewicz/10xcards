@@ -14,12 +14,20 @@ const { user } = Astro.locals;
         Welcome, <span class="font-semibold text-white">{user?.email}</span>
       </p>
       <p class="mt-2 text-sm text-blue-100/50">This page is only for authenticated users.</p>
-      <a
-        href="/generate"
-        class="mt-6 inline-block rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm transition-colors hover:bg-white/20"
-      >
-        Generate flashcards
-      </a>
+      <div class="mt-6 flex flex-wrap justify-center gap-3">
+        <a
+          href="/generate"
+          class="inline-block rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm transition-colors hover:bg-white/20"
+        >
+          Generate flashcards
+        </a>
+        <a
+          href="/create"
+          class="inline-block rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm transition-colors hover:bg-white/20"
+        >
+          Create flashcard
+        </a>
+      </div>
       <form method="POST" action="/api/auth/signout" class="mt-6">
         <button
           type="submit"

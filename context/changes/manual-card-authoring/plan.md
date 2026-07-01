@@ -232,27 +232,27 @@ None — no schema change. The `flashcards.source` column and its CHECK/default 
 
 #### Automated
 
-- [x] 1.1 Type generation passes: `npx astro sync`
-- [x] 1.2 Linting passes: `npm run lint`
-- [x] 1.3 Build passes: `npm run build`
+- [x] 1.1 Type generation passes: `npx astro sync` — 3e100c5
+- [x] 1.2 Linting passes: `npm run lint` — 3e100c5
+- [x] 1.3 Build passes: `npm run build` — 3e100c5
 
 #### Manual
 
-- [x] 1.4 Valid signed-in POST returns 200 {"saved":1}; row has source='manual' and caller's user_id
-- [x] 1.5 Unauthenticated → 401; empty/over-length question or answer → 400 invalid_input
+- [x] 1.4 Valid signed-in POST returns 200 {"saved":1}; row has source='manual' and caller's user_id — 3e100c5
+- [x] 1.5 Unauthenticated → 401; empty/over-length question or answer → 400 invalid_input — 3e100c5
 
 ### Phase 2: Authoring page & form
 
 #### Automated
 
-- [ ] 2.1 Type generation passes: `npx astro sync`
-- [ ] 2.2 Linting passes: `npm run lint`
-- [ ] 2.3 Build passes: `npm run build`
+- [x] 2.1 Type generation passes: `npx astro sync`
+- [x] 2.2 Linting passes: `npm run lint`
+- [x] 2.3 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 2.4 `/create` signed out redirects to `/auth/signin`
-- [ ] 2.5 Signed in, save shows green confirmation, clears form, row saved with source='manual'
-- [ ] 2.6 Empty fields disable save; save failure shows inline message with input preserved
-- [ ] 2.7 Dashboard "Create flashcard" link navigates to `/create`
-- [ ] 2.8 `/generate` AI flow still works (no regression)
+- [x] 2.4 `/create` signed out redirects to `/auth/signin`
+- [x] 2.5 Signed in, save shows green confirmation, clears form, row saved with source='manual'
+- [x] 2.6 Empty fields disable save; save failure shows inline message with input preserved
+- [x] 2.7 Dashboard "Create flashcard" link navigates to `/create`
+- [x] 2.8 `/generate` AI flow still works (no regression)
