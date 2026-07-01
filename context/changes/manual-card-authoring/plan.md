@@ -245,14 +245,14 @@ None — no schema change. The `flashcards.source` column and its CHECK/default 
 
 #### Automated
 
-- [x] 2.1 Type generation passes: `npx astro sync`
-- [x] 2.2 Linting passes: `npm run lint`
-- [x] 2.3 Build passes: `npm run build`
+- [x] 2.1 Type generation passes: `npx astro sync` — d437416
+- [x] 2.2 Linting passes: `npm run lint` — d437416
+- [x] 2.3 Build passes: `npm run build` — d437416
 
 #### Manual
 
-- [x] 2.4 `/create` signed out redirects to `/auth/signin`
-- [x] 2.5 Signed in, save shows green confirmation, clears form, row saved with source='manual'
-- [x] 2.6 Empty fields disable save; save failure shows inline message with input preserved
-- [x] 2.7 Dashboard "Create flashcard" link navigates to `/create`
-- [x] 2.8 `/generate` AI flow still works (no regression)
+- [x] 2.4 `/create` signed out redirects to `/auth/signin` — d437416
+- [x] 2.5 Signed in, save shows green confirmation, clears form, row saved with source='manual' — d437416
+- [x] 2.6 Empty fields disable save; save failure shows inline message with input preserved — d437416
+- [x] 2.7 Dashboard "Create flashcard" link navigates to `/create` — d437416
+- [x] 2.8 `/generate` AI flow still works (no regression) — d437416
