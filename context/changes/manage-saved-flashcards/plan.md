@@ -332,32 +332,32 @@ None. The `flashcards` table, its RLS policies (incl. UPDATE/DELETE), grants, an
 
 #### Automated
 
-- [x] 1.1 Type generation is current: `npx astro sync`
-- [x] 1.2 Linting passes: `npm run lint`
-- [x] 1.3 Build succeeds: `npm run build`
+- [x] 1.1 Type generation is current: `npx astro sync` — 14a163d
+- [x] 1.2 Linting passes: `npm run lint` — 14a163d
+- [x] 1.3 Build succeeds: `npm run build` — 14a163d
 
 #### Manual
 
-- [x] 1.4 Signed-in user sees all their cards at `/cards`, newest first, full Q+A + AI/Manual badge
-- [x] 1.5 Empty deck shows the empty state linking to Generate/Create
-- [x] 1.6 Signed-out access to `/cards` redirects to sign-in
-- [x] 1.7 A second user does not see the first user's cards (RLS)
-- [x] 1.8 Dashboard shows a working "My flashcards" link
+- [x] 1.4 Signed-in user sees all their cards at `/cards`, newest first, full Q+A + AI/Manual badge — 14a163d
+- [x] 1.5 Empty deck shows the empty state linking to Generate/Create — 14a163d
+- [x] 1.6 Signed-out access to `/cards` redirects to sign-in — 14a163d
+- [x] 1.7 A second user does not see the first user's cards (RLS) — 14a163d
+- [x] 1.8 Dashboard shows a working "My flashcards" link — 14a163d
 
 ### Phase 2: Edit a card (FR-007)
 
 #### Automated
 
-- [ ] 2.1 Type generation is current: `npx astro sync`
-- [ ] 2.2 Linting passes: `npm run lint`
-- [ ] 2.3 Build succeeds: `npm run build`
+- [x] 2.1 Type generation is current: `npx astro sync`
+- [x] 2.2 Linting passes: `npm run lint`
+- [x] 2.3 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 2.4 Editing a card and saving persists the change (visible after reload)
-- [ ] 2.5 Over-length/empty input disables Save; server rejects with inline message, input preserved
-- [ ] 2.6 Editing a non-owned / bad id returns not-found (RLS-blocked)
-- [ ] 2.7 Cancel discards edits and restores original text
+- [x] 2.4 Editing a card and saving persists the change (visible after reload)
+- [x] 2.5 Over-length/empty input disables Save; server rejects with inline message, input preserved
+- [x] 2.6 Editing a non-owned / bad id returns not-found (RLS-blocked)
+- [x] 2.7 Cancel discards edits and restores original text
 
 ### Phase 3: Delete a card (FR-008)
 
