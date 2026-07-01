@@ -127,6 +127,47 @@ async function main() {
   assert(!reA.error && reA.data?.id === cardId, "A's card still exists");
   assert(reA.data.answer === "A answer", "A's card answer is unchanged");
 
+  // --- S-04: SRS scheduling columns inherit the same owner isolation -------------
+  // The columns are new (due/state/stability/…); prove a foreign user can neither
+  // read nor write them, and that the owner can.
+  const srsState = {
+    due: "2026-07-02T00:00:00.000Z",
+    state: 1,
+    stability: 2.3065,
+    difficulty: 2.118,
+    scheduled_days: 0,
+    learning_steps: 1,
+    reps: 1,
+    lapses: 0,
+    last_review: "2026-07-01T00:00:00.000Z",
+  };
+
+  // 10. A can write SRS state to its own card.
+  const srsUpdA = await asA.from("flashcards").update(srsState).eq("id", cardId).select();
+  assert(!srsUpdA.error && srsUpdA.data.length === 1, "A can write SRS state to its own card");
+
+  // 11. B cannot read A's SRS columns (still sees zero rows).
+  const srsSelB = await asB.from("flashcards").select("id, due, state, stability");
+  assert(!srsSelB.error && srsSelB.data.length === 0, "B reads zero rows — cannot see A's SRS state");
+
+  // 12. B cannot overwrite A's SRS state (RLS hides the row → 0 rows affected).
+  const srsUpdB = await asB
+    .from("flashcards")
+    .update({ due: "1999-01-01T00:00:00.000Z", state: 3, reps: 999 })
+    .eq("id", cardId)
+    .select();
+  assert(
+    !srsUpdB.error && Array.isArray(srsUpdB.data) && srsUpdB.data.length === 0,
+    "B's update of A's SRS state affects 0 rows",
+  );
+
+  // 13. A's SRS state survived B's attempt unchanged.
+  const reSrsA = await asA.from("flashcards").select("due, state, reps").eq("id", cardId).single();
+  assert(
+    !reSrsA.error && reSrsA.data.state === srsState.state && reSrsA.data.reps === srsState.reps,
+    "A's SRS state is unchanged after B's attempt",
+  );
+
   console.log(`\nAll ${passed} assertions passed. RLS isolation holds. ✅`);
 }
 
