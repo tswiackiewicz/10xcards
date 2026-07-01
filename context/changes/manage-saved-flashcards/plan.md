@@ -363,13 +363,13 @@ None. The `flashcards` table, its RLS policies (incl. UPDATE/DELETE), grants, an
 
 #### Automated
 
-- [x] 3.1 Type generation is current: `npx astro sync`
-- [x] 3.2 Linting passes: `npm run lint`
-- [x] 3.3 Build succeeds: `npm run build`
+- [x] 3.1 Type generation is current: `npx astro sync` — fea2fe8
+- [x] 3.2 Linting passes: `npm run lint` — fea2fe8
+- [x] 3.3 Build succeeds: `npm run build` — fea2fe8
 
 #### Manual
 
-- [x] 3.4 Delete opens a confirmation dialog; canceling leaves the card intact
-- [x] 3.5 Confirming deletes the card (gone after reload) and removes the row from the list
-- [x] 3.6 Deleting the last card shows the empty state
-- [x] 3.7 Deleting a non-owned / bad id returns not-found (RLS-blocked)
+- [x] 3.4 Delete opens a confirmation dialog; canceling leaves the card intact — fea2fe8
+- [x] 3.5 Confirming deletes the card (gone after reload) and removes the row from the list — fea2fe8
+- [x] 3.6 Deleting the last card shows the empty state — fea2fe8
+- [x] 3.7 Deleting a non-owned / bad id returns not-found (RLS-blocked) — fea2fe8
