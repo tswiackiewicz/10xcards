@@ -404,12 +404,12 @@ next-card query cheap. ts-fsrs adds no measurable bundle weight after tree-shaki
 
 #### Automated
 
-- [x] 3.1 `astro sync` + `lint` + `build` pass
-- [x] 3.2 Unauthenticated `GET /study` redirects to `/auth/signin`
+- [x] 3.1 `astro sync` + `lint` + `build` pass — 218258c
+- [x] 3.2 Unauthenticated `GET /study` redirects to `/auth/signin` — 218258c
 
 #### Manual
 
-- [x] 3.3 Full reveal→grade→advance loop works on `astro dev`; interval hints differ per button
-- [x] 3.4 Grading advances scheduling (graded card's `due` moves to the future)
-- [x] 3.5 "All caught up" state shows when no card is due
-- [x] 3.6 No regressions on `/cards`, `/generate`, `/create`
+- [x] 3.3 Full reveal→grade→advance loop works on `astro dev`; interval hints differ per button — 218258c
+- [x] 3.4 Grading advances scheduling (graded card's `due` moves to the future) — 218258c
+- [x] 3.5 "All caught up" state shows when no card is due — 218258c
+- [x] 3.6 No regressions on `/cards`, `/generate`, `/create` — 218258c
