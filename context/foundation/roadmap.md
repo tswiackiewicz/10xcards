@@ -39,13 +39,13 @@ never built on a hand-authored card the learner had to write first. That pairing
 
 ## At a glance
 
-| ID   | Change ID               | Outcome (user can …)                                            | Prerequisites | PRD refs                                        | Status      |
-| ---- | ----------------------- | --------------------------------------------------------------- | ------------- | ----------------------------------------------- | ----------- |
-| F-01 | flashcard-store-rls     | (foundation) per-user flashcard store with RLS isolation lands  | —             | Access Control, NFR(no-loss), Guardrails        | done        |
-| S-01 | ai-card-generation      | paste text, get AI candidates, accept/edit/reject into the deck | F-01          | FR-003, FR-004, US-01, NFR(progress), NFR(GDPR) | implemented |
-| S-02 | manual-card-authoring   | create a flashcard manually                                     | F-01          | FR-005                                          | proposed    |
-| S-03 | manage-saved-flashcards | view, edit, and delete saved flashcards                         | F-01, S-01    | FR-006, FR-007, FR-008                          | proposed    |
-| S-04 | spaced-repetition-study | study a deck through a spaced-repetition schedule               | F-01, S-01    | FR-009                                          | proposed    |
+| ID   | Change ID               | Outcome (user can …)                                            | Prerequisites | PRD refs                                        | Status   |
+| ---- | ----------------------- | --------------------------------------------------------------- | ------------- | ----------------------------------------------- | -------- |
+| F-01 | flashcard-store-rls     | (foundation) per-user flashcard store with RLS isolation lands  | —             | Access Control, NFR(no-loss), Guardrails        | done     |
+| S-01 | ai-card-generation      | paste text, get AI candidates, accept/edit/reject into the deck | F-01          | FR-003, FR-004, US-01, NFR(progress), NFR(GDPR) | done     |
+| S-02 | manual-card-authoring   | create a flashcard manually                                     | F-01          | FR-005                                          | proposed |
+| S-03 | manage-saved-flashcards | view, edit, and delete saved flashcards                         | F-01, S-01    | FR-006, FR-007, FR-008                          | proposed |
+| S-04 | spaced-repetition-study | study a deck through a spaced-repetition schedule               | F-01, S-01    | FR-009                                          | proposed |
 
 ## Streams
 
@@ -97,7 +97,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - ~~Input-size / generated-card-count cap for the MVP (PRD Open Question Q1)~~ — Resolved in implementation: input capped at 10k chars (`400 too_long` above the cap).
 - **Risk:** This is the wedge and the only unfamiliar integration, so it carries the most uncertainty. Generation is a single request/response OpenRouter `fetch`; Cloudflare free tier doesn't meter the wait but does cap per-request CPU and subrequests — keep one model call + minimal Supabase round-trips, and surface continuous progress per the NFR. Human-gating (no silent auto-save) is the load-bearing guardrail to verify.
-- **Status:** implemented (impl-reviewed, PR #2 merged) — generation service, generate + save API endpoints, and `/generate` page with the accept/edit/reject review island all landed across 4 phases. Human-gating verified (rejected candidates leave no DB trace). Not yet archived. Live generation still requires `OPENROUTER_API_KEY` set as a prod Workers Secret.
+- **Status:** done
 
 ### S-02: Manual card authoring
 
@@ -162,3 +162,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 ## Done
 
 - **F-01: (foundation) a single user-scoped `flashcards` store exists, with row-level security enforcing that a card is visible and mutable only by its owner, and that confirmed cards survive sessions.** — Archived 2026-07-01 → `context/archive/2026-06-24-flashcard-store-rls/`. Lesson: —.
+- **S-01: user can paste source text, request AI-generated candidates, and accept / edit / reject each one — accepted cards are saved to their deck and become visible; empty/unusable input gets an explanatory message, not a failure.** — Archived 2026-07-01 → `context/archive/2026-06-25-ai-card-generation/`. Lesson: —.
