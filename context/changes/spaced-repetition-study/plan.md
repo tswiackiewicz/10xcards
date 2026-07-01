@@ -377,28 +377,28 @@ next-card query cheap. ts-fsrs adds no measurable bundle weight after tree-shaki
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly against local Supabase
-- [x] 1.2 Type generation succeeds and `Flashcard` row includes the 9 new fields
-- [x] 1.3 RLS verification script passes: `node scripts/verify-rls.mjs`
-- [x] 1.4 `astro sync` + `lint` + `build` pass
+- [x] 1.1 Migration applies cleanly against local Supabase — a363c4b
+- [x] 1.2 Type generation succeeds and `Flashcard` row includes the 9 new fields — a363c4b
+- [x] 1.3 RLS verification script passes: `node scripts/verify-rls.mjs` — a363c4b
+- [x] 1.4 `astro sync` + `lint` + `build` pass — a363c4b
 
 #### Manual
 
-- [x] 1.5 Migrated table has 9 nullable columns + `due` index; existing rows have NULL SRS state
-- [x] 1.6 No existing flashcard rows were mutated by the migration
+- [x] 1.5 Migrated table has 9 nullable columns + `due` index; existing rows have NULL SRS state — a363c4b
+- [x] 1.6 No existing flashcard rows were mutated by the migration — a363c4b
 
 ### Phase 2: SRS Helper & API
 
 #### Automated
 
-- [ ] 2.1 `astro sync` + `lint` + `build` pass (ts-fsrs bundles without `nodejs_compat` errors)
-- [ ] 2.2 Type checking passes — `applyGrade` output matches the `flashcards` Update type
+- [x] 2.1 `astro sync` + `lint` + `build` pass (ts-fsrs bundles without `nodejs_compat` errors)
+- [x] 2.2 Type checking passes — `applyGrade` output matches the `flashcards` Update type
 
 #### Manual
 
-- [ ] 2.3 `GET /study/next` returns a new card for a fresh deck and `{ card: null }` when nothing is due
-- [ ] 2.4 `PATCH /<id>/review` initializes a new card and advances `due` on repeat grades
-- [ ] 2.5 Review returns 404 (foreign/missing id), 400 (bad rating), 401 (unauthenticated)
+- [x] 2.3 `GET /study/next` returns a new card for a fresh deck and `{ card: null }` when nothing is due
+- [x] 2.4 `PATCH /<id>/review` initializes a new card and advances `due` on repeat grades
+- [x] 2.5 Review returns 404 (foreign/missing id), 400 (bad rating), 401 (unauthenticated)
 
 ### Phase 3: Study UI
 

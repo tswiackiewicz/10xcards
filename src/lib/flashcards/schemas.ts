@@ -28,10 +28,16 @@ export const saveRequestSchema = z.object({
 /** Inbound body for POST /api/flashcards/manual (a single hand-authored card). */
 export const manualCardSchema = candidateSchema;
 
+/** Inbound body for PATCH /api/flashcards/[id]/review — an FSRS grade (1=Again … 4=Easy). */
+export const reviewSchema = z.object({
+  rating: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
+});
+
 export type GenerateRequest = z.infer<typeof generateRequestSchema>;
 export type Candidate = z.infer<typeof candidateSchema>;
 export type SaveRequest = z.infer<typeof saveRequestSchema>;
 export type ManualCardRequest = z.infer<typeof manualCardSchema>;
+export type ReviewRequest = z.infer<typeof reviewSchema>;
 
 /** A saved flashcard row as stored in the `flashcards` table. */
 export type Flashcard = Database["public"]["Tables"]["flashcards"]["Row"];
@@ -46,4 +52,5 @@ export type ApiErrorCode =
   | "invalid_input"
   | "unauthorized"
   | "save_failed"
-  | "not_found";
+  | "not_found"
+  | "invalid_rating";
