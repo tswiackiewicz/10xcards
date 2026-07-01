@@ -1,7 +1,8 @@
 ---
 change_id: spaced-repetition-study
 title: Spaced-repetition study session (S-04)
-status: impl_reviewed
+status: archived
+archived_at: 2026-07-01T20:36:57Z
 created: 2026-07-01
 updated: 2026-07-01
 ---

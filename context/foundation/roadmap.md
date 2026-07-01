@@ -39,13 +39,13 @@ never built on a hand-authored card the learner had to write first. That pairing
 
 ## At a glance
 
-| ID   | Change ID               | Outcome (user can …)                                            | Prerequisites | PRD refs                                        | Status   |
-| ---- | ----------------------- | --------------------------------------------------------------- | ------------- | ----------------------------------------------- | -------- |
-| F-01 | flashcard-store-rls     | (foundation) per-user flashcard store with RLS isolation lands  | —             | Access Control, NFR(no-loss), Guardrails        | done     |
-| S-01 | ai-card-generation      | paste text, get AI candidates, accept/edit/reject into the deck | F-01          | FR-003, FR-004, US-01, NFR(progress), NFR(GDPR) | done     |
-| S-02 | manual-card-authoring   | create a flashcard manually                                     | F-01          | FR-005                                          | done     |
-| S-03 | manage-saved-flashcards | view, edit, and delete saved flashcards                         | F-01, S-01    | FR-006, FR-007, FR-008                          | done     |
-| S-04 | spaced-repetition-study | study a deck through a spaced-repetition schedule               | F-01, S-01    | FR-009                                          | proposed |
+| ID   | Change ID               | Outcome (user can …)                                            | Prerequisites | PRD refs                                        | Status |
+| ---- | ----------------------- | --------------------------------------------------------------- | ------------- | ----------------------------------------------- | ------ |
+| F-01 | flashcard-store-rls     | (foundation) per-user flashcard store with RLS isolation lands  | —             | Access Control, NFR(no-loss), Guardrails        | done   |
+| S-01 | ai-card-generation      | paste text, get AI candidates, accept/edit/reject into the deck | F-01          | FR-003, FR-004, US-01, NFR(progress), NFR(GDPR) | done   |
+| S-02 | manual-card-authoring   | create a flashcard manually                                     | F-01          | FR-005                                          | done   |
+| S-03 | manage-saved-flashcards | view, edit, and delete saved flashcards                         | F-01, S-01    | FR-006, FR-007, FR-008                          | done   |
+| S-04 | spaced-repetition-study | study a deck through a spaced-repetition schedule               | F-01, S-01    | FR-009                                          | done   |
 
 ## Streams
 
@@ -134,7 +134,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - Which ready-made SRS algorithm/library to integrate (PRD Non-Goals forbid building a custom engine) — Owner: user/TBD. Block: no (selectable at plan time).
 - **Risk:** The retention half of the value proposition; weighty because it integrates an external SRS algorithm and introduces scheduling state. Needs cards to exist (follows S-01). Scope risk: must integrate a ready-made scheduler, not drift into building one (Non-Goal).
-- **Status:** proposed
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -165,3 +165,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-01: user can paste source text, request AI-generated candidates, and accept / edit / reject each one — accepted cards are saved to their deck and become visible; empty/unusable input gets an explanatory message, not a failure.** — Archived 2026-07-01 → `context/archive/2026-06-25-ai-card-generation/`. Lesson: —.
 - **S-02: user can create a flashcard manually (question + answer) and have it saved to their deck.** — Archived 2026-07-01 → `context/archive/2026-07-01-manual-card-authoring/`. Lesson: —.
 - **S-03: user can view their saved flashcards in a list, edit any saved card, and delete a card.** — Archived 2026-07-01 → `context/archive/2026-07-01-manage-saved-flashcards/`. Lesson: —.
+- **S-04: user can study a deck through a spaced-repetition schedule — the product decides which card to show next based on prior recall.** — Archived 2026-07-01 → `context/archive/2026-07-01-spaced-repetition-study/`. Lesson: —.
