@@ -14,6 +14,8 @@ export async function getNextCard(supabase: SupabaseClient, now: Date): Promise<
   const { data, error } = await supabase
     .from("flashcards")
     .select("*")
+    // `now` is interpolated into a PostgREST filter string — callers must always pass a
+    // server-generated Date, never a client-supplied timestamp.
     .or(`due.is.null,due.lte.${now.toISOString()}`)
     .order("due", { ascending: true, nullsFirst: true })
     .limit(1);

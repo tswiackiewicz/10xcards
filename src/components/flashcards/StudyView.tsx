@@ -25,6 +25,12 @@ function labelFor(previews: GradePreview[] | null, rating: ReviewRating): string
   return previews?.find((p) => p.rating === rating)?.label ?? null;
 }
 
+async function requestJson(url: string, init: RequestInit): Promise<{ ok: boolean; error?: ApiErrorCode }> {
+  const res = await fetch(url, init);
+  const data = (await res.json().catch(() => ({}))) as { error?: ApiErrorCode };
+  return { ok: res.ok, error: data.error };
+}
+
 interface StudyViewProps {
   initialCard: Flashcard | null;
   initialPreviews: GradePreview[] | null;
@@ -65,19 +71,18 @@ export default function StudyView({ initialCard, initialPreviews }: StudyViewPro
   }
 
   async function grade(rating: ReviewRating) {
-    if (!card) return;
+    if (!card || status === "loading") return;
     setStatus("loading");
     setError(null);
     try {
-      const res = await fetch(`/api/flashcards/${card.id}/review`, {
+      const { ok, error } = await requestJson(`/api/flashcards/${card.id}/review`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rating }),
       });
-      // A 404 means the card was deleted elsewhere — just advance to the next one.
-      if (!res.ok && res.status !== 404) {
-        const data = (await res.json().catch(() => ({}))) as { error?: ApiErrorCode };
-        setError(data.error ?? "save_failed");
+      // not_found means the card was deleted elsewhere — just advance to the next one.
+      if (!ok && error !== "not_found") {
+        setError(error ?? "save_failed");
         setStatus("error");
         return;
       }
