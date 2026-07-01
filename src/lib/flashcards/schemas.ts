@@ -5,8 +5,8 @@ export const MAX_INPUT_CHARS = 10000;
 export const MAX_CARDS = 15;
 
 /** Per-card length caps mirror the `flashcards` table CHECK constraints (F-01). */
-const QUESTION_MAX = 1000;
-const ANSWER_MAX = 2000;
+export const QUESTION_MAX = 1000;
+export const ANSWER_MAX = 2000;
 
 /** Inbound body for POST /api/flashcards/generate. */
 export const generateRequestSchema = z.object({
@@ -24,9 +24,13 @@ export const saveRequestSchema = z.object({
   cards: z.array(candidateSchema).min(1).max(MAX_CARDS),
 });
 
+/** Inbound body for POST /api/flashcards/manual (a single hand-authored card). */
+export const manualCardSchema = candidateSchema;
+
 export type GenerateRequest = z.infer<typeof generateRequestSchema>;
 export type Candidate = z.infer<typeof candidateSchema>;
 export type SaveRequest = z.infer<typeof saveRequestSchema>;
+export type ManualCardRequest = z.infer<typeof manualCardSchema>;
 
 /** Typed error codes returned by the flashcard endpoints and mapped to UI copy. */
 export type ApiErrorCode =
