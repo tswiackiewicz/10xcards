@@ -142,7 +142,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | ---------- | ----------------------- | --------------------------------------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------- |
 | F-01       | flashcard-store-rls     | Per-user flashcard store with RLS isolation         | done                  | Implemented + rolled out to prod. Awaiting `/10x-archive`.                                                  |
 | S-01       | ai-card-generation      | AI flashcard generation & accept/edit/reject review | done                  | Implemented + impl-reviewed (PR #2). Set `OPENROUTER_API_KEY` for live generation. Awaiting `/10x-archive`. |
-| S-02       | manual-card-authoring   | Manual flashcard creation                           | done                  | Implemented + impl-reviewed (PR #3, open). Awaiting merge + `/10x-archive`.                                 |
+| S-02       | manual-card-authoring   | Manual flashcard creation                           | done                  | Done — merged (PR #3), archived 2026-07-01 → `context/archive/2026-07-01-manual-card-authoring/`.           |
 | S-03       | manage-saved-flashcards | View / edit / delete saved flashcards               | yes                   | F-01 + S-01 done — prerequisites met; cards now exist to manage.                                            |
 | S-04       | spaced-repetition-study | Spaced-repetition study session                     | yes                   | F-01 + S-01 done — prerequisites met; pick an SRS library at plan time.                                     |
 
