@@ -1,10 +1,10 @@
 ---
 change_id: manage-saved-flashcards
 title: Manage saved flashcards — view, edit, and delete (S-03)
-status: impl_reviewed
+status: archived
 created: 2026-07-01
 updated: 2026-07-01
-archived_at: null
+archived_at: 2026-07-01T18:54:43Z
 ---
 
 ## Notes
