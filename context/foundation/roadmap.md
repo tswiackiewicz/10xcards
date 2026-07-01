@@ -43,7 +43,7 @@ never built on a hand-authored card the learner had to write first. That pairing
 | ---- | ----------------------- | --------------------------------------------------------------- | ------------- | ----------------------------------------------- | -------- |
 | F-01 | flashcard-store-rls     | (foundation) per-user flashcard store with RLS isolation lands  | —             | Access Control, NFR(no-loss), Guardrails        | done     |
 | S-01 | ai-card-generation      | paste text, get AI candidates, accept/edit/reject into the deck | F-01          | FR-003, FR-004, US-01, NFR(progress), NFR(GDPR) | done     |
-| S-02 | manual-card-authoring   | create a flashcard manually                                     | F-01          | FR-005                                          | proposed |
+| S-02 | manual-card-authoring   | create a flashcard manually                                     | F-01          | FR-005                                          | done     |
 | S-03 | manage-saved-flashcards | view, edit, and delete saved flashcards                         | F-01, S-01    | FR-006, FR-007, FR-008                          | proposed |
 | S-04 | spaced-repetition-study | study a deck through a spaced-repetition schedule               | F-01, S-01    | FR-009                                          | proposed |
 
@@ -109,7 +109,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Smallest slice; depends only on the store. Sequenced as a sibling of S-01 (not after it) because it shares no code path with generation and is the fallback when AI output doesn't fit. Low risk.
-- **Status:** proposed
+- **Status:** done
 
 ### S-03: Manage saved flashcards
 
@@ -142,7 +142,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | ---------- | ----------------------- | --------------------------------------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------- |
 | F-01       | flashcard-store-rls     | Per-user flashcard store with RLS isolation         | done                  | Implemented + rolled out to prod. Awaiting `/10x-archive`.                                                  |
 | S-01       | ai-card-generation      | AI flashcard generation & accept/edit/reject review | done                  | Implemented + impl-reviewed (PR #2). Set `OPENROUTER_API_KEY` for live generation. Awaiting `/10x-archive`. |
-| S-02       | manual-card-authoring   | Manual flashcard creation                           | yes                   | F-01 done — unblocked. Runs parallel to the AI path.                                                        |
+| S-02       | manual-card-authoring   | Manual flashcard creation                           | done                  | Implemented + impl-reviewed (PR #3, open). Awaiting merge + `/10x-archive`.                                 |
 | S-03       | manage-saved-flashcards | View / edit / delete saved flashcards               | yes                   | F-01 + S-01 done — prerequisites met; cards now exist to manage.                                            |
 | S-04       | spaced-repetition-study | Spaced-repetition study session                     | yes                   | F-01 + S-01 done — prerequisites met; pick an SRS library at plan time.                                     |
 
@@ -163,3 +163,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 - **F-01: (foundation) a single user-scoped `flashcards` store exists, with row-level security enforcing that a card is visible and mutable only by its owner, and that confirmed cards survive sessions.** — Archived 2026-07-01 → `context/archive/2026-06-24-flashcard-store-rls/`. Lesson: —.
 - **S-01: user can paste source text, request AI-generated candidates, and accept / edit / reject each one — accepted cards are saved to their deck and become visible; empty/unusable input gets an explanatory message, not a failure.** — Archived 2026-07-01 → `context/archive/2026-06-25-ai-card-generation/`. Lesson: —.
+- **S-02: user can create a flashcard manually (question + answer) and have it saved to their deck.** — Archived 2026-07-01 → `context/archive/2026-07-01-manual-card-authoring/`. Lesson: —.
