@@ -41,7 +41,7 @@ never built on a hand-authored card the learner had to write first. That pairing
 
 | ID   | Change ID               | Outcome (user can …)                                            | Prerequisites | PRD refs                                        | Status      |
 | ---- | ----------------------- | --------------------------------------------------------------- | ------------- | ----------------------------------------------- | ----------- |
-| F-01 | flashcard-store-rls     | (foundation) per-user flashcard store with RLS isolation lands  | —             | Access Control, NFR(no-loss), Guardrails        | implemented |
+| F-01 | flashcard-store-rls     | (foundation) per-user flashcard store with RLS isolation lands  | —             | Access Control, NFR(no-loss), Guardrails        | done        |
 | S-01 | ai-card-generation      | paste text, get AI candidates, accept/edit/reject into the deck | F-01          | FR-003, FR-004, US-01, NFR(progress), NFR(GDPR) | implemented |
 | S-02 | manual-card-authoring   | create a flashcard manually                                     | F-01          | FR-005                                          | proposed    |
 | S-03 | manage-saved-flashcards | view, edit, and delete saved flashcards                         | F-01, S-01    | FR-006, FR-007, FR-008                          | proposed    |
@@ -82,7 +82,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Sequenced first because the isolation + no-loss guardrails are a launch gate and every slice writes to this store. Kept deliberately minimal (one owner-scoped entity, not a full data layer); S-01 immediately exercises it through a real user save, so it does not drift into horizontal layer-completion. Main risk: getting RLS wrong is a silent cross-user-visibility regression — must be verified, not assumed.
-- **Status:** implemented — migration + 4 RLS policies, isolation verification (`scripts/verify-rls.mjs`), typed Supabase client, and prod rollout all landed. Cross-user isolation verified in prod. Not yet archived.
+- **Status:** done
 
 ## Slices
 
@@ -161,4 +161,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 ## Done
 
-(Empty on first generation. `/10x-archive` appends entries here — and flips the matching item's `Status` to `done` — when a change whose `Change ID` matches a roadmap item is archived.)
+- **F-01: (foundation) a single user-scoped `flashcards` store exists, with row-level security enforcing that a card is visible and mutable only by its owner, and that confirmed cards survive sessions.** — Archived 2026-07-01 → `context/archive/2026-06-24-flashcard-store-rls/`. Lesson: —.
