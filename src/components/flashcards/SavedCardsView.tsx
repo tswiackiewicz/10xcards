@@ -1,6 +1,17 @@
 import { useState } from "react";
-import { Sparkles, PenLine, Pencil, Save, X, Loader2 } from "lucide-react";
+import { Sparkles, PenLine, Pencil, Save, X, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { QUESTION_MAX, ANSWER_MAX, type Flashcard, type ApiErrorCode } from "@/lib/flashcards/schemas";
 
 /** Typed error code → friendly inline copy (only the codes the [id] endpoint returns). */
@@ -131,7 +142,36 @@ function CardEditor({
   );
 }
 
-function SavedCard({ card, onStartEdit }: { card: Flashcard; onStartEdit: () => void }) {
+function SavedCard({
+  card,
+  onStartEdit,
+  onDeleted,
+}: {
+  card: Flashcard;
+  onStartEdit: () => void;
+  onDeleted: () => void;
+}) {
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState<ApiErrorCode | null>(null);
+
+  async function handleDelete() {
+    setError(null);
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/flashcards/${card.id}`, { method: "DELETE" });
+      const data = (await res.json().catch(() => ({}))) as { error?: ApiErrorCode };
+      if (!res.ok) {
+        setError(data.error ?? "save_failed");
+        return;
+      }
+      onDeleted();
+    } catch {
+      setError("save_failed");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   return (
     <li className="rounded-xl border border-white/10 bg-white/5 p-4">
       <div className="mb-2 flex items-center justify-between">
@@ -141,7 +181,32 @@ function SavedCard({ card, onStartEdit }: { card: Flashcard; onStartEdit: () => 
       <p className="text-sm whitespace-pre-wrap text-white">{card.question}</p>
       <div className="mt-3 mb-1 text-xs tracking-wide text-blue-100/50 uppercase">Answer</div>
       <p className="text-sm whitespace-pre-wrap text-blue-100/80">{card.answer}</p>
-      <div className="mt-3 flex justify-end">
+
+      {error && (
+        <p className="mt-3 rounded-lg border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
+          {ERROR_COPY[error]}
+        </p>
+      )}
+
+      <div className="mt-3 flex justify-end gap-2">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button type="button" variant="outline" disabled={deleting}>
+              {deleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+              Delete
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete this card?</AlertDialogTitle>
+              <AlertDialogDescription>This can&apos;t be undone.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <Button type="button" variant="outline" onClick={onStartEdit}>
           <Pencil className="size-4" />
           Edit
@@ -186,6 +251,10 @@ export default function SavedCardsView({ cards }: { cards: Flashcard[] }) {
     setEditingId(null);
   }
 
+  function handleDeleted(id: string) {
+    setDeck((prev) => prev.filter((c) => c.id !== id));
+  }
+
   return (
     <ul className="space-y-3">
       {deck.map((card) =>
@@ -206,6 +275,9 @@ export default function SavedCardsView({ cards }: { cards: Flashcard[] }) {
             card={card}
             onStartEdit={() => {
               setEditingId(card.id);
+            }}
+            onDeleted={() => {
+              handleDeleted(card.id);
             }}
           />
         ),

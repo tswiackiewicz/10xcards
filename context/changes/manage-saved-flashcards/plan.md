@@ -348,28 +348,28 @@ None. The `flashcards` table, its RLS policies (incl. UPDATE/DELETE), grants, an
 
 #### Automated
 
-- [x] 2.1 Type generation is current: `npx astro sync`
-- [x] 2.2 Linting passes: `npm run lint`
-- [x] 2.3 Build succeeds: `npm run build`
+- [x] 2.1 Type generation is current: `npx astro sync` — 682f3cb
+- [x] 2.2 Linting passes: `npm run lint` — 682f3cb
+- [x] 2.3 Build succeeds: `npm run build` — 682f3cb
 
 #### Manual
 
-- [x] 2.4 Editing a card and saving persists the change (visible after reload)
-- [x] 2.5 Over-length/empty input disables Save; server rejects with inline message, input preserved
-- [x] 2.6 Editing a non-owned / bad id returns not-found (RLS-blocked)
-- [x] 2.7 Cancel discards edits and restores original text
+- [x] 2.4 Editing a card and saving persists the change (visible after reload) — 682f3cb
+- [x] 2.5 Over-length/empty input disables Save; server rejects with inline message, input preserved — 682f3cb
+- [x] 2.6 Editing a non-owned / bad id returns not-found (RLS-blocked) — 682f3cb
+- [x] 2.7 Cancel discards edits and restores original text — 682f3cb
 
 ### Phase 3: Delete a card (FR-008)
 
 #### Automated
 
-- [ ] 3.1 Type generation is current: `npx astro sync`
-- [ ] 3.2 Linting passes: `npm run lint`
-- [ ] 3.3 Build succeeds: `npm run build`
+- [x] 3.1 Type generation is current: `npx astro sync`
+- [x] 3.2 Linting passes: `npm run lint`
+- [x] 3.3 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 3.4 Delete opens a confirmation dialog; canceling leaves the card intact
-- [ ] 3.5 Confirming deletes the card (gone after reload) and removes the row from the list
-- [ ] 3.6 Deleting the last card shows the empty state
-- [ ] 3.7 Deleting a non-owned / bad id returns not-found (RLS-blocked)
+- [x] 3.4 Delete opens a confirmation dialog; canceling leaves the card intact
+- [x] 3.5 Confirming deletes the card (gone after reload) and removes the row from the list
+- [x] 3.6 Deleting the last card shows the empty state
+- [x] 3.7 Deleting a non-owned / bad id returns not-found (RLS-blocked)
