@@ -39,8 +39,23 @@ export type SaveRequest = z.infer<typeof saveRequestSchema>;
 export type ManualCardRequest = z.infer<typeof manualCardSchema>;
 export type ReviewRequest = z.infer<typeof reviewSchema>;
 
+/** A single FSRS grade as it travels over the wire: 1=Again, 2=Hard, 3=Good, 4=Easy. */
+export type ReviewRating = ReviewRequest["rating"];
+
 /** A saved flashcard row as stored in the `flashcards` table. */
 export type Flashcard = Database["public"]["Tables"]["flashcards"]["Row"];
+
+/** Interval hint for one grade button in the study UI (e.g. rating 3 → "10m"). */
+export interface GradePreview {
+  rating: ReviewRating;
+  label: string;
+}
+
+/** Response of GET /api/flashcards/study/next. `card: null` means the deck is all caught up. */
+export interface NextCardResponse {
+  card: Flashcard | null;
+  previews: GradePreview[] | null;
+}
 
 /** Typed error codes returned by the flashcard endpoints and mapped to UI copy. */
 export type ApiErrorCode =

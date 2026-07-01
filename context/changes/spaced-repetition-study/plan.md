@@ -391,25 +391,25 @@ next-card query cheap. ts-fsrs adds no measurable bundle weight after tree-shaki
 
 #### Automated
 
-- [x] 2.1 `astro sync` + `lint` + `build` pass (ts-fsrs bundles without `nodejs_compat` errors)
-- [x] 2.2 Type checking passes — `applyGrade` output matches the `flashcards` Update type
+- [x] 2.1 `astro sync` + `lint` + `build` pass (ts-fsrs bundles without `nodejs_compat` errors) — 8687e6c
+- [x] 2.2 Type checking passes — `applyGrade` output matches the `flashcards` Update type — 8687e6c
 
 #### Manual
 
-- [x] 2.3 `GET /study/next` returns a new card for a fresh deck and `{ card: null }` when nothing is due
-- [x] 2.4 `PATCH /<id>/review` initializes a new card and advances `due` on repeat grades
-- [x] 2.5 Review returns 404 (foreign/missing id), 400 (bad rating), 401 (unauthenticated)
+- [x] 2.3 `GET /study/next` returns a new card for a fresh deck and `{ card: null }` when nothing is due — 8687e6c
+- [x] 2.4 `PATCH /<id>/review` initializes a new card and advances `due` on repeat grades — 8687e6c
+- [x] 2.5 Review returns 404 (foreign/missing id), 400 (bad rating), 401 (unauthenticated) — 8687e6c
 
 ### Phase 3: Study UI
 
 #### Automated
 
-- [ ] 3.1 `astro sync` + `lint` + `build` pass
-- [ ] 3.2 Unauthenticated `GET /study` redirects to `/auth/signin`
+- [x] 3.1 `astro sync` + `lint` + `build` pass
+- [x] 3.2 Unauthenticated `GET /study` redirects to `/auth/signin`
 
 #### Manual
 
-- [ ] 3.3 Full reveal→grade→advance loop works on `astro dev`; interval hints differ per button
-- [ ] 3.4 Grading advances scheduling (graded card's `due` moves to the future)
-- [ ] 3.5 "All caught up" state shows when no card is due
-- [ ] 3.6 No regressions on `/cards`, `/generate`, `/create`
+- [x] 3.3 Full reveal→grade→advance loop works on `astro dev`; interval hints differ per button
+- [x] 3.4 Grading advances scheduling (graded card's `due` moves to the future)
+- [x] 3.5 "All caught up" state shows when no card is due
+- [x] 3.6 No regressions on `/cards`, `/generate`, `/create`

@@ -1,0 +1,30 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import StudyView from "@/components/flashcards/StudyView";
+import { createClient } from "@/lib/supabase";
+import { getNextCard } from "@/lib/flashcards/study";
+import type { NextCardResponse } from "@/lib/flashcards/schemas";
+
+// Middleware (PROTECTED_ROUTES) already gated this route. Server-load the first card
+// (RLS-scoped) so the island renders it without a mount fetch; it fetches subsequent
+// cards from /api/flashcards/study/next after each grade.
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+let initial: NextCardResponse = { card: null, previews: null };
+if (supabase) {
+  initial = (await getNextCard(supabase, new Date())) ?? { card: null, previews: null };
+}
+---
+
+<Layout title="Study">
+  <div class="bg-cosmic min-h-screen p-4">
+    <div class="mx-auto max-w-2xl">
+      <header class="flex items-center justify-between py-6 text-white">
+        <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-2xl font-bold text-transparent">
+          Study
+        </h1>
+        <a href="/dashboard" class="text-sm text-blue-100/70 transition-colors hover:text-white">← Dashboard</a>
+      </header>
+      <StudyView client:load initialCard={initial.card} initialPreviews={initial.previews} />
+    </div>
+  </div>
+</Layout>

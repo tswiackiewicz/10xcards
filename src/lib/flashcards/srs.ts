@@ -1,5 +1,5 @@
 import { createEmptyCard, fsrs, Rating, State, type Card } from "ts-fsrs";
-import type { Flashcard } from "@/lib/flashcards/schemas";
+import type { Flashcard, GradePreview, ReviewRating } from "@/lib/flashcards/schemas";
 
 /**
  * S-04 spaced-repetition scheduling, isolated behind a thin ts-fsrs wrapper.
@@ -16,9 +16,6 @@ export type SrsColumns = Pick<
   "due" | "stability" | "difficulty" | "scheduled_days" | "learning_steps" | "reps" | "lapses" | "state" | "last_review"
 >;
 
-/** A rating as it arrives from the client: 1=Again, 2=Hard, 3=Good, 4=Easy (FSRS grades, Manual excluded). */
-export type ReviewRating = 1 | 2 | 3 | 4;
-
 /** The four gradable ratings, in button order. */
 const RATINGS: readonly ReviewRating[] = [1, 2, 3, 4];
 
@@ -29,12 +26,6 @@ const GRADE_BY_RATING = {
   3: Rating.Good,
   4: Rating.Easy,
 } as const;
-
-/** Interval hint per grade, for the study UI's four buttons. */
-export interface GradePreview {
-  rating: ReviewRating;
-  label: string;
-}
 
 /** Build a ts-fsrs `Card` from a stored row, or a fresh card when the row was never studied (NULL `due`). */
 function rowToCard(row: SrsColumns): Card {
