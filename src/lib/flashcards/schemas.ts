@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { Database } from "@/db/database.types";
 
 /** Hard caps shared by the app layer and mirrored against the DB CHECK constraints. */
 export const MAX_INPUT_CHARS = 10000;
@@ -32,6 +33,9 @@ export type Candidate = z.infer<typeof candidateSchema>;
 export type SaveRequest = z.infer<typeof saveRequestSchema>;
 export type ManualCardRequest = z.infer<typeof manualCardSchema>;
 
+/** A saved flashcard row as stored in the `flashcards` table. */
+export type Flashcard = Database["public"]["Tables"]["flashcards"]["Row"];
+
 /** Typed error codes returned by the flashcard endpoints and mapped to UI copy. */
 export type ApiErrorCode =
   | "empty_input"
@@ -41,4 +45,5 @@ export type ApiErrorCode =
   | "rate_limited"
   | "invalid_input"
   | "unauthorized"
-  | "save_failed";
+  | "save_failed"
+  | "not_found";

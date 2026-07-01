@@ -1,0 +1,29 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import SavedCardsView from "@/components/flashcards/SavedCardsView";
+import { createClient } from "@/lib/supabase";
+import type { Flashcard } from "@/lib/flashcards/schemas";
+
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+
+let cards: Flashcard[] = [];
+if (supabase) {
+  // RLS scopes this to the signed-in owner; middleware already gated the route.
+  const { data } = await supabase.from("flashcards").select("*").order("created_at", { ascending: false });
+  cards = data ?? [];
+}
+---
+
+<Layout title="My flashcards">
+  <div class="bg-cosmic min-h-screen p-4">
+    <div class="mx-auto max-w-3xl">
+      <header class="flex items-center justify-between py-6 text-white">
+        <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-2xl font-bold text-transparent">
+          My flashcards
+        </h1>
+        <a href="/dashboard" class="text-sm text-blue-100/70 transition-colors hover:text-white">← Dashboard</a>
+      </header>
+      <SavedCardsView client:load cards={cards} />
+    </div>
+  </div>
+</Layout>
