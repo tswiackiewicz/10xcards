@@ -138,13 +138,13 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 ## Backlog Handoff
 
-| Roadmap ID | Change ID               | Suggested issue title                               | Ready for `/10x-plan` | Notes                                                                                                       |
-| ---------- | ----------------------- | --------------------------------------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------- |
-| F-01       | flashcard-store-rls     | Per-user flashcard store with RLS isolation         | done                  | Implemented + rolled out to prod. Awaiting `/10x-archive`.                                                  |
-| S-01       | ai-card-generation      | AI flashcard generation & accept/edit/reject review | done                  | Implemented + impl-reviewed (PR #2). Set `OPENROUTER_API_KEY` for live generation. Awaiting `/10x-archive`. |
-| S-02       | manual-card-authoring   | Manual flashcard creation                           | done                  | Done — merged (PR #3), archived 2026-07-01 → `context/archive/2026-07-01-manual-card-authoring/`.           |
-| S-03       | manage-saved-flashcards | View / edit / delete saved flashcards               | yes                   | F-01 + S-01 done — prerequisites met; cards now exist to manage.                                            |
-| S-04       | spaced-repetition-study | Spaced-repetition study session                     | yes                   | F-01 + S-01 done — prerequisites met; pick an SRS library at plan time.                                     |
+| Roadmap ID | Change ID               | Suggested issue title                               | Ready for `/10x-plan` | Notes                                                                                                                                                          |
+| ---------- | ----------------------- | --------------------------------------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F-01       | flashcard-store-rls     | Per-user flashcard store with RLS isolation         | done                  | Done — rolled out to prod, archived 2026-06-24 → `context/archive/2026-06-24-flashcard-store-rls/`.                                                            |
+| S-01       | ai-card-generation      | AI flashcard generation & accept/edit/reject review | done                  | Done — impl-reviewed (PR #2), archived 2026-06-25 → `context/archive/2026-06-25-ai-card-generation/`. Confirm `OPENROUTER_API_KEY` is set for live generation. |
+| S-02       | manual-card-authoring   | Manual flashcard creation                           | done                  | Done — merged (PR #3), archived 2026-07-01 → `context/archive/2026-07-01-manual-card-authoring/`.                                                              |
+| S-03       | manage-saved-flashcards | View / edit / delete saved flashcards               | done                  | Done — archived 2026-07-01 → `context/archive/2026-07-01-manage-saved-flashcards/`.                                                                            |
+| S-04       | spaced-repetition-study | Spaced-repetition study session                     | done                  | Done — impl-reviewed, archived 2026-07-01 → `context/archive/2026-07-01-spaced-repetition-study/`.                                                             |
 
 ## Open Roadmap Questions
 
