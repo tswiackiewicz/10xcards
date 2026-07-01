@@ -40,7 +40,7 @@
 - **Location**: src/components/flashcards/SavedCardsView.tsx:76, 162
 - **Detail**: ManualCardForm centralizes fetch in a typed `postJson()` helper; SavedCardsView inlines `fetch` twice (PATCH, DELETE) with an inline `{ error?: ApiErrorCode }` cast. Functionally equivalent and arguably clearer given the two calls differ in method/body.
 - **Fix**: Leave as-is; extract a shared `requestJson(url, init)` only if a third caller appears.
-- **Decision**: PENDING
+- **Decision**: FIXED — extracted `requestJson(url, init)` helper; both PATCH + DELETE routed through it. Verified lint + build.
 
 ### F2 — Row not auto-removed on a 404 (not_found) response
 
@@ -50,4 +50,4 @@
 - **Location**: src/components/flashcards/SavedCardsView.tsx:157-173
 - **Detail**: If edit/delete returns 404 (card already gone / RLS-hidden), the row stays in the deck until the user manually refreshes. Matches the shown copy ("This card no longer exists. Refresh the page.") — acceptable for MVP.
 - **Fix**: Optional follow-up — on a 404, drop the row from local state instead of only showing the message.
-- **Decision**: PENDING
+- **Decision**: FIXED — on a 404 not_found, edit (`onGone`) and delete (`onDeleted`) both remove the stale row so the list self-heals. Verified sync + lint + build.

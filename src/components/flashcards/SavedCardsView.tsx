@@ -25,6 +25,12 @@ const ERROR_COPY: Partial<Record<ApiErrorCode, string>> = {
 const fieldClass =
   "w-full resize-y rounded-lg border border-white/10 bg-white/5 p-3 text-sm text-white outline-none focus:border-purple-300 disabled:opacity-50";
 
+async function requestJson(url: string, init: RequestInit): Promise<{ ok: boolean; error?: ApiErrorCode }> {
+  const res = await fetch(url, init);
+  const data = (await res.json().catch(() => ({}))) as { error?: ApiErrorCode };
+  return { ok: res.ok, error: data.error };
+}
+
 function SourceBadge({ source }: { source: string }) {
   const isAi = source === "ai";
   return (
@@ -46,10 +52,12 @@ function CardEditor({
   card,
   onCancel,
   onSaved,
+  onGone,
 }: {
   card: Flashcard;
   onCancel: () => void;
   onSaved: (question: string, answer: string) => void;
+  onGone: () => void;
 }) {
   const [question, setQuestion] = useState(card.question);
   const [answer, setAnswer] = useState(card.answer);
@@ -68,14 +76,18 @@ function CardEditor({
     setError(null);
     setStatus("saving");
     try {
-      const res = await fetch(`/api/flashcards/${card.id}`, {
+      const { ok, error } = await requestJson(`/api/flashcards/${card.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question, answer }),
       });
-      const data = (await res.json().catch(() => ({}))) as { error?: ApiErrorCode };
-      if (!res.ok) {
-        setError(data.error ?? "save_failed");
+      if (!ok) {
+        // The card is gone (deleted elsewhere / RLS-hidden) — drop the stale row instead of stranding it.
+        if (error === "not_found") {
+          onGone();
+          return;
+        }
+        setError(error ?? "save_failed");
         return;
       }
       onSaved(question, answer);
@@ -158,10 +170,14 @@ function SavedCard({
     setError(null);
     setDeleting(true);
     try {
-      const res = await fetch(`/api/flashcards/${card.id}`, { method: "DELETE" });
-      const data = (await res.json().catch(() => ({}))) as { error?: ApiErrorCode };
-      if (!res.ok) {
-        setError(data.error ?? "save_failed");
+      const { ok, error } = await requestJson(`/api/flashcards/${card.id}`, { method: "DELETE" });
+      if (!ok) {
+        // A 404 means the row is already gone — treat it as a successful removal so the list self-heals.
+        if (error === "not_found") {
+          onDeleted();
+          return;
+        }
+        setError(error ?? "save_failed");
         return;
       }
       onDeleted();
@@ -267,6 +283,10 @@ export default function SavedCardsView({ cards }: { cards: Flashcard[] }) {
             }}
             onSaved={(q, a) => {
               handleSaved(card.id, q, a);
+            }}
+            onGone={() => {
+              handleDeleted(card.id);
+              setEditingId(null);
             }}
           />
         ) : (
