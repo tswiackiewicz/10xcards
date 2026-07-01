@@ -3,7 +3,7 @@ project: "10xCards"
 version: 1
 status: draft
 created: 2026-06-23
-updated: 2026-06-23
+updated: 2026-07-01
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -39,13 +39,13 @@ never built on a hand-authored card the learner had to write first. That pairing
 
 ## At a glance
 
-| ID   | Change ID               | Outcome (user can …)                                            | Prerequisites | PRD refs                                        | Status   |
-| ---- | ----------------------- | --------------------------------------------------------------- | ------------- | ----------------------------------------------- | -------- |
-| F-01 | flashcard-store-rls     | (foundation) per-user flashcard store with RLS isolation lands  | —             | Access Control, NFR(no-loss), Guardrails        | ready    |
-| S-01 | ai-card-generation      | paste text, get AI candidates, accept/edit/reject into the deck | F-01          | FR-003, FR-004, US-01, NFR(progress), NFR(GDPR) | proposed |
-| S-02 | manual-card-authoring   | create a flashcard manually                                     | F-01          | FR-005                                          | proposed |
-| S-03 | manage-saved-flashcards | view, edit, and delete saved flashcards                         | F-01, S-01    | FR-006, FR-007, FR-008                          | proposed |
-| S-04 | spaced-repetition-study | study a deck through a spaced-repetition schedule               | F-01, S-01    | FR-009                                          | proposed |
+| ID   | Change ID               | Outcome (user can …)                                            | Prerequisites | PRD refs                                        | Status      |
+| ---- | ----------------------- | --------------------------------------------------------------- | ------------- | ----------------------------------------------- | ----------- |
+| F-01 | flashcard-store-rls     | (foundation) per-user flashcard store with RLS isolation lands  | —             | Access Control, NFR(no-loss), Guardrails        | implemented |
+| S-01 | ai-card-generation      | paste text, get AI candidates, accept/edit/reject into the deck | F-01          | FR-003, FR-004, US-01, NFR(progress), NFR(GDPR) | implemented |
+| S-02 | manual-card-authoring   | create a flashcard manually                                     | F-01          | FR-005                                          | proposed    |
+| S-03 | manage-saved-flashcards | view, edit, and delete saved flashcards                         | F-01, S-01    | FR-006, FR-007, FR-008                          | proposed    |
+| S-04 | spaced-repetition-study | study a deck through a spaced-repetition schedule               | F-01, S-01    | FR-009                                          | proposed    |
 
 ## Streams
 
@@ -82,7 +82,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Sequenced first because the isolation + no-loss guardrails are a launch gate and every slice writes to this store. Kept deliberately minimal (one owner-scoped entity, not a full data layer); S-01 immediately exercises it through a real user save, so it does not drift into horizontal layer-completion. Main risk: getting RLS wrong is a silent cross-user-visibility regression — must be verified, not assumed.
-- **Status:** ready
+- **Status:** implemented — migration + 4 RLS policies, isolation verification (`scripts/verify-rls.mjs`), typed Supabase client, and prod rollout all landed. Cross-user isolation verified in prod. Not yet archived.
 
 ## Slices
 
@@ -95,9 +95,9 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Parallel with:** S-02
 - **Blockers:** `OPENROUTER_API_KEY` must be set as a production Workers Secret (human-only action, deferred per `deploy-plan.md`) before live generation works.
 - **Unknowns:**
-  - Input-size / generated-card-count cap for the MVP (PRD Open Question Q1) — Owner: user. Block: no (a sensible default cap unblocks build; the value also bounds the Cloudflare free-tier CPU/subrequest risk flagged in `infrastructure.md`).
+  - ~~Input-size / generated-card-count cap for the MVP (PRD Open Question Q1)~~ — Resolved in implementation: input capped at 10k chars (`400 too_long` above the cap).
 - **Risk:** This is the wedge and the only unfamiliar integration, so it carries the most uncertainty. Generation is a single request/response OpenRouter `fetch`; Cloudflare free tier doesn't meter the wait but does cap per-request CPU and subrequests — keep one model call + minimal Supabase round-trips, and surface continuous progress per the NFR. Human-gating (no silent auto-save) is the load-bearing guardrail to verify.
-- **Status:** proposed
+- **Status:** implemented (impl-reviewed, PR #2 merged) — generation service, generate + save API endpoints, and `/generate` page with the accept/edit/reject review island all landed across 4 phases. Human-gating verified (rejected candidates leave no DB trace). Not yet archived. Live generation still requires `OPENROUTER_API_KEY` set as a prod Workers Secret.
 
 ### S-02: Manual card authoring
 
@@ -138,13 +138,13 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 ## Backlog Handoff
 
-| Roadmap ID | Change ID               | Suggested issue title                               | Ready for `/10x-plan` | Notes                                                               |
-| ---------- | ----------------------- | --------------------------------------------------- | --------------------- | ------------------------------------------------------------------- |
-| F-01       | flashcard-store-rls     | Per-user flashcard store with RLS isolation         | yes                   | Run `/10x-plan flashcard-store-rls` first — unlocks the north star. |
-| S-01       | ai-card-generation      | AI flashcard generation & accept/edit/reject review | no                    | Needs F-01; set `OPENROUTER_API_KEY` before live generation.        |
-| S-02       | manual-card-authoring   | Manual flashcard creation                           | no                    | Needs F-01.                                                         |
-| S-03       | manage-saved-flashcards | View / edit / delete saved flashcards               | no                    | Needs F-01 + S-01 (cards to manage).                                |
-| S-04       | spaced-repetition-study | Spaced-repetition study session                     | no                    | Needs F-01 + S-01; pick an SRS library at plan time.                |
+| Roadmap ID | Change ID               | Suggested issue title                               | Ready for `/10x-plan` | Notes                                                                                                       |
+| ---------- | ----------------------- | --------------------------------------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------- |
+| F-01       | flashcard-store-rls     | Per-user flashcard store with RLS isolation         | done                  | Implemented + rolled out to prod. Awaiting `/10x-archive`.                                                  |
+| S-01       | ai-card-generation      | AI flashcard generation & accept/edit/reject review | done                  | Implemented + impl-reviewed (PR #2). Set `OPENROUTER_API_KEY` for live generation. Awaiting `/10x-archive`. |
+| S-02       | manual-card-authoring   | Manual flashcard creation                           | yes                   | F-01 done — unblocked. Runs parallel to the AI path.                                                        |
+| S-03       | manage-saved-flashcards | View / edit / delete saved flashcards               | yes                   | F-01 + S-01 done — prerequisites met; cards now exist to manage.                                            |
+| S-04       | spaced-repetition-study | Spaced-repetition study session                     | yes                   | F-01 + S-01 done — prerequisites met; pick an SRS library at plan time.                                     |
 
 ## Open Roadmap Questions
 
