@@ -1,10 +1,10 @@
 ---
 change_id: ai-card-generation
 title: AI flashcard generation & accept/edit/reject review
-status: impl_reviewed
+status: archived
 created: 2026-06-25
-updated: 2026-06-30
-archived_at: null
+updated: 2026-07-01
+archived_at: 2026-07-01T16:35:00Z
 ---
 
 ## Notes

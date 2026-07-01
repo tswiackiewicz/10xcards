@@ -1,0 +1,20 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import ManualCardForm from "@/components/flashcards/ManualCardForm";
+---
+
+<Layout title="Create flashcard">
+  <div class="bg-cosmic min-h-screen p-4">
+    <div class="mx-auto max-w-3xl">
+      <header class="flex items-center justify-between py-6 text-white">
+        <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-2xl font-bold text-transparent">
+          Create flashcard
+        </h1>
+        <a href="/dashboard" class="text-sm text-blue-100/70 transition-colors hover:text-white">← Dashboard</a>
+      </header>
+      <div class="rounded-2xl border border-white/10 bg-white/10 p-6 backdrop-blur-xl">
+        <ManualCardForm client:load />
+      </div>
+    </div>
+  </div>
+</Layout>
