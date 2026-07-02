@@ -46,7 +46,7 @@ never built on a hand-authored card the learner had to write first. That pairing
 | S-02 | manual-card-authoring   | create a flashcard manually                                     | F-01          | FR-005                                          | done    |
 | S-03 | manage-saved-flashcards | view, edit, and delete saved flashcards                         | F-01, S-01    | FR-006, FR-007, FR-008                          | done    |
 | S-04 | spaced-repetition-study | study a deck through a spaced-repetition schedule               | F-01, S-01    | FR-009                                          | done    |
-| S-05 | account-deletion        | request account deletion, kept 30 days, then permanently erased | F-01          | GDPR NFR (+ new FR, see Open Q3)                | planned |
+| S-05 | account-deletion        | request account deletion, kept 30 days, then permanently erased | F-01          | GDPR NFR (+ new FR, see Open Q3)                | done    |
 | S-06 | ux-improvements         | bulk-action candidates, reset a review session, clearer loading | F-01, S-01    | FR-004, NFR(progress)                           | planned |
 
 ## Streams
@@ -151,7 +151,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - How the 30-day purge is triggered on Cloudflare Workers (Cron Trigger vs. purge-on-access) and where "deleted" state lives (app uses only Supabase `auth.users`, no schema). Owner: user/TBD. Block: no (decidable at plan time).
 - **Risk:** Compliance-driven, destructive, and time-delayed with no background-job baseline or observability (Open Q2). The purge is load-bearing: a silent failure retains data past the promised window (GDPR liability), a premature one violates the no-loss guardrail. Soft-delete must revoke access without deleting rows; verify the retention boundary explicitly.
-- **Status:** planned
+- **Status:** done
 
 ### S-06: UX improvements
 
@@ -198,3 +198,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-02: user can create a flashcard manually (question + answer) and have it saved to their deck.** — Archived 2026-07-01 → `context/archive/2026-07-01-manual-card-authoring/`. Lesson: —.
 - **S-03: user can view their saved flashcards in a list, edit any saved card, and delete a card.** — Archived 2026-07-01 → `context/archive/2026-07-01-manage-saved-flashcards/`. Lesson: —.
 - **S-04: user can study a deck through a spaced-repetition schedule — the product decides which card to show next based on prior recall.** — Archived 2026-07-01 → `context/archive/2026-07-01-spaced-repetition-study/`. Lesson: —.
+- **S-05: user can request account deletion; the account is immediately marked deleted and sign-in blocked, all their data stays recoverable for a 30-day window, then is permanently erased across every user-scoped store.** — Archived 2026-07-02 → `context/archive/2026-07-02-account-deletion/`. Lesson: —.
