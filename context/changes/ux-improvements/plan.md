@@ -229,12 +229,12 @@ No new network calls; bulk/reset are O(n) `map`s over ≤15 cards. Loading chang
 
 #### Automated
 
-- [x] 2.1 Type sync passes (`npx astro sync`)
-- [x] 2.2 Lint passes (`npm run lint`)
-- [x] 2.3 Build passes (`npm run build`)
+- [x] 2.1 Type sync passes (`npx astro sync`) — b38d261
+- [x] 2.2 Lint passes (`npm run lint`) — b38d261
+- [x] 2.3 Build passes (`npm run build`) — b38d261
 
 #### Manual
 
-- [x] 2.4 Full-view spinner + "Generating cards…" shows during generation; screen never looks frozen
-- [x] 2.5 During save, textarea + all per-card controls + all footer buttons are disabled; double-click cannot double-submit
-- [x] 2.6 All error paths still show the friendly banner with pasted text preserved
+- [x] 2.4 Full-view spinner + "Generating cards…" shows during generation; screen never looks frozen — b38d261
+- [x] 2.5 During save, textarea + all per-card controls + all footer buttons are disabled; double-click cannot double-submit — b38d261
+- [x] 2.6 All error paths still show the friendly banner with pasted text preserved — b38d261
