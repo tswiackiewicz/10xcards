@@ -421,29 +421,29 @@ eligible is a no-op. Reuse the existing service-role seed/teardown.
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly against a local Supabase
-- [x] 1.2 Type check + lint pass with regenerated types (`npx astro sync && npm run lint`)
-- [x] 1.3 Build passes (`npm run build`)
-- [x] 1.4 RLS suite passes including new blocking/reactivation assertions (`node scripts/verify-rls.mjs`)
+- [x] 1.1 Migration applies cleanly against a local Supabase — ad5683a
+- [x] 1.2 Type check + lint pass with regenerated types (`npx astro sync && npm run lint`) — ad5683a
+- [x] 1.3 Build passes (`npm run build`) — ad5683a
+- [x] 1.4 RLS suite passes including new blocking/reactivation assertions (`node scripts/verify-rls.mjs`) — ad5683a
 
 #### Manual
 
-- [x] 1.5 Pending-deletion user's flashcards still physically exist in the DB (soft, not hard)
-- [x] 1.6 Removing the `account_deletions` row restores visibility for that user
+- [x] 1.5 Pending-deletion user's flashcards still physically exist in the DB (soft, not hard) — ad5683a
+- [x] 1.6 Removing the `account_deletions` row restores visibility for that user — ad5683a
 
 ### Phase 2: Request / cancel / sign-in divert + /account UI
 
 #### Automated
 
-- [ ] 2.1 Type check + lint pass (`npx astro sync && npm run lint`)
-- [ ] 2.2 Build passes (`npm run build`)
+- [x] 2.1 Type check + lint pass (`npx astro sync && npm run lint`)
+- [x] 2.2 Build passes (`npm run build`)
 
 #### Manual
 
-- [ ] 2.3 Delete button stays disabled until confirm text matches; confirming signs out and hides cards
-- [ ] 2.4 Signing back in lands on `/account` reactivate panel with correct purge date
-- [ ] 2.5 Reactivating restores access; `/cards` shows cards again
-- [ ] 2.6 `/account` redirects to `/auth/signin` when signed out
+- [x] 2.3 Delete button stays disabled until confirm text matches; confirming signs out and hides cards
+- [x] 2.4 Signing back in lands on `/account` reactivate panel with correct purge date
+- [x] 2.5 Reactivating restores access; `/cards` shows cards again
+- [x] 2.6 `/account` redirects to `/auth/signin` when signed out
 
 ### Phase 3: Hard-delete purge + GitHub Actions cron
 
