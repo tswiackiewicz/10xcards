@@ -28,7 +28,7 @@ async function postJson(url: string): Promise<boolean> {
 
 function purgeDate(requestedAt: string): string {
   const d = new Date(new Date(requestedAt).getTime() + RETENTION_DAYS * 24 * 60 * 60 * 1000);
-  return d.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 }
 
 export default function AccountView({ pending, requestedAt, email }: Props) {
