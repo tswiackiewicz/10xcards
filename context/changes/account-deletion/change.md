@@ -1,7 +1,7 @@
 ---
 change_id: account-deletion
 title: Account deletion with 30-day retention
-status: implementing
+status: implemented
 created: 2026-07-02
 updated: 2026-07-02
 archived_at: null

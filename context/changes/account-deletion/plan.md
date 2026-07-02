@@ -449,13 +449,13 @@ eligible is a no-op. Reuse the existing service-role seed/teardown.
 
 #### Automated
 
-- [x] 3.1 Type check + lint pass (`npx astro sync && npm run lint`)
-- [x] 3.2 Build passes (`npm run build`)
-- [x] 3.3 Purge + idempotency assertions pass (`node scripts/verify-rls.mjs`)
-- [x] 3.4 Purge route returns 401 with a wrong/absent bearer secret
+- [x] 3.1 Type check + lint pass (`npx astro sync && npm run lint`) — 54cafbc
+- [x] 3.2 Build passes (`npm run build`) — 54cafbc
+- [x] 3.3 Purge + idempotency assertions pass (`node scripts/verify-rls.mjs`) — 54cafbc
+- [x] 3.4 Purge route returns 401 with a wrong/absent bearer secret — 54cafbc
 
 #### Manual
 
-- [x] 3.5 Backdated test account fully erased (auth user + flashcards) after hitting the route; log counts correct
-- [x] 3.6 Second immediate call deletes nothing (idempotent)
+- [x] 3.5 Backdated test account fully erased (auth user + flashcards) after hitting the route; log counts correct — 54cafbc
+- [x] 3.6 Second immediate call deletes nothing (idempotent) — 54cafbc
 - [ ] 3.7 GitHub Actions workflow runs on `workflow_dispatch` against production and reports success
