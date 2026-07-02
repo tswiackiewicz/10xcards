@@ -1,11 +1,16 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
+import type { AccountErrorCode } from "@/lib/account/schemas";
 
 function json(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: { "Content-Type": "application/json" },
   });
+}
+
+function fail(status: number, error: AccountErrorCode): Response {
+  return json(status, { error });
 }
 
 // S-05: record a deletion request for the session user, then sign them out.
@@ -16,13 +21,13 @@ function json(status: number, body: unknown): Response {
 export const POST: APIRoute = async (context) => {
   const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {
-    return json(401, { error: "unauthorized" });
+    return fail(401, "unauthorized");
   }
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return json(401, { error: "unauthorized" });
+    return fail(401, "unauthorized");
   }
 
   // user_id comes from the verified session, never the request body; RLS also
@@ -31,7 +36,7 @@ export const POST: APIRoute = async (context) => {
     .from("account_deletions")
     .upsert({ user_id: user.id }, { onConflict: "user_id", ignoreDuplicates: true });
   if (error) {
-    return json(500, { error: "server_error" });
+    return fail(500, "server_error");
   }
 
   await supabase.auth.signOut();

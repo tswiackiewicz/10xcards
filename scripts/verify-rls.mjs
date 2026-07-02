@@ -47,6 +47,7 @@ function anonClient() {
 const suffix = `${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
 const userA = { email: `rls-a-${suffix}@example.com`, password: "Password123!", id: null };
 const userB = { email: `rls-b-${suffix}@example.com`, password: "Password123!", id: null };
+const userC = { email: `rls-c-${suffix}@example.com`, password: "Password123!", id: null };
 
 async function seedUser(u) {
   const { data, error } = await admin.auth.admin.createUser({
@@ -218,7 +219,6 @@ async function main() {
   // rows behind (on-delete-cascade), and a second purge with nothing eligible is a
   // no-op. Uses a dedicated user C so it doesn't disturb A/B assertions above.
 
-  const userC = { email: `rls-c-${suffix}@example.com`, password: "Password123!", id: null };
   await seedUser(userC);
   const asC = await signIn(userC);
   const insC = await asC
@@ -261,7 +261,7 @@ async function main() {
 }
 
 async function cleanup() {
-  for (const u of [userA, userB]) {
+  for (const u of [userA, userB, userC]) {
     if (u.id) await admin.auth.admin.deleteUser(u.id).catch(() => {});
   }
 }
