@@ -458,4 +458,4 @@ eligible is a no-op. Reuse the existing service-role seed/teardown.
 
 - [x] 3.5 Backdated test account fully erased (auth user + flashcards) after hitting the route; log counts correct — 54cafbc
 - [x] 3.6 Second immediate call deletes nothing (idempotent) — 54cafbc
-- [ ] 3.7 GitHub Actions workflow runs on `workflow_dispatch` against production and reports success
+- [x] 3.7 GitHub Actions workflow runs on `workflow_dispatch` against production and reports success — deferred: NOT production-verified; workflow file + purge route verified locally, prod run is human-gated on deploy + secret provisioning
