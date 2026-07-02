@@ -39,15 +39,15 @@ never built on a hand-authored card the learner had to write first. That pairing
 
 ## At a glance
 
-| ID   | Change ID               | Outcome (user can …)                                            | Prerequisites | PRD refs                                        | Status  |
-| ---- | ----------------------- | --------------------------------------------------------------- | ------------- | ----------------------------------------------- | ------- |
-| F-01 | flashcard-store-rls     | (foundation) per-user flashcard store with RLS isolation lands  | —             | Access Control, NFR(no-loss), Guardrails        | done    |
-| S-01 | ai-card-generation      | paste text, get AI candidates, accept/edit/reject into the deck | F-01          | FR-003, FR-004, US-01, NFR(progress), NFR(GDPR) | done    |
-| S-02 | manual-card-authoring   | create a flashcard manually                                     | F-01          | FR-005                                          | done    |
-| S-03 | manage-saved-flashcards | view, edit, and delete saved flashcards                         | F-01, S-01    | FR-006, FR-007, FR-008                          | done    |
-| S-04 | spaced-repetition-study | study a deck through a spaced-repetition schedule               | F-01, S-01    | FR-009                                          | done    |
-| S-05 | account-deletion        | request account deletion, kept 30 days, then permanently erased | F-01          | GDPR NFR (+ new FR, see Open Q3)                | done    |
-| S-06 | ux-improvements         | bulk-action candidates, reset a review session, clearer loading | F-01, S-01    | FR-004, NFR(progress)                           | planned |
+| ID   | Change ID               | Outcome (user can …)                                            | Prerequisites | PRD refs                                        | Status |
+| ---- | ----------------------- | --------------------------------------------------------------- | ------------- | ----------------------------------------------- | ------ |
+| F-01 | flashcard-store-rls     | (foundation) per-user flashcard store with RLS isolation lands  | —             | Access Control, NFR(no-loss), Guardrails        | done   |
+| S-01 | ai-card-generation      | paste text, get AI candidates, accept/edit/reject into the deck | F-01          | FR-003, FR-004, US-01, NFR(progress), NFR(GDPR) | done   |
+| S-02 | manual-card-authoring   | create a flashcard manually                                     | F-01          | FR-005                                          | done   |
+| S-03 | manage-saved-flashcards | view, edit, and delete saved flashcards                         | F-01, S-01    | FR-006, FR-007, FR-008                          | done   |
+| S-04 | spaced-repetition-study | study a deck through a spaced-repetition schedule               | F-01, S-01    | FR-009                                          | done   |
+| S-05 | account-deletion        | request account deletion, kept 30 days, then permanently erased | F-01          | GDPR NFR (+ new FR, see Open Q3)                | done   |
+| S-06 | ux-improvements         | bulk-action candidates, reset a review session, clearer loading | F-01, S-01    | FR-004, NFR(progress)                           | done   |
 
 ## Streams
 
@@ -163,7 +163,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Polish over an existing surface (the S-01 review flow), so low risk and no new data model. Scope risk: keep to bulk actions, session reset, and loading states — do not redesign the review flow. Bulk reject must stay inside the human-gating guardrail (no silent auto-accept).
-- **Status:** planned
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -199,3 +199,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-03: user can view their saved flashcards in a list, edit any saved card, and delete a card.** — Archived 2026-07-01 → `context/archive/2026-07-01-manage-saved-flashcards/`. Lesson: —.
 - **S-04: user can study a deck through a spaced-repetition schedule — the product decides which card to show next based on prior recall.** — Archived 2026-07-01 → `context/archive/2026-07-01-spaced-repetition-study/`. Lesson: —.
 - **S-05: user can request account deletion; the account is immediately marked deleted and sign-in blocked, all their data stays recoverable for a 30-day window, then is permanently erased across every user-scoped store.** — Archived 2026-07-02 → `context/archive/2026-07-02-account-deletion/`. Lesson: —.
+- **S-06: on the AI candidate review flow, user can accept/reject candidates in bulk and reset a review session; long operations show clearer loading states so the screen never looks frozen.** — Archived 2026-07-02 → `context/archive/2026-07-02-ux-improvements/`. Lesson: —.
