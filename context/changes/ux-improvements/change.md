@@ -1,7 +1,7 @@
 ---
 change_id: ux-improvements
 title: Candidate review UX — bulk actions, session reset, clearer loading states
-status: implemented
+status: impl_reviewed
 created: 2026-07-02
 updated: 2026-07-02
 archived_at: null

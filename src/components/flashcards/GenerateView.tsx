@@ -144,7 +144,11 @@ export default function GenerateView() {
           <span className={overLimit ? "text-red-300" : "text-blue-100/50"}>
             {trimmedLength.toLocaleString()} / {MAX_INPUT_CHARS.toLocaleString()}
           </span>
-          <Button type="button" onClick={handleGenerate} disabled={generating || text.trim().length === 0 || overLimit}>
+          <Button
+            type="button"
+            onClick={handleGenerate}
+            disabled={generating || saving || text.trim().length === 0 || overLimit}
+          >
             {generating ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
             {generating ? "Generating cards…" : "Generate"}
           </Button>
