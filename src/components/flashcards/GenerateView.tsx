@@ -16,7 +16,7 @@ import { MAX_INPUT_CHARS, type Candidate, type ApiErrorCode } from "@/lib/flashc
 import { CandidateCard, type ReviewCard } from "@/components/flashcards/CandidateCard";
 
 /** Typed error code → friendly inline copy. */
-const ERROR_COPY: Record<ApiErrorCode, string> = {
+const ERROR_COPY: Partial<Record<ApiErrorCode, string>> = {
   empty_input: "Please paste some text first.",
   too_long: `Text is too long — keep it under ${MAX_INPUT_CHARS.toLocaleString()} characters.`,
   no_cards: "The AI couldn't make usable cards from this text. Try a longer or clearer passage.",
@@ -138,7 +138,7 @@ export default function GenerateView() {
           onChange={(e) => {
             setText(e.target.value);
           }}
-          disabled={generating}
+          disabled={generating || saving}
         />
         <div className="mt-1 flex items-center justify-between text-xs">
           <span className={overLimit ? "text-red-300" : "text-blue-100/50"}>
@@ -163,7 +163,14 @@ export default function GenerateView() {
         </p>
       )}
 
-      {cards.length > 0 && (
+      {generating && (
+        <div className="flex flex-col items-center gap-2 py-16 text-blue-100/70">
+          <Loader2 className="size-6 animate-spin" />
+          <span className="text-sm">Generating cards…</span>
+        </div>
+      )}
+
+      {!generating && cards.length > 0 && (
         <>
           <ul className="space-y-3">
             {cards.map((card, i) => (
@@ -171,6 +178,7 @@ export default function GenerateView() {
                 key={card.id}
                 card={card}
                 index={i}
+                disabled={saving}
                 onEdit={editCard}
                 onAccept={acceptCard}
                 onReject={rejectCard}
@@ -185,7 +193,7 @@ export default function GenerateView() {
                 size="sm"
                 variant="secondary"
                 onClick={acceptAll}
-                disabled={pendingCount === 0 || generating || saving}
+                disabled={pendingCount === 0 || saving}
               >
                 Accept all
               </Button>
@@ -194,7 +202,7 @@ export default function GenerateView() {
                 size="sm"
                 variant="outline"
                 onClick={rejectAll}
-                disabled={pendingCount === 0 || generating || saving}
+                disabled={pendingCount === 0 || saving}
               >
                 Reject all
               </Button>
@@ -202,7 +210,7 @@ export default function GenerateView() {
             <div className="flex items-center gap-2">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button type="button" variant="ghost" disabled={generating || saving}>
+                  <Button type="button" variant="ghost" disabled={saving}>
                     Reset
                   </Button>
                 </AlertDialogTrigger>

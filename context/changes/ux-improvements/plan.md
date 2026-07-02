@@ -213,28 +213,28 @@ No new network calls; bulk/reset are O(n) `map`s over ≤15 cards. Loading chang
 
 #### Automated
 
-- [x] 1.1 Type sync passes (`npx astro sync`)
-- [x] 1.2 Lint passes (`npm run lint`)
-- [x] 1.3 Build passes (`npm run build`)
+- [x] 1.1 Type sync passes (`npx astro sync`) — 210dffd
+- [x] 1.2 Lint passes (`npm run lint`) — 210dffd
+- [x] 1.3 Build passes (`npm run build`) — 210dffd
 
 #### Manual
 
-- [x] 1.4 Accept-all / reject-all apply to pending cards only; already-decided cards unchanged; accepted-count updates
-- [x] 1.5 Per-card Accept/Edit/Reject still override after a bulk action
-- [x] 1.6 Reset with candidates present shows confirm; confirming returns to empty start state; cancel is a no-op
-- [x] 1.7 Bulk buttons disabled when nothing is pending
-- [x] 1.8 No bulk/reset action persists any card (human-gating)
+- [x] 1.4 Accept-all / reject-all apply to pending cards only; already-decided cards unchanged; accepted-count updates — 210dffd
+- [x] 1.5 Per-card Accept/Edit/Reject still override after a bulk action — 210dffd
+- [x] 1.6 Reset with candidates present shows confirm; confirming returns to empty start state; cancel is a no-op — 210dffd
+- [x] 1.7 Bulk buttons disabled when nothing is pending — 210dffd
+- [x] 1.8 No bulk/reset action persists any card (human-gating) — 210dffd
 
 ### Phase 2: Clearer Loading States & Type Fix
 
 #### Automated
 
-- [ ] 2.1 Type sync passes (`npx astro sync`)
-- [ ] 2.2 Lint passes (`npm run lint`)
-- [ ] 2.3 Build passes (`npm run build`)
+- [x] 2.1 Type sync passes (`npx astro sync`)
+- [x] 2.2 Lint passes (`npm run lint`)
+- [x] 2.3 Build passes (`npm run build`)
 
 #### Manual
 
-- [ ] 2.4 Full-view spinner + "Generating cards…" shows during generation; screen never looks frozen
-- [ ] 2.5 During save, textarea + all per-card controls + all footer buttons are disabled; double-click cannot double-submit
-- [ ] 2.6 All error paths still show the friendly banner with pasted text preserved
+- [x] 2.4 Full-view spinner + "Generating cards…" shows during generation; screen never looks frozen
+- [x] 2.5 During save, textarea + all per-card controls + all footer buttons are disabled; double-click cannot double-submit
+- [x] 2.6 All error paths still show the friendly banner with pasted text preserved
