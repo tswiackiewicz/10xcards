@@ -11,12 +11,13 @@ export interface ReviewCard {
 interface Props {
   card: ReviewCard;
   index: number;
+  disabled?: boolean;
   onEdit: (id: string, field: "question" | "answer", value: string) => void;
   onAccept: (id: string) => void;
   onReject: (id: string) => void;
 }
 
-export function CandidateCard({ card, index, onEdit, onAccept, onReject }: Props) {
+export function CandidateCard({ card, index, disabled, onEdit, onAccept, onReject }: Props) {
   const tone =
     card.status === "accepted"
       ? "border-emerald-400/60 bg-emerald-400/10"
@@ -33,6 +34,7 @@ export function CandidateCard({ card, index, onEdit, onAccept, onReject }: Props
             type="button"
             size="sm"
             variant={card.status === "accepted" ? "default" : "outline"}
+            disabled={disabled}
             onClick={() => {
               onAccept(card.id);
             }}
@@ -43,6 +45,7 @@ export function CandidateCard({ card, index, onEdit, onAccept, onReject }: Props
             type="button"
             size="sm"
             variant={card.status === "rejected" ? "destructive" : "outline"}
+            disabled={disabled}
             onClick={() => {
               onReject(card.id);
             }}
@@ -54,9 +57,10 @@ export function CandidateCard({ card, index, onEdit, onAccept, onReject }: Props
 
       <label className="mb-1 block text-xs text-blue-100/60">Question</label>
       <textarea
-        className="mb-3 w-full resize-y rounded-md border border-white/10 bg-white/5 p-2 text-sm text-white outline-none focus:border-purple-300"
+        className="mb-3 w-full resize-y rounded-md border border-white/10 bg-white/5 p-2 text-sm text-white outline-none focus:border-purple-300 disabled:opacity-50"
         rows={2}
         value={card.question}
+        disabled={disabled}
         onChange={(e) => {
           onEdit(card.id, "question", e.target.value);
         }}
@@ -64,9 +68,10 @@ export function CandidateCard({ card, index, onEdit, onAccept, onReject }: Props
 
       <label className="mb-1 block text-xs text-blue-100/60">Answer</label>
       <textarea
-        className="w-full resize-y rounded-md border border-white/10 bg-white/5 p-2 text-sm text-white outline-none focus:border-purple-300"
+        className="w-full resize-y rounded-md border border-white/10 bg-white/5 p-2 text-sm text-white outline-none focus:border-purple-300 disabled:opacity-50"
         rows={3}
         value={card.answer}
+        disabled={disabled}
         onChange={(e) => {
           onEdit(card.id, "answer", e.target.value);
         }}
