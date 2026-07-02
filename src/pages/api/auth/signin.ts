@@ -10,10 +10,25 @@ export const POST: APIRoute = async (context) => {
   if (!supabase) {
     return context.redirect(`/auth/signin?error=${encodeURIComponent("Supabase is not configured")}`);
   }
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     return context.redirect(`/auth/signin?error=${encodeURIComponent(error.message)}`);
+  }
+
+  // S-05: a flagged (pending-deletion) account still signs in — the live session is
+  // what powers self-service reactivation — but is diverted to /account instead of
+  // the app. RLS keeps their data hidden meanwhile, so the diverted session is safe.
+  const { data: pending, error: pendingError } = await supabase
+    .from("account_deletions")
+    .select("user_id")
+    .eq("user_id", data.user.id)
+    .maybeSingle();
+  // Fail safe: if we can't confirm the account is clean, divert to /account rather
+  // than into the app. RLS hides a pending user's data either way, so an over-divert
+  // is harmless; an under-divert would drop a pending user into an empty-looking app.
+  if (pendingError || pending) {
+    return context.redirect("/account");
   }
 
   return context.redirect("/");

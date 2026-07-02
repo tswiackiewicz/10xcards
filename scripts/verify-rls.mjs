@@ -47,6 +47,7 @@ function anonClient() {
 const suffix = `${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
 const userA = { email: `rls-a-${suffix}@example.com`, password: "Password123!", id: null };
 const userB = { email: `rls-b-${suffix}@example.com`, password: "Password123!", id: null };
+const userC = { email: `rls-c-${suffix}@example.com`, password: "Password123!", id: null };
 
 async function seedUser(u) {
   const { data, error } = await admin.auth.admin.createUser({
@@ -168,11 +169,99 @@ async function main() {
     "A's SRS state is unchanged after B's attempt",
   );
 
+  // --- S-05: Soft-delete blocking (account_deletions) ----------------------------
+  // A pending-deletion user must neither read nor mutate their own flashcards; the
+  // block lives in RLS via is_pending_deletion(). Seeding/cleanup uses service-role;
+  // the assertions run on A's real anon-key + JWT client.
+
+  // 14. Seed a pending-deletion row for A (service-role — bypasses RLS to seed).
+  const seedDel = await admin.from("account_deletions").insert({ user_id: userA.id });
+  assert(!seedDel.error, "pending-deletion row seeded for A");
+
+  // 15. A now sees zero flashcards (RLS hides own rows while pending).
+  const selPending = await asA.from("flashcards").select("*");
+  assert(!selPending.error && selPending.data.length === 0, "pending A sees zero flashcards");
+
+  // 16. A cannot update its own card while pending (RLS → 0 rows affected).
+  const updPending = await asA.from("flashcards").update({ answer: "while pending" }).eq("id", cardId).select();
+  assert(
+    !updPending.error && Array.isArray(updPending.data) && updPending.data.length === 0,
+    "pending A's update affects 0 rows",
+  );
+
+  // 17. A cannot delete its own card while pending (RLS → 0 rows affected).
+  const delPending = await asA.from("flashcards").delete().eq("id", cardId).select();
+  assert(
+    !delPending.error && Array.isArray(delPending.data) && delPending.data.length === 0,
+    "pending A's delete affects 0 rows",
+  );
+
+  // 18. A cannot insert a new card while pending (INSERT WITH CHECK rejects it).
+  const insPending = await asA
+    .from("flashcards")
+    .insert({ user_id: userA.id, question: "while pending", answer: "while pending" })
+    .select();
+  assert(!!insPending.error, "pending A cannot insert a card (WITH CHECK rejects it)");
+
+  // 19. Reactivate: delete the pending row (service-role) → A regains visibility.
+  const cancelDel = await admin.from("account_deletions").delete().eq("user_id", userA.id);
+  assert(!cancelDel.error, "pending-deletion row removed for A");
+
+  const selRestored = await asA.from("flashcards").select("*").eq("id", cardId);
+  assert(
+    !selRestored.error && selRestored.data.length === 1 && selRestored.data[0].id === cardId,
+    "after reactivation, A sees its card again",
+  );
+
+  // --- S-05 Phase 3: hard-delete purge + idempotency ------------------------------
+  // Prove permanent erasure: a >30-day-old pending account, when purged the way the
+  // route does (admin.deleteUser), leaves zero flashcards and zero account_deletions
+  // rows behind (on-delete-cascade), and a second purge with nothing eligible is a
+  // no-op. Uses a dedicated user C so it doesn't disturb A/B assertions above.
+
+  await seedUser(userC);
+  const asC = await signIn(userC);
+  const insC = await asC
+    .from("flashcards")
+    .insert({ user_id: userC.id, question: "C question", answer: "C answer", source: "manual" })
+    .select()
+    .single();
+  assert(!insC.error && insC.data?.id, "C can insert a card it owns");
+
+  // Backdate a pending-deletion row for C to >30 days ago (service-role seed).
+  const backdated = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString();
+  const seedC = await admin.from("account_deletions").insert({ user_id: userC.id, requested_at: backdated });
+  assert(!seedC.error, "C backdated (>30d) pending-deletion row seeded");
+
+  // Select eligible the way the purge route does, then delete each user.
+  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const eligible = await admin.from("account_deletions").select("user_id").lt("requested_at", cutoff);
+  assert(!eligible.error && eligible.data.some((r) => r.user_id === userC.id), "C is eligible for purge (>30d)");
+  for (const row of eligible.data) {
+    await admin.auth.admin.deleteUser(row.user_id);
+  }
+
+  // Post-purge: the auth user is gone. Because flashcards.user_id and
+  // account_deletions.user_id both FK auth.users(id) ON DELETE CASCADE, a missing
+  // auth user guarantees zero flashcards survive — a strictly stronger proof than a
+  // row count (service_role has no SELECT grant on flashcards, and shouldn't need one).
+  const cUser = await admin.auth.admin.getUserById(userC.id);
+  assert(!cUser.data?.user, "post-purge: C's auth user is gone (cascade erases flashcards)");
+  const cDel = await admin.from("account_deletions").select("user_id").eq("user_id", userC.id);
+  assert(!cDel.error && cDel.data.length === 0, "post-purge: zero account_deletions rows survive for C (cascade)");
+
+  // Idempotency: a second purge finds nothing eligible → no-op.
+  const eligible2 = await admin.from("account_deletions").select("user_id").lt("requested_at", cutoff);
+  assert(
+    !eligible2.error && !eligible2.data.some((r) => r.user_id === userC.id),
+    "second purge finds nothing eligible for C (idempotent no-op)",
+  );
+
   console.log(`\nAll ${passed} assertions passed. RLS isolation holds. ✅`);
 }
 
 async function cleanup() {
-  for (const u of [userA, userB]) {
+  for (const u of [userA, userB, userC]) {
     if (u.id) await admin.auth.admin.deleteUser(u.id).catch(() => {});
   }
 }

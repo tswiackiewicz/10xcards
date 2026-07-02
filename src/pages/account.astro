@@ -1,0 +1,33 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import AccountView from "@/components/account/AccountView";
+import { createClient } from "@/lib/supabase";
+
+const { user } = Astro.locals;
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+
+let pending = false;
+let requestedAt: string | null = null;
+if (supabase) {
+  // RLS scopes this to the signed-in owner; middleware already gated the route.
+  const { data } = await supabase.from("account_deletions").select("requested_at").maybeSingle();
+  if (data) {
+    pending = true;
+    requestedAt = data.requested_at;
+  }
+}
+---
+
+<Layout title="Account">
+  <div class="bg-cosmic min-h-screen p-4">
+    <div class="mx-auto max-w-2xl">
+      <header class="flex items-center justify-between py-6 text-white">
+        <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-2xl font-bold text-transparent">
+          Account
+        </h1>
+        <a href="/dashboard" class="text-sm text-blue-100/70 transition-colors hover:text-white">← Dashboard</a>
+      </header>
+      <AccountView client:load pending={pending} requestedAt={requestedAt} email={user?.email ?? null} />
+    </div>
+  </div>
+</Layout>

@@ -421,41 +421,41 @@ eligible is a no-op. Reuse the existing service-role seed/teardown.
 
 #### Automated
 
-- [ ] 1.1 Migration applies cleanly against a local Supabase
-- [ ] 1.2 Type check + lint pass with regenerated types (`npx astro sync && npm run lint`)
-- [ ] 1.3 Build passes (`npm run build`)
-- [ ] 1.4 RLS suite passes including new blocking/reactivation assertions (`node scripts/verify-rls.mjs`)
+- [x] 1.1 Migration applies cleanly against a local Supabase — ad5683a
+- [x] 1.2 Type check + lint pass with regenerated types (`npx astro sync && npm run lint`) — ad5683a
+- [x] 1.3 Build passes (`npm run build`) — ad5683a
+- [x] 1.4 RLS suite passes including new blocking/reactivation assertions (`node scripts/verify-rls.mjs`) — ad5683a
 
 #### Manual
 
-- [ ] 1.5 Pending-deletion user's flashcards still physically exist in the DB (soft, not hard)
-- [ ] 1.6 Removing the `account_deletions` row restores visibility for that user
+- [x] 1.5 Pending-deletion user's flashcards still physically exist in the DB (soft, not hard) — ad5683a
+- [x] 1.6 Removing the `account_deletions` row restores visibility for that user — ad5683a
 
 ### Phase 2: Request / cancel / sign-in divert + /account UI
 
 #### Automated
 
-- [ ] 2.1 Type check + lint pass (`npx astro sync && npm run lint`)
-- [ ] 2.2 Build passes (`npm run build`)
+- [x] 2.1 Type check + lint pass (`npx astro sync && npm run lint`) — 7f5c053
+- [x] 2.2 Build passes (`npm run build`) — 7f5c053
 
 #### Manual
 
-- [ ] 2.3 Delete button stays disabled until confirm text matches; confirming signs out and hides cards
-- [ ] 2.4 Signing back in lands on `/account` reactivate panel with correct purge date
-- [ ] 2.5 Reactivating restores access; `/cards` shows cards again
-- [ ] 2.6 `/account` redirects to `/auth/signin` when signed out
+- [x] 2.3 Delete button stays disabled until confirm text matches; confirming signs out and hides cards — 7f5c053
+- [x] 2.4 Signing back in lands on `/account` reactivate panel with correct purge date — 7f5c053
+- [x] 2.5 Reactivating restores access; `/cards` shows cards again — 7f5c053
+- [x] 2.6 `/account` redirects to `/auth/signin` when signed out — 7f5c053
 
 ### Phase 3: Hard-delete purge + GitHub Actions cron
 
 #### Automated
 
-- [ ] 3.1 Type check + lint pass (`npx astro sync && npm run lint`)
-- [ ] 3.2 Build passes (`npm run build`)
-- [ ] 3.3 Purge + idempotency assertions pass (`node scripts/verify-rls.mjs`)
-- [ ] 3.4 Purge route returns 401 with a wrong/absent bearer secret
+- [x] 3.1 Type check + lint pass (`npx astro sync && npm run lint`) — 54cafbc
+- [x] 3.2 Build passes (`npm run build`) — 54cafbc
+- [x] 3.3 Purge + idempotency assertions pass (`node scripts/verify-rls.mjs`) — 54cafbc
+- [x] 3.4 Purge route returns 401 with a wrong/absent bearer secret — 54cafbc
 
 #### Manual
 
-- [ ] 3.5 Backdated test account fully erased (auth user + flashcards) after hitting the route; log counts correct
-- [ ] 3.6 Second immediate call deletes nothing (idempotent)
-- [ ] 3.7 GitHub Actions workflow runs on `workflow_dispatch` against production and reports success
+- [x] 3.5 Backdated test account fully erased (auth user + flashcards) after hitting the route; log counts correct — 54cafbc
+- [x] 3.6 Second immediate call deletes nothing (idempotent) — 54cafbc
+- [x] 3.7 GitHub Actions workflow runs on `workflow_dispatch` against production and reports success — deferred: NOT production-verified; workflow file + purge route verified locally, prod run is human-gated on deploy + secret provisioning
