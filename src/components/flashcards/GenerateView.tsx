@@ -1,6 +1,17 @@
 import { useState } from "react";
 import { Sparkles, Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { MAX_INPUT_CHARS, type Candidate, type ApiErrorCode } from "@/lib/flashcards/schemas";
 import { CandidateCard, type ReviewCard } from "@/components/flashcards/CandidateCard";
 
@@ -42,6 +53,7 @@ export default function GenerateView() {
   const trimmedLength = text.trim().length;
   const overLimit = trimmedLength > MAX_INPUT_CHARS;
   const acceptedCount = cards.filter((c) => c.status === "accepted").length;
+  const pendingCount = cards.filter((c) => c.status === "pending").length;
   const generating = status === "generating";
   const saving = status === "saving";
 
@@ -103,6 +115,18 @@ export default function GenerateView() {
   function rejectCard(id: string) {
     setCards((prev) => prev.map((c) => (c.id === id ? { ...c, status: "rejected" } : c)));
   }
+  function acceptAll() {
+    setCards((prev) => prev.map((c) => (c.status === "pending" ? { ...c, status: "accepted" } : c)));
+  }
+  function rejectAll() {
+    setCards((prev) => prev.map((c) => (c.status === "pending" ? { ...c, status: "rejected" } : c)));
+  }
+  function resetSession() {
+    setCards([]);
+    setText("");
+    setError(null);
+    setSavedCount(null);
+  }
 
   return (
     <div className="space-y-4">
@@ -153,12 +177,53 @@ export default function GenerateView() {
               />
             ))}
           </ul>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-blue-100/60">{acceptedCount} accepted</span>
-            <Button type="button" onClick={handleSave} disabled={saving || acceptedCount === 0}>
-              {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-              {saving ? "Saving…" : "Save accepted"}
-            </Button>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-blue-100/60">{acceptedCount} accepted</span>
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={acceptAll}
+                disabled={pendingCount === 0 || generating || saving}
+              >
+                Accept all
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={rejectAll}
+                disabled={pendingCount === 0 || generating || saving}
+              >
+                Reject all
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button type="button" variant="ghost" disabled={generating || saving}>
+                    Reset
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Reset this review session?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Your unsaved candidates and edits will be discarded.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={resetSession}>Reset</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+              <Button type="button" onClick={handleSave} disabled={saving || acceptedCount === 0}>
+                {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+                {saving ? "Saving…" : "Save accepted"}
+              </Button>
+            </div>
           </div>
         </>
       )}
