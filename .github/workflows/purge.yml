@@ -1,0 +1,27 @@
+name: Purge deleted accounts
+
+# S-05 Phase 3: daily hard-delete of accounts past the 30-day retention window.
+# Posts to the bearer-guarded /api/cron/purge route. Requires two repo secrets:
+#   PURGE_URL          — full production URL, e.g. https://<app>/api/cron/purge
+#   CRON_PURGE_SECRET  — must match the Worker's CRON_PURGE_SECRET secret
+# The route is idempotent, so a missed or double run is safe.
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    steps:
+      # -f fails the job on any non-2xx so failures surface in the Actions UI;
+      # -sS keeps it quiet on success but still prints errors.
+      - name: POST purge endpoint
+        run: |
+          # Content-Type: application/json is required — Astro's CSRF origin guard
+          # rejects form content types from a request with no matching Origin (which
+          # a cross-site cron POST is); JSON bypasses that guard.
+          curl -fsS -X POST "${{ secrets.PURGE_URL }}" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.CRON_PURGE_SECRET }}"

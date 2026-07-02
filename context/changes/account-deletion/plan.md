@@ -435,27 +435,27 @@ eligible is a no-op. Reuse the existing service-role seed/teardown.
 
 #### Automated
 
-- [x] 2.1 Type check + lint pass (`npx astro sync && npm run lint`)
-- [x] 2.2 Build passes (`npm run build`)
+- [x] 2.1 Type check + lint pass (`npx astro sync && npm run lint`) — 7f5c053
+- [x] 2.2 Build passes (`npm run build`) — 7f5c053
 
 #### Manual
 
-- [x] 2.3 Delete button stays disabled until confirm text matches; confirming signs out and hides cards
-- [x] 2.4 Signing back in lands on `/account` reactivate panel with correct purge date
-- [x] 2.5 Reactivating restores access; `/cards` shows cards again
-- [x] 2.6 `/account` redirects to `/auth/signin` when signed out
+- [x] 2.3 Delete button stays disabled until confirm text matches; confirming signs out and hides cards — 7f5c053
+- [x] 2.4 Signing back in lands on `/account` reactivate panel with correct purge date — 7f5c053
+- [x] 2.5 Reactivating restores access; `/cards` shows cards again — 7f5c053
+- [x] 2.6 `/account` redirects to `/auth/signin` when signed out — 7f5c053
 
 ### Phase 3: Hard-delete purge + GitHub Actions cron
 
 #### Automated
 
-- [ ] 3.1 Type check + lint pass (`npx astro sync && npm run lint`)
-- [ ] 3.2 Build passes (`npm run build`)
-- [ ] 3.3 Purge + idempotency assertions pass (`node scripts/verify-rls.mjs`)
-- [ ] 3.4 Purge route returns 401 with a wrong/absent bearer secret
+- [x] 3.1 Type check + lint pass (`npx astro sync && npm run lint`)
+- [x] 3.2 Build passes (`npm run build`)
+- [x] 3.3 Purge + idempotency assertions pass (`node scripts/verify-rls.mjs`)
+- [x] 3.4 Purge route returns 401 with a wrong/absent bearer secret
 
 #### Manual
 
-- [ ] 3.5 Backdated test account fully erased (auth user + flashcards) after hitting the route; log counts correct
-- [ ] 3.6 Second immediate call deletes nothing (idempotent)
+- [x] 3.5 Backdated test account fully erased (auth user + flashcards) after hitting the route; log counts correct
+- [x] 3.6 Second immediate call deletes nothing (idempotent)
 - [ ] 3.7 GitHub Actions workflow runs on `workflow_dispatch` against production and reports success
