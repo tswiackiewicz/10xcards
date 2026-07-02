@@ -34,6 +34,21 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletions: {
+        Row: {
+          requested_at: string
+          user_id: string
+        }
+        Insert: {
+          requested_at?: string
+          user_id: string
+        }
+        Update: {
+          requested_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       flashcards: {
         Row: {
           answer: string
@@ -96,7 +111,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_pending_deletion: { Args: { uid: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

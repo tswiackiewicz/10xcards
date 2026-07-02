@@ -168,6 +168,50 @@ async function main() {
     "A's SRS state is unchanged after B's attempt",
   );
 
+  // --- S-05: Soft-delete blocking (account_deletions) ----------------------------
+  // A pending-deletion user must neither read nor mutate their own flashcards; the
+  // block lives in RLS via is_pending_deletion(). Seeding/cleanup uses service-role;
+  // the assertions run on A's real anon-key + JWT client.
+
+  // 14. Seed a pending-deletion row for A (service-role — bypasses RLS to seed).
+  const seedDel = await admin.from("account_deletions").insert({ user_id: userA.id });
+  assert(!seedDel.error, "pending-deletion row seeded for A");
+
+  // 15. A now sees zero flashcards (RLS hides own rows while pending).
+  const selPending = await asA.from("flashcards").select("*");
+  assert(!selPending.error && selPending.data.length === 0, "pending A sees zero flashcards");
+
+  // 16. A cannot update its own card while pending (RLS → 0 rows affected).
+  const updPending = await asA.from("flashcards").update({ answer: "while pending" }).eq("id", cardId).select();
+  assert(
+    !updPending.error && Array.isArray(updPending.data) && updPending.data.length === 0,
+    "pending A's update affects 0 rows",
+  );
+
+  // 17. A cannot delete its own card while pending (RLS → 0 rows affected).
+  const delPending = await asA.from("flashcards").delete().eq("id", cardId).select();
+  assert(
+    !delPending.error && Array.isArray(delPending.data) && delPending.data.length === 0,
+    "pending A's delete affects 0 rows",
+  );
+
+  // 18. A cannot insert a new card while pending (INSERT WITH CHECK rejects it).
+  const insPending = await asA
+    .from("flashcards")
+    .insert({ user_id: userA.id, question: "while pending", answer: "while pending" })
+    .select();
+  assert(!!insPending.error, "pending A cannot insert a card (WITH CHECK rejects it)");
+
+  // 19. Reactivate: delete the pending row (service-role) → A regains visibility.
+  const cancelDel = await admin.from("account_deletions").delete().eq("user_id", userA.id);
+  assert(!cancelDel.error, "pending-deletion row removed for A");
+
+  const selRestored = await asA.from("flashcards").select("*").eq("id", cardId);
+  assert(
+    !selRestored.error && selRestored.data.length === 1 && selRestored.data[0].id === cardId,
+    "after reactivation, A sees its card again",
+  );
+
   console.log(`\nAll ${passed} assertions passed. RLS isolation holds. ✅`);
 }
 
