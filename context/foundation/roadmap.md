@@ -3,7 +3,7 @@ project: "10xCards"
 version: 1
 status: draft
 created: 2026-06-23
-updated: 2026-07-01
+updated: 2026-07-02
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -39,23 +39,27 @@ never built on a hand-authored card the learner had to write first. That pairing
 
 ## At a glance
 
-| ID   | Change ID               | Outcome (user can …)                                            | Prerequisites | PRD refs                                        | Status |
-| ---- | ----------------------- | --------------------------------------------------------------- | ------------- | ----------------------------------------------- | ------ |
-| F-01 | flashcard-store-rls     | (foundation) per-user flashcard store with RLS isolation lands  | —             | Access Control, NFR(no-loss), Guardrails        | done   |
-| S-01 | ai-card-generation      | paste text, get AI candidates, accept/edit/reject into the deck | F-01          | FR-003, FR-004, US-01, NFR(progress), NFR(GDPR) | done   |
-| S-02 | manual-card-authoring   | create a flashcard manually                                     | F-01          | FR-005                                          | done   |
-| S-03 | manage-saved-flashcards | view, edit, and delete saved flashcards                         | F-01, S-01    | FR-006, FR-007, FR-008                          | done   |
-| S-04 | spaced-repetition-study | study a deck through a spaced-repetition schedule               | F-01, S-01    | FR-009                                          | done   |
+| ID   | Change ID               | Outcome (user can …)                                            | Prerequisites | PRD refs                                        | Status  |
+| ---- | ----------------------- | --------------------------------------------------------------- | ------------- | ----------------------------------------------- | ------- |
+| F-01 | flashcard-store-rls     | (foundation) per-user flashcard store with RLS isolation lands  | —             | Access Control, NFR(no-loss), Guardrails        | done    |
+| S-01 | ai-card-generation      | paste text, get AI candidates, accept/edit/reject into the deck | F-01          | FR-003, FR-004, US-01, NFR(progress), NFR(GDPR) | done    |
+| S-02 | manual-card-authoring   | create a flashcard manually                                     | F-01          | FR-005                                          | done    |
+| S-03 | manage-saved-flashcards | view, edit, and delete saved flashcards                         | F-01, S-01    | FR-006, FR-007, FR-008                          | done    |
+| S-04 | spaced-repetition-study | study a deck through a spaced-repetition schedule               | F-01, S-01    | FR-009                                          | done    |
+| S-05 | account-deletion        | request account deletion, kept 30 days, then permanently erased | F-01          | GDPR NFR (+ new FR, see Open Q3)                | planned |
+| S-06 | ux-improvements         | bulk-action candidates, reset a review session, clearer loading | F-01, S-01    | FR-004, NFR(progress)                           | planned |
 
 ## Streams
 
 Navigation aid — groups items that share a Prerequisites chain. Canonical ordering still lives in the dependency graph below; this table is the proposed reading order across parallel tracks.
 
-| Stream | Theme               | Chain           | Note                                                                                     |
-| ------ | ------------------- | --------------- | ---------------------------------------------------------------------------------------- |
-| A      | AI card pipeline    | `F-01` → `S-01` | The wedge + the store it writes to. Speed bias places this first.                        |
-| B      | Manual authoring    | `S-02`          | Needs only `F-01`; runs parallel with `S-01` (fallback path when AI output doesn't fit). |
-| C      | Manage & study loop | `S-03` → `S-04` | Post-creation lifecycle; joins Stream A at `S-01` (both need cards to exist first).      |
+| Stream | Theme               | Chain           | Note                                                                                                 |
+| ------ | ------------------- | --------------- | ---------------------------------------------------------------------------------------------------- |
+| A      | AI card pipeline    | `F-01` → `S-01` | The wedge + the store it writes to. Speed bias places this first.                                    |
+| B      | Manual authoring    | `S-02`          | Needs only `F-01`; runs parallel with `S-01` (fallback path when AI output doesn't fit).             |
+| C      | Manage & study loop | `S-03` → `S-04` | Post-creation lifecycle; joins Stream A at `S-01` (both need cards to exist first).                  |
+| D      | Account lifecycle   | `S-05`          | Compliance-driven account erasure across all user data; needs only `F-01` (the store it must purge). |
+| E      | UX polish           | `S-01` → `S-06` | Post-hoc refinements to the S-01 review flow; runs parallel with `S-05`.                             |
 
 ## Baseline
 
@@ -136,6 +140,31 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Risk:** The retention half of the value proposition; weighty because it integrates an external SRS algorithm and introduces scheduling state. Needs cards to exist (follows S-01). Scope risk: must integrate a ready-made scheduler, not drift into building one (Non-Goal).
 - **Status:** done
 
+### S-05: Account deletion with 30-day retention
+
+- **Outcome:** user can request account deletion; the account is immediately marked deleted and sign-in blocked, all their data stays recoverable for a 30-day window, then is permanently erased across every user-scoped store.
+- **Change ID:** account-deletion
+- **PRD refs:** GDPR NFR (data handling). No dedicated erasure FR yet — see Open Roadmap Question 3.
+- **Prerequisites:** F-01
+- **Parallel with:** —
+- **Blockers:** —
+- **Unknowns:**
+  - How the 30-day purge is triggered on Cloudflare Workers (Cron Trigger vs. purge-on-access) and where "deleted" state lives (app uses only Supabase `auth.users`, no schema). Owner: user/TBD. Block: no (decidable at plan time).
+- **Risk:** Compliance-driven, destructive, and time-delayed with no background-job baseline or observability (Open Q2). The purge is load-bearing: a silent failure retains data past the promised window (GDPR liability), a premature one violates the no-loss guardrail. Soft-delete must revoke access without deleting rows; verify the retention boundary explicitly.
+- **Status:** planned
+
+### S-06: UX improvements
+
+- **Outcome:** on the AI candidate review flow, user can accept/reject candidates in bulk and reset a review session; long operations show clearer loading states so the screen never looks frozen.
+- **Change ID:** ux-improvements
+- **PRD refs:** FR-004, NFR (visible progress for >~2s operations)
+- **Prerequisites:** F-01, S-01
+- **Parallel with:** S-05
+- **Blockers:** —
+- **Unknowns:** —
+- **Risk:** Polish over an existing surface (the S-01 review flow), so low risk and no new data model. Scope risk: keep to bulk actions, session reset, and loading states — do not redesign the review flow. Bulk reject must stay inside the human-gating guardrail (no silent auto-accept).
+- **Status:** planned
+
 ## Backlog Handoff
 
 | Roadmap ID | Change ID               | Suggested issue title                               | Ready for `/10x-plan` | Notes                                                                                                                                                          |
@@ -145,11 +174,14 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | S-02       | manual-card-authoring   | Manual flashcard creation                           | done                  | Done — merged (PR #3), archived 2026-07-01 → `context/archive/2026-07-01-manual-card-authoring/`.                                                              |
 | S-03       | manage-saved-flashcards | View / edit / delete saved flashcards               | done                  | Done — archived 2026-07-01 → `context/archive/2026-07-01-manage-saved-flashcards/`.                                                                            |
 | S-04       | spaced-repetition-study | Spaced-repetition study session                     | done                  | Done — impl-reviewed, archived 2026-07-01 → `context/archive/2026-07-01-spaced-repetition-study/`.                                                             |
+| S-05       | account-deletion        | Account deletion with 30-day retention              | not yet               | New. Blocked on Open Q3 (add erasure FR to PRD) + purge-trigger + soft-delete-state decisions. Do `/10x-research` on auth/data stores before `/10x-plan`.      |
+| S-06       | ux-improvements         | Candidate review UX: bulk actions, reset, loading   | yes                   | New. Polish over the existing S-01 review flow; no new data model or open questions.                                                                           |
 
 ## Open Roadmap Questions
 
 1. **What is the input-size / generated-card-count cap for AI generation in the MVP?** — Owner: user. Block: gates S-01 implementation (not planning). Also bounds the Cloudflare free-tier CPU/subrequest risk (`infrastructure.md`).
 2. **Log retention beyond live `wrangler tail`?** — Owner: user. Block: roadmap-wide (observability is absent). The infra pre-mortem warns that intermittent production-only generation failures are hard to diagnose without retained logs (Workers Logs paid, or an external sink), and an in-flight generation failure could bruise the no-loss guardrail's spirit. Left open under the `speed` goal; revisit if S-01 generation proves flaky in production.
+3. **Should account deletion (right-to-erasure) be a first-class PRD requirement?** — Owner: user. Block: gates S-05. The PRD's Account section (FR-001/FR-002) has no deletion FR, and the only GDPR clause (an NFR) covers source-text handling, not account erasure. S-05 currently anchors to that NFR by intent; re-run `/10x-prd` to add an explicit erasure FR (and confirm the 30-day window is product policy, not an arbitrary default) so the slice traces to a real requirement.
 
 ## Parked
 
