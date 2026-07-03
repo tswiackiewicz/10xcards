@@ -97,7 +97,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **PRD refs:** FR-003, FR-004, US-01, NFR (visible progress for >~2s operations), NFR (GDPR — source text not exposed to other users, not reused beyond the request)
 - **Prerequisites:** F-01
 - **Parallel with:** S-02
-- **Blockers:** `OPENROUTER_API_KEY` must be set as a production Workers Secret (human-only action, deferred per `deploy-plan.md`) before live generation works.
+- **Blockers:** — (`OPENROUTER_API_KEY` confirmed set as a production Workers Secret 2026-07-03; live generation works.)
 - **Unknowns:**
   - ~~Input-size / generated-card-count cap for the MVP (PRD Open Question Q1)~~ — Resolved in implementation: input capped at 10k chars (`400 too_long` above the cap).
 - **Risk:** This is the wedge and the only unfamiliar integration, so it carries the most uncertainty. Generation is a single request/response OpenRouter `fetch`; Cloudflare free tier doesn't meter the wait but does cap per-request CPU and subrequests — keep one model call + minimal Supabase round-trips, and surface continuous progress per the NFR. Human-gating (no silent auto-save) is the load-bearing guardrail to verify.
@@ -167,15 +167,15 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 ## Backlog Handoff
 
-| Roadmap ID | Change ID               | Suggested issue title                               | Ready for `/10x-plan` | Notes                                                                                                                                                          |
-| ---------- | ----------------------- | --------------------------------------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| F-01       | flashcard-store-rls     | Per-user flashcard store with RLS isolation         | done                  | Done — rolled out to prod, archived 2026-06-24 → `context/archive/2026-06-24-flashcard-store-rls/`.                                                            |
-| S-01       | ai-card-generation      | AI flashcard generation & accept/edit/reject review | done                  | Done — impl-reviewed (PR #2), archived 2026-06-25 → `context/archive/2026-06-25-ai-card-generation/`. Confirm `OPENROUTER_API_KEY` is set for live generation. |
-| S-02       | manual-card-authoring   | Manual flashcard creation                           | done                  | Done — merged (PR #3), archived 2026-07-01 → `context/archive/2026-07-01-manual-card-authoring/`.                                                              |
-| S-03       | manage-saved-flashcards | View / edit / delete saved flashcards               | done                  | Done — archived 2026-07-01 → `context/archive/2026-07-01-manage-saved-flashcards/`.                                                                            |
-| S-04       | spaced-repetition-study | Spaced-repetition study session                     | done                  | Done — impl-reviewed, archived 2026-07-01 → `context/archive/2026-07-01-spaced-repetition-study/`.                                                             |
-| S-05       | account-deletion        | Account deletion with 30-day retention              | not yet               | New. Blocked on Open Q3 (add erasure FR to PRD) + purge-trigger + soft-delete-state decisions. Do `/10x-research` on auth/data stores before `/10x-plan`.      |
-| S-06       | ux-improvements         | Candidate review UX: bulk actions, reset, loading   | yes                   | New. Polish over the existing S-01 review flow; no new data model or open questions.                                                                           |
+| Roadmap ID | Change ID               | Suggested issue title                               | Ready for `/10x-plan` | Notes                                                                                                                                                              |
+| ---------- | ----------------------- | --------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| F-01       | flashcard-store-rls     | Per-user flashcard store with RLS isolation         | done                  | Done — rolled out to prod, archived 2026-06-24 → `context/archive/2026-06-24-flashcard-store-rls/`.                                                                |
+| S-01       | ai-card-generation      | AI flashcard generation & accept/edit/reject review | done                  | Done — impl-reviewed (PR #2), archived 2026-06-25 → `context/archive/2026-06-25-ai-card-generation/`. `OPENROUTER_API_KEY` confirmed set in production 2026-07-03. |
+| S-02       | manual-card-authoring   | Manual flashcard creation                           | done                  | Done — merged (PR #3), archived 2026-07-01 → `context/archive/2026-07-01-manual-card-authoring/`.                                                                  |
+| S-03       | manage-saved-flashcards | View / edit / delete saved flashcards               | done                  | Done — archived 2026-07-01 → `context/archive/2026-07-01-manage-saved-flashcards/`.                                                                                |
+| S-04       | spaced-repetition-study | Spaced-repetition study session                     | done                  | Done — impl-reviewed, archived 2026-07-01 → `context/archive/2026-07-01-spaced-repetition-study/`.                                                                 |
+| S-05       | account-deletion        | Account deletion with 30-day retention              | not yet               | New. Blocked on Open Q3 (add erasure FR to PRD) + purge-trigger + soft-delete-state decisions. Do `/10x-research` on auth/data stores before `/10x-plan`.          |
+| S-06       | ux-improvements         | Candidate review UX: bulk actions, reset, loading   | yes                   | New. Polish over the existing S-01 review flow; no new data model or open questions.                                                                               |
 
 ## Open Roadmap Questions
 
