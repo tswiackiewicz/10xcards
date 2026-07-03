@@ -180,7 +180,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 ## Open Roadmap Questions
 
 1. **What is the input-size / generated-card-count cap for AI generation in the MVP?** — Owner: user. Block: gates S-01 implementation (not planning). Also bounds the Cloudflare free-tier CPU/subrequest risk (`infrastructure.md`).
-2. **Log retention beyond live `wrangler tail`?** — Owner: user. Block: roadmap-wide (observability is absent). The infra pre-mortem warns that intermittent production-only generation failures are hard to diagnose without retained logs (Workers Logs paid, or an external sink), and an in-flight generation failure could bruise the no-loss guardrail's spirit. Left open under the `speed` goal; revisit if S-01 generation proves flaky in production.
+2. ~~**Log retention beyond live `wrangler tail`?**~~ — **Resolved 2026-07-03**: free-tier Workers Logs (`observability.enabled` in `wrangler.jsonc`) already persists logs — 3-day retention, 200K events/day — sufficient for this side project's traffic. No paid plan or external sink needed. See `infrastructure.md`.
 3. **Should account deletion (right-to-erasure) be a first-class PRD requirement?** — Owner: user. Block: gates S-05. The PRD's Account section (FR-001/FR-002) has no deletion FR, and the only GDPR clause (an NFR) covers source-text handling, not account erasure. S-05 currently anchors to that NFR by intent; re-run `/10x-prd` to add an explicit erasure FR (and confirm the 30-day window is product policy, not an arbitrary default) so the slice traces to a real requirement.
 
 ## Parked
