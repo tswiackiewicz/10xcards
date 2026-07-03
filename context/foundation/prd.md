@@ -1,6 +1,6 @@
 ---
 project: "10xCards"
-version: 2
+version: 3
 status: draft
 created: 2026-06-13
 context_type: greenfield
@@ -92,8 +92,8 @@ into a studyable deck without spending an evening writing cards by hand.
 
 - FR-003: User can paste source text and request AI-generated flashcard candidates. Priority: must-have
   > Socratic: Counter-argument considered: "long inputs are slow/costly — input size may
-  > need a cap." Resolution: kept, but an input-size/cost limit for the MVP is unresolved —
-  > routed to Open Questions (Q1).
+  > need a cap." Resolution: kept; input-size/cost limit resolved in implementation — see
+  > Open Questions (Q1).
 - FR-004: User can review each AI candidate and accept, edit, or reject it. Priority: must-have
   > Socratic: Counter-argument considered: "auto-accept everything would be faster."
   > Resolution: kept; review is what realizes the user-control guardrail and the 75%
@@ -183,7 +183,5 @@ product store decks per user and serve them across sessions/devices.
 
 ## Open Questions
 
-1. **What is the input-size / cost limit for AI generation in the MVP?** — Owner: user.
-   Surfaced during the Socratic round on FR-003: long pasted texts may be slow or costly,
-   so the MVP likely needs a cap on input length (and/or generated-card count). Resolution
-   deferred; not blocking the PRD, to be decided before/at implementation.
+1. ~~**What is the input-size / cost limit for AI generation in the MVP?**~~ — **Resolved in
+   implementation**: input capped at 10k chars (`400 too_long` above the cap).
