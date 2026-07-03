@@ -27,7 +27,7 @@ No `test` script exists yet — there is no test framework wired up.
 
 - API endpoints live under `src/pages/api/` (e.g. `auth/signin.ts`).
 - **Auth & route protection:** `src/middleware.ts` guards routes listed in its `PROTECTED_ROUTES` array and attaches the user to `context.locals.user`. Supabase SSR client (cookie-based, `@supabase/ssr`) lives in `src/lib/supabase.ts`.
-- **No DB migrations.** The app uses only Supabase's built-in `auth.users` table — don't scaffold a schema or migrations unless a feature explicitly requires it.
+- **DB migrations** live in `supabase/migrations/` (flashcards, SRS state, account deletions). Apply locally with `npx supabase db reset` or `start`; pushed to production automatically by the `deploy` job in CI (see Git & CI).
 
 ## Environment
 
