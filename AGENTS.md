@@ -37,7 +37,8 @@ No `test` script exists yet — there is no test framework wired up.
 ## Git & CI
 
 - Pre-commit (`.husky/pre-commit` → lint-staged): `eslint --fix` on `*.{ts,tsx,astro}`, `prettier --write` on `*.{json,css,md}`. A lint failure blocks the commit.
-- CI (`@.github/workflows/ci.yml`) runs on push/PR to **`master`**: `npm ci` → `astro sync` → lint → build. Note the default branch here is `main` but CI targets `master` — confirm the intended branch before relying on CI.
+- CI (`@.github/workflows/ci.yml`) runs on push/PR to **`master`**: `npm ci` → `astro sync` → lint → build → Supabase migration dry-run (`supabase db push --dry-run`, catches migrations that fail against prod before merge). Note the default branch here is `main` but CI targets `master` — confirm the intended branch before relying on CI.
+- On push to `master`, the `deploy` job additionally pushes pending Supabase migrations for real (`supabase db push`) before `wrangler deploy`, so prod schema stays in sync with the repo. Requires repo secrets `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_ID`.
 - Commit style: Conventional Commits.
 
 ## Don't touch

@@ -20,6 +20,18 @@ jobs:
       - run: npm run lint
       - run: npm run build
 
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Check Supabase migrations apply cleanly
+        run: |
+          supabase link --project-ref "$SUPABASE_PROJECT_ID"
+          supabase db push --dry-run
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
   deploy:
     needs: ci
     if: github.ref == 'refs/heads/master'
@@ -32,6 +44,19 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Push Supabase migrations
+        run: |
+          supabase link --project-ref "$SUPABASE_PROJECT_ID"
+          supabase db push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
       - uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
