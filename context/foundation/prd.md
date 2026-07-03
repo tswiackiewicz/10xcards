@@ -1,6 +1,6 @@
 ---
 project: "10xCards"
-version: 1
+version: 2
 status: draft
 created: 2026-06-13
 context_type: greenfield
@@ -40,6 +40,7 @@ into a studyable deck without spending an evening writing cards by hand.
 ## Success Criteria
 
 ### Primary
+
 - The end-to-end flow works: a user pastes text, AI proposes flashcards, the user
   reviews (accept / edit / reject), accepted cards land in their deck, and they can
   study the deck through a spaced-repetition schedule.
@@ -48,10 +49,12 @@ into a studyable deck without spending an evening writing cards by hand.
   (vs. fully manual authoring).
 
 ### Secondary
+
 - Users return on later days to keep studying — a signal that the spaced-repetition loop
   is delivering value, not just one-off card generation.
 
 ### Guardrails
+
 - No flashcard a user has saved is ever lost, and no flashcard is ever visible to another
   user. Failure here is a regression even if generation works perfectly.
 - No AI-generated flashcard enters a user's deck without explicit acceptance — the user
@@ -67,6 +70,7 @@ into a studyable deck without spending an evening writing cards by hand.
   their deck and become available to study
 
 #### Acceptance Criteria
+
 - Each AI candidate can be individually accepted, edited before accepting, or rejected.
 - Only explicitly accepted cards are persisted; rejected candidates leave no trace in the deck.
 - After acceptance, the saved cards are immediately visible in the user's flashcard list.
@@ -75,6 +79,7 @@ into a studyable deck without spending an evening writing cards by hand.
 ## Functional Requirements
 
 ### Account
+
 - FR-001: User can create an account with email + password. Priority: must-have
   > Socratic: Counter-argument considered: "auth before first value discourages trial;
   > passwords add security burden." Resolution: kept; accounts are required to store decks
@@ -84,6 +89,7 @@ into a studyable deck without spending an evening writing cards by hand.
   > explicit session in/out is what enforces per-user data isolation.
 
 ### AI generation
+
 - FR-003: User can paste source text and request AI-generated flashcard candidates. Priority: must-have
   > Socratic: Counter-argument considered: "long inputs are slow/costly — input size may
   > need a cap." Resolution: kept, but an input-size/cost limit for the MVP is unresolved —
@@ -94,6 +100,7 @@ into a studyable deck without spending an evening writing cards by hand.
   > acceptance metric.
 
 ### Manual authoring & management
+
 - FR-005: User can create a flashcard manually. Priority: must-have
   > Socratic: Counter-argument considered: "dilutes the AI focus / works against the
   > 75%-via-AI metric." Resolution: kept; it is the fallback when AI output doesn't fit,
@@ -110,10 +117,24 @@ into a studyable deck without spending an evening writing cards by hand.
   > accidental/cross-user loss, not intentional deletion.
 
 ### Study
+
 - FR-009: User can study a deck through a spaced-repetition schedule. Priority: must-have
   > Socratic: Counter-argument considered: "MVP could prove value without SRS; add it in v2."
   > Resolution: kept; without the spaced-repetition loop the product is only a card
   > generator — SRS is the point of the product and drives the retention metric.
+
+### Account lifecycle
+
+- FR-010: User can request deletion of their account. The account is deactivated and
+  sign-in blocked immediately; all account data is recoverable for a 30-day retention
+  window, then permanently erased. Priority: must-have
+  > Socratic: Counter-argument considered: "immediate hard-delete is simpler and needs no
+  > retention/purge machinery." Resolution: kept a 30-day soft-delete window — it gives the
+  > user an accidental-deletion recovery grace period before erasure is final. The 30-day
+  > figure is a product-chosen default, not a specific compliance mandate; permanent erasure
+  > after the window satisfies GDPR right-to-erasure. Added retroactively (v2) — the feature
+  > shipped as S-05 anchored to the GDPR NFR before this FR existed; see Roadmap Open
+  > Question 3.
 
 ## Non-Functional Requirements
 
@@ -139,7 +160,7 @@ discrete question paired with its answer. The user encounters the output as a re
 queue: candidates are presented for accept / edit / reject, and only accepted cards
 become part of the studyable deck. A separate spaced-repetition rule then orders accepted
 cards over time, deciding which card a user sees next based on their prior recall — so the
-product decides both *what* to study (the generated cards) and *when* to study each one.
+product decides both _what_ to study (the generated cards) and _when_ to study each one.
 
 ## Access Control
 

@@ -3,8 +3,8 @@ project: "10xCards"
 version: 1
 status: draft
 created: 2026-06-23
-updated: 2026-07-02
-prd_version: 1
+updated: 2026-07-03
+prd_version: 2
 main_goal: speed
 top_blocker: time
 ---
@@ -46,7 +46,7 @@ never built on a hand-authored card the learner had to write first. That pairing
 | S-02 | manual-card-authoring   | create a flashcard manually                                     | F-01          | FR-005                                          | done   |
 | S-03 | manage-saved-flashcards | view, edit, and delete saved flashcards                         | F-01, S-01    | FR-006, FR-007, FR-008                          | done   |
 | S-04 | spaced-repetition-study | study a deck through a spaced-repetition schedule               | F-01, S-01    | FR-009                                          | done   |
-| S-05 | account-deletion        | request account deletion, kept 30 days, then permanently erased | F-01          | GDPR NFR (+ new FR, see Open Q3)                | done   |
+| S-05 | account-deletion        | request account deletion, kept 30 days, then permanently erased | F-01          | FR-010, GDPR NFR                                | done   |
 | S-06 | ux-improvements         | bulk-action candidates, reset a review session, clearer loading | F-01, S-01    | FR-004, NFR(progress)                           | done   |
 
 ## Streams
@@ -144,7 +144,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 - **Outcome:** user can request account deletion; the account is immediately marked deleted and sign-in blocked, all their data stays recoverable for a 30-day window, then is permanently erased across every user-scoped store.
 - **Change ID:** account-deletion
-- **PRD refs:** GDPR NFR (data handling). No dedicated erasure FR yet — see Open Roadmap Question 3.
+- **PRD refs:** FR-010 (added retroactively, PRD v2), GDPR NFR (data handling).
 - **Prerequisites:** F-01
 - **Parallel with:** —
 - **Blockers:** —
@@ -174,14 +174,14 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | S-02       | manual-card-authoring   | Manual flashcard creation                           | done                  | Done — merged (PR #3), archived 2026-07-01 → `context/archive/2026-07-01-manual-card-authoring/`.                                                                  |
 | S-03       | manage-saved-flashcards | View / edit / delete saved flashcards               | done                  | Done — archived 2026-07-01 → `context/archive/2026-07-01-manage-saved-flashcards/`.                                                                                |
 | S-04       | spaced-repetition-study | Spaced-repetition study session                     | done                  | Done — impl-reviewed, archived 2026-07-01 → `context/archive/2026-07-01-spaced-repetition-study/`.                                                                 |
-| S-05       | account-deletion        | Account deletion with 30-day retention              | not yet               | New. Blocked on Open Q3 (add erasure FR to PRD) + purge-trigger + soft-delete-state decisions. Do `/10x-research` on auth/data stores before `/10x-plan`.          |
+| S-05       | account-deletion        | Account deletion with 30-day retention              | done                  | Done — archived 2026-07-02 → `context/archive/2026-07-02-account-deletion/`. PRD gap closed 2026-07-03 (FR-010 added, PRD v2).                                     |
 | S-06       | ux-improvements         | Candidate review UX: bulk actions, reset, loading   | yes                   | New. Polish over the existing S-01 review flow; no new data model or open questions.                                                                               |
 
 ## Open Roadmap Questions
 
 1. ~~**What is the input-size / generated-card-count cap for AI generation in the MVP?**~~ — **Resolved in implementation**: input capped at 10k chars (`400 too_long` above the cap). See S-01 slice notes.
 2. ~~**Log retention beyond live `wrangler tail`?**~~ — **Resolved 2026-07-03**: free-tier Workers Logs (`observability.enabled` in `wrangler.jsonc`) already persists logs — 3-day retention, 200K events/day — sufficient for this side project's traffic. No paid plan or external sink needed. See `infrastructure.md`.
-3. **Should account deletion (right-to-erasure) be a first-class PRD requirement?** — Owner: user. Block: gates S-05. The PRD's Account section (FR-001/FR-002) has no deletion FR, and the only GDPR clause (an NFR) covers source-text handling, not account erasure. S-05 currently anchors to that NFR by intent; re-run `/10x-prd` to add an explicit erasure FR (and confirm the 30-day window is product policy, not an arbitrary default) so the slice traces to a real requirement.
+3. ~~**Should account deletion (right-to-erasure) be a first-class PRD requirement?**~~ — **Resolved 2026-07-03**: added FR-010 (PRD v2, `### Account lifecycle`). The 30-day retention window is confirmed a product-chosen default, not a compliance mandate. S-05 now traces to FR-010 instead of the source-text GDPR NFR.
 
 ## Parked
 
