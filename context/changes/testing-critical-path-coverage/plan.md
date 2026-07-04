@@ -362,8 +362,8 @@ None — no schema or migration changes in this plan.
 
 #### Automated
 
-- [x] 4.1 `npm run lint` passes
+- [x] 4.1 `npm run lint` passes — 89f0ac9
 
 #### Manual
 
-- [x] 4.2 `test-plan.md` §6.1, §6.2, §3, §5 read correctly and match what Phases 1-3 built
+- [x] 4.2 `test-plan.md` §6.1, §6.2, §3, §5 read correctly and match what Phases 1-3 built — 89f0ac9
