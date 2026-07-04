@@ -42,4 +42,9 @@ export default function setup(): void {
     }
     process.env[targetKey] = value;
   }
+
+  // The app itself (src/lib/supabase.ts, via astro:env/server) reads the anon key under
+  // its own name, SUPABASE_KEY — distinct from the test-helper name above but the same
+  // underlying local-instance value.
+  process.env.SUPABASE_KEY = parsed.ANON_KEY;
 }

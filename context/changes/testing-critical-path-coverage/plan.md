@@ -326,26 +326,26 @@ None — no schema or migration changes in this plan.
 
 #### Automated
 
-- [x] 1.1 `npm test` runs and exits 0 against a running local Supabase instance
-- [x] 1.2 `npm run lint` passes with the new files present
-- [x] 1.3 `npx astro sync && npm run build` still passes unaffected
+- [x] 1.1 `npm test` runs and exits 0 against a running local Supabase instance — ee74f0d
+- [x] 1.2 `npm run lint` passes with the new files present — ee74f0d
+- [x] 1.3 `npx astro sync && npm run build` still passes unaffected — ee74f0d
 
 #### Manual
 
-- [x] 1.4 `supabase start` then `npm test` produces expected harness-functional output
-- [x] 1.5 A stopped local Supabase instance makes `npm test` fail with the clear intentional error message
+- [x] 1.4 `supabase start` then `npm test` produces expected harness-functional output — ee74f0d
+- [x] 1.5 A stopped local Supabase instance makes `npm test` fail with the clear intentional error message — ee74f0d
 
 ### Phase 2: Risk #1 — flashcard ownership & isolation tests
 
 #### Automated
 
-- [ ] 2.1 `npm test` passes both new test files against a fresh local Supabase instance
-- [ ] 2.2 Temporarily reverting one RLS policy causes a test failure in `risk1-rls-isolation.test.ts`
-- [ ] 2.3 `npm run lint` and `npx astro sync && npm run build` remain green
+- [x] 2.1 `npm test` passes both new test files against a fresh local Supabase instance
+- [x] 2.2 Temporarily reverting one RLS policy causes a test failure in `risk1-rls-isolation.test.ts`
+- [x] 2.3 `npm run lint` and `npx astro sync && npm run build` remain green
 
 #### Manual
 
-- [ ] 2.4 `scripts/verify-rls.mjs` still passes standalone, unmodified
+- [x] 2.4 `scripts/verify-rls.mjs` still passes standalone, unmodified
 
 ### Phase 3: Risk #2 — AI review human-gating contract test
 

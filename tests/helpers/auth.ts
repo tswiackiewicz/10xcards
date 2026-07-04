@@ -1,4 +1,4 @@
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { createClient as createSupabaseClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 import type { Database } from "@/db/database.types";
 import { requireEnv } from "./require-env";
@@ -7,6 +7,23 @@ function adminClient() {
   return createSupabaseClient<Database>(requireEnv("SUPABASE_URL"), requireEnv("SUPABASE_SERVICE_ROLE_KEY"), {
     auth: { autoRefreshToken: false, persistSession: false },
   });
+}
+
+/** A fresh anon-key client, unauthenticated — one per identity / per signed-out check. */
+export function anonClient(): SupabaseClient<Database> {
+  return createSupabaseClient<Database>(requireEnv("SUPABASE_URL"), requireEnv("SUPABASE_ANON_KEY"), {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
+
+/** Signs in as (email, password) with a plain supabase-js client — for tests that talk to the DB directly (not through a route handler's cookie-based session). */
+export async function signInDirect(user: { email: string; password: string }): Promise<SupabaseClient<Database>> {
+  const client = anonClient();
+  const { error } = await client.auth.signInWithPassword({ email: user.email, password: user.password });
+  if (error) {
+    throw new Error(`sign-in failed for ${user.email}: ${error.message}`);
+  }
+  return client;
 }
 
 export interface TestUser {
