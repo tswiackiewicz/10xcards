@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-07-04 (Phase 1 → implementing, sub-phase 4 pending)
+> Last updated: 2026-07-04 (Phase 1 → complete)
 
 ## 1. Strategy
 
@@ -83,12 +83,12 @@ Each row is a discrete rollout phase that will open its own change folder
 via `/10x-new`. Status moves left-to-right through the values below; the
 orchestrator updates Status as artifacts appear on disk.
 
-| #   | Phase name                               | Goal (one line)                                                                                   | Risks covered | Test types         | Status       | Change folder                                     |
-| --- | ---------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------- | ------------------ | ------------ | ------------------------------------------------- |
-| 1   | Critical-path coverage                   | Bootstrap the test runner and prove the no-loss/no-leak and human-gating guardrails actually hold | #1, #2        | unit + integration | implementing | `context/changes/testing-critical-path-coverage/` |
-| 2   | Authorization & input-boundary hardening | Prove per-resource ownership checks and input-boundary handling are enforced, not assumed         | #3, #7        | integration + unit | not started  | —                                                 |
-| 3   | Compliance-critical flows                | Prove the 30-day retention boundary and AI-error-response data hygiene                            | #4, #6        | integration        | not started  | —                                                 |
-| 4   | Quality-gates wiring                     | Lock a migration-drift gate in CI; wire required gates; add an e2e smoke on the AI review flow    | #5            | gates + e2e        | not started  | —                                                 |
+| #   | Phase name                               | Goal (one line)                                                                                   | Risks covered | Test types         | Status      | Change folder                                     |
+| --- | ---------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------- | ------------------ | ----------- | ------------------------------------------------- |
+| 1   | Critical-path coverage                   | Bootstrap the test runner and prove the no-loss/no-leak and human-gating guardrails actually hold | #1, #2        | unit + integration | complete    | `context/changes/testing-critical-path-coverage/` |
+| 2   | Authorization & input-boundary hardening | Prove per-resource ownership checks and input-boundary handling are enforced, not assumed         | #3, #7        | integration + unit | not started | —                                                 |
+| 3   | Compliance-critical flows                | Prove the 30-day retention boundary and AI-error-response data hygiene                            | #4, #6        | integration        | not started | —                                                 |
+| 4   | Quality-gates wiring                     | Lock a migration-drift gate in CI; wire required gates; add an e2e smoke on the AI review flow    | #5            | gates + e2e        | not started | —                                                 |
 
 **Status vocabulary** (fixed — parser literals): `not started` → `change opened` → `researched` → `planned` → `implementing` → `complete`.
 
@@ -122,7 +122,7 @@ phase lands; before that, the gate is `planned`.
 | Gate                                                                | Where                | Required?                                 | Catches                               |
 | ------------------------------------------------------------------- | -------------------- | ----------------------------------------- | ------------------------------------- |
 | lint + typecheck                                                    | local + CI           | required (already wired)                  | syntactic / type drift                |
-| unit + integration                                                  | local + CI           | required after §3 Phase 1                 | logic + isolation regressions         |
+| unit + integration                                                  | local + CI           | required (wired in CI since §3 Phase 1)   | logic + isolation regressions         |
 | migration-live gate (pending migrations = 0 before deploy proceeds) | CI (deploy job)      | required after §3 Phase 4                 | schema/production drift (see Risk #5) |
 | e2e on AI review flow                                               | CI on PR             | required after §3 Phase 4                 | broken critical review/save path      |
 | post-edit hook                                                      | local (agent loop)   | not this rollout — configured in Lesson 3 | —                                     |
@@ -138,11 +138,14 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 ### 6.1 Adding a unit test
 
-- TBD — see §3 Phase 1 (test-runner bootstrap + Risk #1/#2 unit-level pieces).
+- No pure unit tests were added by Phase 1 — both Risk #1 and Risk #2 were graded "integration" (a mocked Supabase client would lie about RLS or the save endpoint's real behavior by construction; see §1 principle #1 and the Risk Response Guidance's "likely cheapest layer" column). When a future risk genuinely calls for a unit test, follow the harness this rollout established: place the file at `tests/**/*.test.ts`, import `describe`/`it`/`expect` explicitly from `"vitest"` (`vitest.config.ts` sets `globals: false`, so no ESLint globals override is needed), and rely on the `@/*` alias plus the `astro:env/server` virtual-module stub already wired into `vitest.config.ts`. Note the config is a plain Vitest config, not Astro's `getViteConfig` — that helper pulls in the `@astrojs/cloudflare` adapter's Vite plugin, which conflicts with Vitest's own use of the `ssr` Vite Environment.
 
 ### 6.2 Adding an integration test
 
-- TBD — see §3 Phase 1 for the no-loss/no-leak and human-gating pattern (local Supabase, two-session isolation check).
+- Phase 1 established a two-layer pattern (`tests/integration/risk1-rls-isolation.test.ts`, `risk1-api-route-ownership.test.ts`, `risk2-review-save-contract.test.ts`):
+  - **RLS-policy layer** — talk to the database directly with a plain `@supabase/supabase-js` client signed in as a real seeded user (`tests/helpers/auth.ts`'s `seedUser` + `signInDirect`). Never mock the client here — a mock would lie about RLS by construction.
+  - **Route-wiring layer** — invoke the real exported route handler directly (e.g. `import { POST } from "@/pages/api/flashcards"`) with a real `Request`/`Headers` object and a minimal fake `APIContext` from `tests/helpers/api-context.ts`'s `buildContext`, authenticated via `tests/helpers/auth.ts`'s `getAuthCookieHeader` (signs in once with a plain client, then replays the resulting tokens through a throwaway `@supabase/ssr` server client to get the exact cookie encoding the app's own `createClient()` expects). This exercises the real handler, the real `@supabase/ssr` client, and a real local Supabase instance — only the outermost Astro HTTP transport is faked.
+  - Both layers need a running `supabase start`; `tests/setup/env.ts` sources credentials via `supabase status -o env` as Vitest's `globalSetup`, so every worker process inherits them.
 
 ### 6.3 Adding an e2e test
 
