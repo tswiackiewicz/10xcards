@@ -339,13 +339,13 @@ None — no schema or migration changes in this plan.
 
 #### Automated
 
-- [x] 2.1 `npm test` passes both new test files against a fresh local Supabase instance
-- [x] 2.2 Temporarily reverting one RLS policy causes a test failure in `risk1-rls-isolation.test.ts`
-- [x] 2.3 `npm run lint` and `npx astro sync && npm run build` remain green
+- [x] 2.1 `npm test` passes both new test files against a fresh local Supabase instance — 1872f20
+- [x] 2.2 Temporarily reverting one RLS policy causes a test failure in `risk1-rls-isolation.test.ts` — 1872f20
+- [x] 2.3 `npm run lint` and `npx astro sync && npm run build` remain green — 1872f20
 
 #### Manual
 
-- [x] 2.4 `scripts/verify-rls.mjs` still passes standalone, unmodified
+- [x] 2.4 `scripts/verify-rls.mjs` still passes standalone, unmodified — 1872f20
 
 ### Phase 3: Risk #2 — AI review human-gating contract test
 
