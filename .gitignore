@@ -25,6 +25,10 @@ pnpm-debug.log*
 # playwright mcp scratch output (console logs, page snapshots)
 .playwright-mcp/
 
+# stryker mutation testing output
+.stryker-tmp/
+reports/
+
 # macOS-specific files
 .DS_Store
 
