@@ -53,7 +53,9 @@ export async function seedUser(): Promise<TestUser> {
 export async function cleanupUser(id: string): Promise<void> {
   await adminClient()
     .auth.admin.deleteUser(id)
-    .catch(() => undefined);
+    .catch((err: unknown) => {
+      console.warn(`cleanupUser(${id}) failed: ${err instanceof Error ? err.message : String(err)}`);
+    });
 }
 
 /**

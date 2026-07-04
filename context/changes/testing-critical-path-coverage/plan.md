@@ -155,6 +155,8 @@ export default getViteConfig({
 
 **Contract**: Add a `.env.test.local` line under the existing "environment variables" section.
 
+**Addendum (discovered during implementation, impl-review F1)**: two additional files landed as part of this phase, not itemized above — `tests/helpers/require-env.ts` (small extracted `requireEnv()` used by `auth.ts` and the smoke test, avoiding duplicated "clear error if env missing" logic across call sites) and `tests/integration/harness-smoke.test.ts` (proves the harness reaches a real local Supabase instance — the concrete artifact behind this phase's manual verification step). Both are disclosed in the Phase 1 commit (`ee74f0d`).
+
 ### Success Criteria:
 
 #### Automated Verification:
