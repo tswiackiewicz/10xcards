@@ -18,11 +18,15 @@ jobs:
       - run: npm ci
       - run: npx astro sync
       - run: npm run lint
-      - run: npm run build
 
       - uses: supabase/setup-cli@v1
         with:
           version: latest
+      - run: supabase start
+      - run: npm test
+
+      - run: npm run build
+
       - name: Check Supabase migrations apply cleanly
         run: |
           supabase link --project-ref "$SUPABASE_PROJECT_ID"
