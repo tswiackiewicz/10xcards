@@ -31,6 +31,18 @@ describe("Risk #1 — route-wiring ownership (by-id flashcard mutation routes)",
     await cleanupUser(userB.id);
   });
 
+  it("POST /api/flashcards with no session cookie returns 401 unauthorized", async () => {
+    const response = await POST(
+      buildContext({
+        method: "POST",
+        url: "http://localhost/api/flashcards",
+        body: { cards: [{ question: "should never save", answer: "should never save" }] },
+      }),
+    );
+    expect(response.status).toBe(401);
+    expect(await response.json()).toEqual({ error: "unauthorized" });
+  });
+
   it("user A can create a card via the real POST /api/flashcards handler", async () => {
     const response = await POST(
       buildContext({
