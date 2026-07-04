@@ -351,12 +351,12 @@ None — no schema or migration changes in this plan.
 
 #### Automated
 
-- [ ] 3.1 `npm test` passes, including the new Risk #2 test
-- [ ] 3.2 `npm run lint` and `npx astro sync && npm run build` remain green
+- [x] 3.1 `npm test` passes, including the new Risk #2 test
+- [x] 3.2 `npm run lint` and `npx astro sync && npm run build` remain green
 
 #### Manual
 
-- [ ] 3.3 Manually POST an extra unexpected card to the save endpoint and confirm it saves (validates the documented caveat)
+- [x] 3.3 Manually POST an extra unexpected card to the save endpoint and confirm it saves (validates the documented caveat)
 
 ### Phase 4: Cookbook & test-plan sync
 
