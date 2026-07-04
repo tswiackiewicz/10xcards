@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-07-04 (Phase 1 → implementing, sub-phase 3 pending)
+> Last updated: 2026-07-04 (Phase 1 → implementing, sub-phase 4 pending)
 
 ## 1. Strategy
 
