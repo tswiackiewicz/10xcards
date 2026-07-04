@@ -163,6 +163,55 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 (Filled in by `/10x-implement`'s final sub-phase as each rollout phase lands.)
 
+**Phase 1 — mutation testing pass (ad hoc, 2026-07-04).** Ran Stryker
+(`@stryker-mutator/core` + `@stryker-mutator/vitest-runner`, config at
+`stryker.conf.json`, `coverageAnalysis: "off"` because the test suite hits a
+real local Supabase instance) scoped to the three routes Risk #1/#2 tests
+cover: `src/pages/api/flashcards/{index.ts,[id].ts,[id]/review.ts}`.
+
+Two config gotchas worth keeping in mind if this is re-run: Stryker's sandbox
+copy chokes on the `.claude/skills/*` symlinks (added `.claude`, `.agents`,
+`context` to `ignorePatterns`), and Stryker normalizes backslashes out of
+`mutate` globs before matching, so `\[id\].ts`-style escaping for a literal
+bracket in a filename silently fails — use a character-class escape instead:
+`[[]id[]].ts`.
+
+Initial score 65.43% (162 mutants, 8 survived) surfaced two real gaps in
+`index.ts` (the POST `/api/flashcards` save endpoint): the `!supabase` /
+`!user` auth guards and the DB-insert-failure branch were never independently
+exercised, because the existing Risk #1/#2 tests only ever drive this route
+with a valid session and a successful insert. Closed with three tests:
+
+- `tests/integration/risk1-api-route-ownership.test.ts` — added a
+  no-session-cookie request asserting 401 (real integration; kills the
+  `!user` mutant).
+- `tests/unit/risk1-risk2-save-endpoint-hermetic.test.ts` — new file, two
+  hermetic tests (mocked `@/lib/supabase` client): missing-client 401, and
+  insert-failure 500. Per §1/§4's hermetic-vs-integration split, these
+  branches can't be triggered by real local Supabase on demand, so mocking
+  the client factory here doesn't lie about RLS — neither branch depends on
+  RLS/DB behavior.
+
+Result: `index.ts` 44.12% → 79.41% (7 → 3 survived). Final score 72.84%
+(118 killed, 4 survived, 0 errors/timeouts).
+
+Four mutants consciously left surviving (per §6's "would this hurt a user or
+the business?" rubric):
+
+- `index.ts:8` (×2) — dropping the `Content-Type` header / response init
+  object. Cosmetic; no test in this project asserts on response headers, and
+  no client here depends on the header being present.
+- `index.ts:36` (`!parsed.success`) — the invalid-body branch. Correctly out
+  of scope: Risk #7 / input-boundary hardening is rollout Phase 2's job, not
+  Phase 1's.
+- `review.ts:20` (`SRS_COLUMNS` truncated to `""`) — every review test in
+  this rollout grades a never-studied card, so the repeat-review path (which
+  needs the _prior_ SRS state to schedule correctly) never surfaces this.
+  This isn't a Risk #1/#2 scenario — it's an SRS-scheduling-correctness risk
+  not currently on the §2 Risk Map — so it's flagged here rather than patched
+  into this phase's test files. Candidate for a `/10x-lesson` entry or a new
+  risk-map row at the next `/10x-test-plan --refresh`.
+
 ## 7. What We Deliberately Don't Test
 
 Exclusions agreed during the rollout (Phase 2 interview, Q5). Future
