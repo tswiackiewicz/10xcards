@@ -454,19 +454,19 @@ None — no schema or data changes.
 
 #### Automated
 
-- [x] 3.1 Stryker run completes without errors: `npx stryker run`
-- [x] 3.2 Mutation score reported for `generate.ts` and `schemas.ts`
+- [x] 3.1 Stryker run completes without errors: `npx stryker run` — ab4ba5b
+- [x] 3.2 Mutation score reported for `generate.ts` and `schemas.ts` — ab4ba5b
 
 #### Manual
 
-- [x] 3.3 Every surviving mutant in `generate.ts`/`schemas.ts` has a recorded verdict
+- [x] 3.3 Every surviving mutant in `generate.ts`/`schemas.ts` has a recorded verdict — ab4ba5b
 
 ### Phase 4: Cookbook & test-plan sync
 
 #### Automated
 
-- [ ] 4.1 `test-plan.md` §3 row 2 reads `complete`; no remaining `TBD` in §6.4 for this pattern
+- [x] 4.1 `test-plan.md` §3 row 2 reads `complete`; no remaining `TBD` in §6.4 for this pattern
 
 #### Manual
 
-- [ ] 4.2 §6.4 and §6.1 are usable by a future reader without re-reading this plan
+- [x] 4.2 §6.4 and §6.1 are usable by a future reader without re-reading this plan

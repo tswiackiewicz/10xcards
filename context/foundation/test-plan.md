@@ -83,12 +83,12 @@ Each row is a discrete rollout phase that will open its own change folder
 via `/10x-new`. Status moves left-to-right through the values below; the
 orchestrator updates Status as artifacts appear on disk.
 
-| #   | Phase name                               | Goal (one line)                                                                                   | Risks covered | Test types         | Status      | Change folder                                     |
-| --- | ---------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------- | ------------------ | ----------- | ------------------------------------------------- |
-| 1   | Critical-path coverage                   | Bootstrap the test runner and prove the no-loss/no-leak and human-gating guardrails actually hold | #1, #2        | unit + integration | complete    | `context/changes/testing-critical-path-coverage/` |
-| 2   | Authorization & input-boundary hardening | Prove per-resource ownership checks and input-boundary handling are enforced, not assumed         | #3, #7        | integration + unit | not started | —                                                 |
-| 3   | Compliance-critical flows                | Prove the 30-day retention boundary and AI-error-response data hygiene                            | #4, #6        | integration        | not started | —                                                 |
-| 4   | Quality-gates wiring                     | Lock a migration-drift gate in CI; wire required gates; add an e2e smoke on the AI review flow    | #5            | gates + e2e        | not started | —                                                 |
+| #   | Phase name                               | Goal (one line)                                                                                   | Risks covered | Test types         | Status      | Change folder                                                     |
+| --- | ---------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------- | ------------------ | ----------- | ----------------------------------------------------------------- |
+| 1   | Critical-path coverage                   | Bootstrap the test runner and prove the no-loss/no-leak and human-gating guardrails actually hold | #1, #2        | unit + integration | complete    | `context/changes/testing-critical-path-coverage/`                 |
+| 2   | Authorization & input-boundary hardening | Prove per-resource ownership checks and input-boundary handling are enforced, not assumed         | #3, #7        | integration + unit | complete    | `context/changes/testing-authorization-input-boundary-hardening/` |
+| 3   | Compliance-critical flows                | Prove the 30-day retention boundary and AI-error-response data hygiene                            | #4, #6        | integration        | not started | —                                                                 |
+| 4   | Quality-gates wiring                     | Lock a migration-drift gate in CI; wire required gates; add an e2e smoke on the AI review flow    | #5            | gates + e2e        | not started | —                                                                 |
 
 **Status vocabulary** (fixed — parser literals): `not started` → `change opened` → `researched` → `planned` → `implementing` → `complete`.
 
@@ -139,6 +139,7 @@ the relevant rollout phase ships; before that, the sub-section reads
 ### 6.1 Adding a unit test
 
 - No pure unit tests were added by Phase 1 — both Risk #1 and Risk #2 were graded "integration" (a mocked Supabase client would lie about RLS or the save endpoint's real behavior by construction; see §1 principle #1 and the Risk Response Guidance's "likely cheapest layer" column). When a future risk genuinely calls for a unit test, follow the harness this rollout established: place the file at `tests/**/*.test.ts`, import `describe`/`it`/`expect` explicitly from `"vitest"` (`vitest.config.ts` sets `globals: false`, so no ESLint globals override is needed), and rely on the `@/*` alias plus the `astro:env/server` virtual-module stub already wired into `vitest.config.ts`. Note the config is a plain Vitest config, not Astro's `getViteConfig` — that helper pulls in the `@astrojs/cloudflare` adapter's Vite plugin, which conflicts with Vitest's own use of the `ssr` Vite Environment.
+- **Phase 2's first genuine unit test (Risk #7).** `generateRequestSchema` + `mapInputError` (`src/lib/flashcards/schemas.ts` / `src/pages/api/flashcards/generate.ts`) are exercised with zero HTTP/DB/provider involvement: call `generateRequestSchema.safeParse({ text })` directly and, on failure, pass `.error` straight into `mapInputError` — no hand-built `ZodError` needed. This is the pattern for any Zod-schema boundary validation: if the schema and its error mapping are pure, importable functions with no side effects, test them directly as a unit, not through a route handler. One caveat found while writing this: `vitest.config.ts`'s `globalSetup` (§6.2) runs for the **entire** Vitest process, not per matched file — even a single unit-test-only invocation (`vitest run <unit-test-file>`) still shells out to `supabase status` and throws if local Supabase is down. A unit test having no Supabase/HTTP calls in its own code is what "genuinely the cheap layer" means here, not that the harness can run with Supabase stopped.
 
 ### 6.2 Adding an integration test
 
@@ -153,7 +154,21 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 ### 6.4 Adding a test for a new API endpoint
 
-- TBD — see §3 Phase 2 for the ownership-check / IDOR pattern.
+- **Not-found-vs-not-owned equivalence (Phase 2, Risk #3).** For a new
+  by-id route (or when auditing an existing one), don't stop at asserting
+  each negative case is a 404 in isolation — that only proves "both happen
+  to 404," not that the boundary genuinely hides ownership. Instead, define
+  one shared expected-response constant (e.g. `{ status: 404, body: {
+error: "not_found" } }`), then assert **both** a syntactically-valid but
+  never-created ID (any caller, generated via `crypto.randomUUID()` — no
+  import needed on Node 24) and a real ID owned by a different user equal
+  that same constant. Making the equivalence explicit in the assertions
+  themselves (not two separately hard-coded expectations) is what closes
+  the signal gap. See `tests/integration/risk3-idor-not-found-equivalence.test.ts`.
+  Reuse the exact `seedUser()` → `getAuthCookieHeader()` → `buildContext()`
+  harness from §6.2 — a denied mutation on a real card leaves 0 rows
+  affected, so one seeded card can safely be the target of all three
+  by-id routes' negative-path assertions without ordering hazards.
 
 ### 6.5 Adding a test for the account-deletion / retention boundary
 
@@ -211,6 +226,53 @@ the business?" rubric):
   not currently on the §2 Risk Map — so it's flagged here rather than patched
   into this phase's test files. Candidate for a `/10x-lesson` entry or a new
   risk-map row at the next `/10x-test-plan --refresh`.
+
+**Phase 2 — mutation testing pass (2026-07-05).** Widened `stryker.conf.json`'s
+`mutate` array to add `src/pages/api/flashcards/generate.ts` and
+`src/lib/flashcards/schemas.ts` alongside Phase 1's three by-id routes.
+
+Initial run: `generate.ts` 15.87% (7 survived), `schemas.ts` 87.50% (2
+survived). Triage surfaced one real gap in `generate.ts`: `mapInputError`'s
+final `invalid_input` fallback (line 23) was never independently exercised
+— every existing boundary test (empty/whitespace/over-cap) produces a Zod
+`too_small`/`too_big` issue, so a mutant forcing `if (true) return
+"too_long"` survived by coincidence. A non-string `text` value (e.g. a
+number) produces a `too_small`/`too_big`-free Zod `invalid_type` issue that
+should map to `invalid_input` instead — untested until now. Closed with one
+test in `tests/unit/risk7-generate-input-boundary.test.ts` asserting
+`generateRequestSchema.safeParse({ text: 123 })` maps to `invalid_input`,
+not `empty_input`/`too_long`.
+
+Result: `generate.ts` 15.87% → 19.05% (7 → 6 survived — the low total score
+reflects the endpoint's `rate_limited`/`ai_unavailable`/`no_cards` provider
+branches, correctly out of this rollout's scope; see below). `schemas.ts`
+unchanged at 87.50% (2 survived).
+
+Survivors consciously left (per §6's "would this hurt a user or the
+business?" rubric):
+
+- `generate.ts:21` (×6) — `mapInputError`'s
+  `error.issues.find((i) => i.path[0] === "text") ?? error.issues[0]`
+  fallback. `generateRequestSchema` has exactly one top-level field
+  (`text`), so any `ZodError` it produces always has exactly one issue with
+  path `["text"]` — the `.find` predicate and the `??` fallback can never
+  be distinguished by any input this schema can produce. Equivalent
+  mutants, not a real gap. Would only start mattering if the schema grew a
+  second field; revisit then, don't hand-build a multi-issue `ZodError`
+  now just to kill a mutant no real request can trigger.
+- `schemas.ts:19`/`schemas.ts:20` — dropping `.trim()` from
+  `candidateSchema`'s `question`/`answer`. Out of scope for Risk #3/#7:
+  `candidateSchema` backs `saveRequestSchema`/`manualCardSchema`, not
+  `generateRequestSchema` — this phase's plan explicitly excluded those
+  schemas. Flag for whichever future rollout phase covers the save/manual
+  endpoints.
+- `generate.ts`'s uncovered `rate_limited`/`ai_unavailable`/`no_cards`
+  branches (the "no coverage" rows in the report, not survivors) — these
+  require a live or mocked OpenRouter call, out of Risk #7's scope (input
+  boundary only); the Open Risks section below already flags this for a
+  future phase.
+- `review.ts:20` and `index.ts:8`/`index.ts:36` — unchanged from Phase 1's
+  entry above; already triaged and accepted there.
 
 ## 7. What We Deliberately Don't Test
 
