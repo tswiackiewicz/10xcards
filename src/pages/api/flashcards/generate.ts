@@ -17,7 +17,7 @@ function fail(status: number, error: ApiErrorCode): Response {
 }
 
 /** Map a request-body validation failure to a specific typed error code. */
-function mapInputError(error: ZodError): ApiErrorCode {
+export function mapInputError(error: ZodError): ApiErrorCode {
   const issue = error.issues.find((i) => i.path[0] === "text") ?? error.issues[0];
   if (issue.code === "too_small") return "empty_input";
   if (issue.code === "too_big") return "too_long";

@@ -427,28 +427,28 @@ None — no schema or data changes.
 
 #### Automated
 
-- [x] 1.1 New test file passes: `npm test -- risk3-idor-not-found-equivalence`
-- [x] 1.2 Full suite still passes: `npm test`
-- [x] 1.3 Lint is clean: `npm run lint`
-- [x] 1.4 Type check is clean: `npx astro check`
+- [x] 1.1 New test file passes: `npm test -- risk3-idor-not-found-equivalence` — 0386d15
+- [x] 1.2 Full suite still passes: `npm test` — 0386d15
+- [x] 1.3 Lint is clean: `npm run lint` — 0386d15
+- [x] 1.4 Type check is clean: `npx astro check` — 0386d15
 
 #### Manual
 
-- [x] 1.5 Local Supabase running before the run
-- [x] 1.6 Both equivalence cases appear as distinct assertions in the test output
+- [x] 1.5 Local Supabase running before the run — 0386d15
+- [x] 1.6 Both equivalence cases appear as distinct assertions in the test output — 0386d15
 
 ### Phase 2: Risk #7 — input-boundary unit tests
 
 #### Automated
 
-- [ ] 2.1 New test file passes: `npm test -- risk7-generate-input-boundary`
-- [ ] 2.2 Full suite still passes: `npm test`
-- [ ] 2.3 Lint is clean: `npm run lint`
-- [ ] 2.4 Type check is clean: `npx astro check`
+- [x] 2.1 New test file passes: `npm test -- risk7-generate-input-boundary`
+- [x] 2.2 Full suite still passes: `npm test`
+- [x] 2.3 Lint is clean: `npm run lint`
+- [x] 2.4 Type check is clean: `npx astro check`
 
 #### Manual
 
-- [ ] 2.5 Test file passes without a live Supabase instance
+- [x] 2.5 Test file passes without a live Supabase instance
 
 ### Phase 3: Mutation-testing pass
 
