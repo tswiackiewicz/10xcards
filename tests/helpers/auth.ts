@@ -54,6 +54,7 @@ export async function cleanupUser(id: string): Promise<void> {
   await adminClient()
     .auth.admin.deleteUser(id)
     .catch((err: unknown) => {
+      // eslint-disable-next-line no-console -- surfaces cleanupUser failures instead of swallowing them (test hygiene)
       console.warn(`cleanupUser(${id}) failed: ${err instanceof Error ? err.message : String(err)}`);
     });
 }
