@@ -144,24 +144,24 @@ Not applicable — no data model or schema changes.
 
 #### Automated
 
-- [x] 1.1 Local lint is clean of the `no-console` warning
-- [x] 1.2 Full lint still passes with no new errors introduced
-- [x] 1.3 Type checking still passes
+- [x] 1.1 Local lint is clean of the `no-console` warning — 7ee0471
+- [x] 1.2 Full lint still passes with no new errors introduced — 7ee0471
+- [x] 1.3 Type checking still passes — 7ee0471
 
 #### Manual
 
-- [x] 1.4 Diff reviewed: only the two call sites and the one comment line changed
+- [x] 1.4 Diff reviewed: only the two call sites and the one comment line changed — 7ee0471
 
 ### Phase 2: Verify via a real CI run
 
 #### Automated
 
-- [ ] 2.1 PR's `ci` job run completes with conclusion `success`
-- [ ] 2.2 PR's `ci` job check-run has zero relevant annotations
-- [ ] 2.3 `npm test` step within the run still passes
-- [ ] 2.4 `Check Supabase migrations apply cleanly` step still passes
+- [x] 2.1 PR's `ci` job run completes with conclusion `success`
+- [x] 2.2 PR's `ci` job check-run has zero relevant annotations
+- [x] 2.3 `npm test` step within the run still passes
+- [x] 2.4 `Check Supabase migrations apply cleanly` step still passes
 
 #### Manual
 
-- [ ] 2.5 Checks tab visually confirmed clean of warning annotations
-- [ ] 2.6 Post-merge `deploy` job completes successfully
+- [x] 2.5 Checks tab visually confirmed clean of warning annotations
+- [x] 2.6 Post-merge `deploy` job completes successfully
