@@ -1,10 +1,10 @@
 ---
 change_id: testing-authorization-input-boundary-hardening
 title: Prove per-resource ownership checks and input-boundary handling
-status: implemented
+status: archived
 created: 2026-07-05
 updated: 2026-07-05
-archived_at: null
+archived_at: 2026-07-05T18:32:38Z
 ---
 
 ## Notes
