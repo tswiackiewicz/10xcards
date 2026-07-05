@@ -156,12 +156,12 @@ Not applicable — no data model or schema changes.
 
 #### Automated
 
-- [x] 2.1 PR's `ci` job run completes with conclusion `success`
-- [x] 2.2 PR's `ci` job check-run has zero relevant annotations
-- [x] 2.3 `npm test` step within the run still passes
-- [x] 2.4 `Check Supabase migrations apply cleanly` step still passes
+- [x] 2.1 PR's `ci` job run completes with conclusion `success` — b51acfe
+- [x] 2.2 PR's `ci` job check-run has zero relevant annotations — b51acfe
+- [x] 2.3 `npm test` step within the run still passes — b51acfe
+- [x] 2.4 `Check Supabase migrations apply cleanly` step still passes — b51acfe
 
 #### Manual
 
-- [x] 2.5 Checks tab visually confirmed clean of warning annotations
-- [x] 2.6 Post-merge `deploy` job completes successfully
+- [x] 2.5 Checks tab visually confirmed clean of warning annotations — b51acfe
+- [x] 2.6 Post-merge `deploy` job completes successfully — b51acfe
