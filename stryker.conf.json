@@ -9,7 +9,9 @@
   "mutate": [
     "src/pages/api/flashcards/index.ts",
     "src/pages/api/flashcards/[[]id[]].ts",
-    "src/pages/api/flashcards/[[]id[]]/review.ts"
+    "src/pages/api/flashcards/[[]id[]]/review.ts",
+    "src/pages/api/flashcards/generate.ts",
+    "src/lib/flashcards/schemas.ts"
   ],
   "vitest": {
     "configFile": "vitest.config.ts"

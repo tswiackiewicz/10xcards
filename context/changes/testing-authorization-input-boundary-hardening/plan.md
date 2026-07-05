@@ -441,25 +441,25 @@ None — no schema or data changes.
 
 #### Automated
 
-- [x] 2.1 New test file passes: `npm test -- risk7-generate-input-boundary`
-- [x] 2.2 Full suite still passes: `npm test`
-- [x] 2.3 Lint is clean: `npm run lint`
-- [x] 2.4 Type check is clean: `npx astro check`
+- [x] 2.1 New test file passes: `npm test -- risk7-generate-input-boundary` — ba366aa
+- [x] 2.2 Full suite still passes: `npm test` — ba366aa
+- [x] 2.3 Lint is clean: `npm run lint` — ba366aa
+- [x] 2.4 Type check is clean: `npx astro check` — ba366aa
 
 #### Manual
 
-- [x] 2.5 Test file passes without a live Supabase instance
+- [x] 2.5 Test file passes without a live Supabase instance — ba366aa
 
 ### Phase 3: Mutation-testing pass
 
 #### Automated
 
-- [ ] 3.1 Stryker run completes without errors: `npx stryker run`
-- [ ] 3.2 Mutation score reported for `generate.ts` and `schemas.ts`
+- [x] 3.1 Stryker run completes without errors: `npx stryker run`
+- [x] 3.2 Mutation score reported for `generate.ts` and `schemas.ts`
 
 #### Manual
 
-- [ ] 3.3 Every surviving mutant in `generate.ts`/`schemas.ts` has a recorded verdict
+- [x] 3.3 Every surviving mutant in `generate.ts`/`schemas.ts` has a recorded verdict
 
 ### Phase 4: Cookbook & test-plan sync
 

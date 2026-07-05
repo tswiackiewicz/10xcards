@@ -40,4 +40,13 @@ describe("Risk #7 — generateRequestSchema input-boundary handling", () => {
 
     expect(result.success).toBe(true);
   });
+
+  it("rejects a non-string text value as invalid_input, not empty_input or too_long", () => {
+    const result = generateRequestSchema.safeParse({ text: 123 });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(mapInputError(result.error)).toBe("invalid_input");
+    }
+  });
 });
