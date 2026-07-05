@@ -465,8 +465,8 @@ None — no schema or data changes.
 
 #### Automated
 
-- [x] 4.1 `test-plan.md` §3 row 2 reads `complete`; no remaining `TBD` in §6.4 for this pattern
+- [x] 4.1 `test-plan.md` §3 row 2 reads `complete`; no remaining `TBD` in §6.4 for this pattern — 1fe3de6
 
 #### Manual
 
-- [x] 4.2 §6.4 and §6.1 are usable by a future reader without re-reading this plan
+- [x] 4.2 §6.4 and §6.1 are usable by a future reader without re-reading this plan — 1fe3de6
