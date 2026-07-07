@@ -172,9 +172,55 @@ error: "not_found" } }`), then assert **both** a syntactically-valid but
 
 ### 6.5 Adding a test for the account-deletion / retention boundary
 
-- TBD — see §3 Phase 3.
+- **Two-layer split, same shape as §6.2 (Phase 3, Risk #4).** The RLS-policy layer
+  (`tests/integration/risk4-pending-deletion-rls.test.ts`) seeds a user via `seedUser()`,
+  then calls `tests/helpers/account-deletion.ts`'s `seedAccountDeletion(userId, ageDays,
+ageMinutesOffset?)` — a service-role insert into `account_deletions` with a computed
+  `requested_at`, since a normal signed-in insert always gets `now()` from the column
+  default and can't produce an aged row. Seed at age `0` to prove the RLS lock
+  (`is_pending_deletion()`) fires immediately, not just once a row is old — the lockout
+  is not the same thing as the purge boundary. The route-wiring layer
+  (`tests/integration/risk4-purge-boundary.test.ts`) invokes `POST` from
+  `@/pages/api/cron/purge` directly via `buildContext`'s `headers` option (the route
+  reads a bearer token, not a session cookie) with the fixed test secret
+  `tests/setup/env.ts` injects (`CRON_PURGE_SECRET`).
+- **Boundary-seeding margins, not exact ticks.** Seed the "not yet eligible" row at
+  `29 days + 23 hours` old and the "eligible" row at `30 days + 5 minutes` old — never
+  exactly 29 or 30 days. The purge route computes its own cutoff at call time, a few
+  milliseconds after the test seeds the row; an exact-boundary seed races that gap and
+  can flip eligibility non-deterministically.
+- **A per-row deletion failure can't be seeded via real Supabase.**
+  `account_deletions.user_id` has an `ON DELETE CASCADE` FK to `auth.users` — deleting
+  the auth user out-of-band to force a `deleteUser` failure also deletes its
+  `account_deletions` row before the purge's eligibility query ever sees it. This state
+  is hermetic-only: mock `createAdminClient` (`@/lib/supabase-admin`) to return a stub
+  whose query chain resolves with fabricated rows and whose `auth.admin.deleteUser`
+  rejects for one of them. See `tests/unit/risk4-purge-partial-failure-hermetic.test.ts`,
+  which follows the same "mock only when real Supabase genuinely can't produce the
+  branch on demand, and the branch doesn't depend on RLS/DB behavior" rule as
+  `tests/unit/risk1-risk2-save-endpoint-hermetic.test.ts`.
 
-### 6.6 Per-rollout-phase notes
+### 6.6 Mocking an external HTTP provider (MSW)
+
+- **Scope the server's lifecycle to one file — never register it globally (Phase 3,
+  Risk #6).** `tests/setup/msw.ts` exports a bare `setupServer()` instance with no
+  default handlers. Drive it from inside the one test file that needs it
+  (`beforeAll(() => server.listen({ onUnhandledRequest: "bypass" }))`,
+  `afterEach(() => server.resetHandlers())`, `afterAll(() => server.close())`) — do not
+  add it to `vitest.config.ts`'s `setupFiles`. That file's own route handler still makes
+  real Supabase calls (e.g. the auth check); a global registration, or omitting
+  `onUnhandledRequest: "bypass"`, would intercept those too and break every other
+  integration test sharing the same worker. Register per-test handlers via
+  `server.use(http.post(<URL>, () => HttpResponse.json(...)))` inside each `it`, not as
+  server-level defaults, so `resetHandlers()` keeps tests isolated from each other.
+- **A network-level mock (`HttpResponse.error()`) covers both "generic failure" and
+  "timeout" claims when the code doesn't distinguish them.** Check whether the code
+  under test has a single bare `catch` around the provider call before writing two
+  separate tests for "network failure" and "timeout" — if the catch discards the error
+  type, they're the same test with a different label. See
+  `tests/integration/risk6-generation-error-hygiene.test.ts`.
+
+### 6.7 Per-rollout-phase notes
 
 (Filled in by `/10x-implement`'s final sub-phase as each rollout phase lands.)
 

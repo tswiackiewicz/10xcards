@@ -244,23 +244,23 @@ None — no schema changes in this phase; `account_deletions` and its RLS polici
 
 #### Automated
 
-- [x] 2.1 `npm test -- tests/integration/risk4-pending-deletion-rls.test.ts` passes
-- [x] 2.2 `npm test -- tests/integration/risk4-purge-boundary.test.ts` passes
-- [x] 2.3 `npm test -- tests/unit/risk4-purge-partial-failure-hermetic.test.ts` passes
-- [x] 2.4 `npm run lint` passes
+- [x] 2.1 `npm test -- tests/integration/risk4-pending-deletion-rls.test.ts` passes — b1f69bf
+- [x] 2.2 `npm test -- tests/integration/risk4-purge-boundary.test.ts` passes — b1f69bf
+- [x] 2.3 `npm test -- tests/unit/risk4-purge-partial-failure-hermetic.test.ts` passes — b1f69bf
+- [x] 2.4 `npm run lint` passes — b1f69bf
 
 #### Manual
 
-- [x] 2.5 Three new Phase 2 files pass against a freshly-started `supabase start`
+- [x] 2.5 Three new Phase 2 files pass against a freshly-started `supabase start` — b1f69bf
 
 ### Phase 3: Risk #6 — AI-generation error-response data hygiene
 
 #### Automated
 
-- [ ] 3.1 `npm test -- tests/integration/risk6-generation-error-hygiene.test.ts` passes
-- [ ] 3.2 `npm test` (full suite) passes
-- [ ] 3.3 `npm run lint` passes
+- [x] 3.1 `npm test -- tests/integration/risk6-generation-error-hygiene.test.ts` passes
+- [x] 3.2 `npm test` (full suite) passes
+- [x] 3.3 `npm run lint` passes
 
 #### Manual
 
-- [ ] 3.4 `test-plan.md` §6.5 and the MSW cookbook note are filled in and accurate
+- [x] 3.4 `test-plan.md` §6.5 and the MSW cookbook note are filled in and accurate
