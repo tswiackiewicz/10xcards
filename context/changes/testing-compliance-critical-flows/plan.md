@@ -257,10 +257,10 @@ None — no schema changes in this phase; `account_deletions` and its RLS polici
 
 #### Automated
 
-- [x] 3.1 `npm test -- tests/integration/risk6-generation-error-hygiene.test.ts` passes
-- [x] 3.2 `npm test` (full suite) passes
-- [x] 3.3 `npm run lint` passes
+- [x] 3.1 `npm test -- tests/integration/risk6-generation-error-hygiene.test.ts` passes — e62e8b9
+- [x] 3.2 `npm test` (full suite) passes — e62e8b9
+- [x] 3.3 `npm run lint` passes — e62e8b9
 
 #### Manual
 
-- [x] 3.4 `test-plan.md` §6.5 and the MSW cookbook note are filled in and accurate
+- [x] 3.4 `test-plan.md` §6.5 and the MSW cookbook note are filled in and accurate — e62e8b9
