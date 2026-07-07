@@ -32,6 +32,8 @@ describe("Risk #4 — purge route boundary and auth gate", () => {
       buildContext({ method: "POST", url: "http://localhost/api/cron/purge", headers: VALID_AUTH }),
     );
     expect(response.status).toBe(200);
+    const body = (await response.json()) as { deleted: number; skipped: number };
+    expect(body.deleted).toBe(0);
     expect(await userExists(user.id)).toBe(true);
   });
 
