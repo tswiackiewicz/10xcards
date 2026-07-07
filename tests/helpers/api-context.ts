@@ -6,6 +6,7 @@ interface BuildContextOptions {
   cookieHeader?: string;
   headers?: Record<string, string>;
   body?: unknown;
+  formBody?: Record<string, string>;
   params?: Record<string, string | undefined>;
 }
 
@@ -24,6 +25,7 @@ export function buildContext({
   cookieHeader,
   headers: extraHeaders,
   body,
+  formBody,
   params,
 }: BuildContextOptions): APIContext {
   const headers = new Headers();
@@ -33,21 +35,35 @@ export function buildContext({
   if (body !== undefined) {
     headers.set("Content-Type", "application/json");
   }
+  if (formBody !== undefined) {
+    headers.set("Content-Type", "application/x-www-form-urlencoded");
+  }
   if (extraHeaders) {
     for (const [key, value] of Object.entries(extraHeaders)) {
       headers.set(key, value);
     }
   }
 
+  const requestBody =
+    formBody !== undefined
+      ? new URLSearchParams(formBody).toString()
+      : body !== undefined
+        ? JSON.stringify(body)
+        : undefined;
+
   const context = {
     request: new Request(url, {
       method,
       headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: requestBody,
     }),
     cookies: { set: () => undefined },
     params: params ?? {},
     locals: {},
+    // Mirrors astro/dist/core/middleware/index.js's redirect(path, status) exactly —
+    // signin.ts calls context.redirect(...) and relies on the real 302 default.
+    redirect: (path: string, status?: number) =>
+      new Response(null, { status: status ?? 302, headers: { Location: path } }),
   };
 
   return context as unknown as APIContext;

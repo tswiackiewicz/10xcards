@@ -233,25 +233,25 @@ None — no schema changes in this phase; `account_deletions` and its RLS polici
 
 #### Automated
 
-- [x] 1.1 `npm run lint` passes
-- [x] 1.2 `npm test -- tests/integration/harness-smoke.test.ts` still passes
+- [x] 1.1 `npm run lint` passes — d1de18e
+- [x] 1.2 `npm test -- tests/integration/harness-smoke.test.ts` still passes — d1de18e
 
 #### Manual
 
-- [x] 1.3 `npm ls msw` shows the package installed
+- [x] 1.3 `npm ls msw` shows the package installed — d1de18e
 
 ### Phase 2: Risk #4 — account-deletion retention boundary
 
 #### Automated
 
-- [ ] 2.1 `npm test -- tests/integration/risk4-pending-deletion-rls.test.ts` passes
-- [ ] 2.2 `npm test -- tests/integration/risk4-purge-boundary.test.ts` passes
-- [ ] 2.3 `npm test -- tests/unit/risk4-purge-partial-failure-hermetic.test.ts` passes
-- [ ] 2.4 `npm run lint` passes
+- [x] 2.1 `npm test -- tests/integration/risk4-pending-deletion-rls.test.ts` passes
+- [x] 2.2 `npm test -- tests/integration/risk4-purge-boundary.test.ts` passes
+- [x] 2.3 `npm test -- tests/unit/risk4-purge-partial-failure-hermetic.test.ts` passes
+- [x] 2.4 `npm run lint` passes
 
 #### Manual
 
-- [ ] 2.5 Three new Phase 2 files pass against a freshly-started `supabase start`
+- [x] 2.5 Three new Phase 2 files pass against a freshly-started `supabase start`
 
 ### Phase 3: Risk #6 — AI-generation error-response data hygiene
 
