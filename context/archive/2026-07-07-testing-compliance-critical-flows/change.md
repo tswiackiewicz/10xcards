@@ -1,10 +1,10 @@
 ---
 change_id: testing-compliance-critical-flows
 title: Test the account-deletion retention boundary and AI-error data hygiene
-status: impl_reviewed
+status: archived
 created: 2026-07-07
 updated: 2026-07-07
-archived_at: null
+archived_at: 2026-07-07T19:05:36Z
 ---
 
 ## Notes
