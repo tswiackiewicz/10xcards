@@ -4,6 +4,7 @@ interface BuildContextOptions {
   method: string;
   url: string;
   cookieHeader?: string;
+  headers?: Record<string, string>;
   body?: unknown;
   params?: Record<string, string | undefined>;
 }
@@ -17,13 +18,25 @@ interface BuildContextOptions {
  * refreshes via `cookies.set(...)`, so this is enough to exercise the real handler code,
  * the real @supabase/ssr client, and a real local Supabase instance.
  */
-export function buildContext({ method, url, cookieHeader, body, params }: BuildContextOptions): APIContext {
+export function buildContext({
+  method,
+  url,
+  cookieHeader,
+  headers: extraHeaders,
+  body,
+  params,
+}: BuildContextOptions): APIContext {
   const headers = new Headers();
   if (cookieHeader) {
     headers.set("Cookie", cookieHeader);
   }
   if (body !== undefined) {
     headers.set("Content-Type", "application/json");
+  }
+  if (extraHeaders) {
+    for (const [key, value] of Object.entries(extraHeaders)) {
+      headers.set(key, value);
+    }
   }
 
   const context = {

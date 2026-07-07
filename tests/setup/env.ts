@@ -47,4 +47,10 @@ export default function setup(): void {
   // its own name, SUPABASE_KEY — distinct from the test-helper name above but the same
   // underlying local-instance value.
   process.env.SUPABASE_KEY = parsed.ANON_KEY;
+
+  // Fixed test-only values for the two secrets the astro:env/server stub exposes
+  // (vitest.config.ts) that aren't part of `supabase status -o env` — deliberately not
+  // sourced from .dev.vars, so test correctness never depends on a real secret.
+  process.env.CRON_PURGE_SECRET = "test-purge-secret";
+  process.env.OPENROUTER_API_KEY = "test-openrouter-key";
 }
