@@ -206,11 +206,11 @@ Not applicable — no schema changes in this plan; it hardens the process that s
 
 #### Automated
 
-- [x] 2.1 `npm run test:e2e` passes locally with the extended accept+reject assertion
+- [x] 2.1 `npm run test:e2e` passes locally with the extended accept+reject assertion — 76ecf9d
 
 #### Manual
 
-- [x] 2.2 Deliberately breaking the accept-filter makes the extended test fail
+- [x] 2.2 Deliberately breaking the accept-filter makes the extended test fail — 76ecf9d
 
 ### Phase 3: Wire the e2e suite into CI
 

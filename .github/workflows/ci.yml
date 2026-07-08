@@ -25,6 +25,9 @@ jobs:
       - run: supabase start
       - run: npm test
 
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+
       - run: npm run build
 
       - name: Check Supabase migrations apply cleanly

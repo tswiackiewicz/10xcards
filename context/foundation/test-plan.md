@@ -83,12 +83,12 @@ Each row is a discrete rollout phase that will open its own change folder
 via `/10x-new`. Status moves left-to-right through the values below; the
 orchestrator updates Status as artifacts appear on disk.
 
-| #   | Phase name                               | Goal (one line)                                                                                   | Risks covered | Test types         | Status        | Change folder                                                     |
-| --- | ---------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------- | ------------------ | ------------- | ----------------------------------------------------------------- |
-| 1   | Critical-path coverage                   | Bootstrap the test runner and prove the no-loss/no-leak and human-gating guardrails actually hold | #1, #2        | unit + integration | complete      | `context/changes/testing-critical-path-coverage/`                 |
-| 2   | Authorization & input-boundary hardening | Prove per-resource ownership checks and input-boundary handling are enforced, not assumed         | #3, #7        | integration + unit | complete      | `context/changes/testing-authorization-input-boundary-hardening/` |
-| 3   | Compliance-critical flows                | Prove the 30-day retention boundary and AI-error-response data hygiene                            | #4, #6        | integration + unit | complete      | `context/changes/testing-compliance-critical-flows/`              |
-| 4   | Quality-gates wiring                     | Lock a migration-drift gate in CI; wire required gates; add an e2e smoke on the AI review flow    | #5            | gates + e2e        | change opened | `context/changes/testing-quality-gates-wiring/`                   |
+| #   | Phase name                               | Goal (one line)                                                                                   | Risks covered | Test types         | Status       | Change folder                                                     |
+| --- | ---------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------- | ------------------ | ------------ | ----------------------------------------------------------------- |
+| 1   | Critical-path coverage                   | Bootstrap the test runner and prove the no-loss/no-leak and human-gating guardrails actually hold | #1, #2        | unit + integration | complete     | `context/changes/testing-critical-path-coverage/`                 |
+| 2   | Authorization & input-boundary hardening | Prove per-resource ownership checks and input-boundary handling are enforced, not assumed         | #3, #7        | integration + unit | complete     | `context/changes/testing-authorization-input-boundary-hardening/` |
+| 3   | Compliance-critical flows                | Prove the 30-day retention boundary and AI-error-response data hygiene                            | #4, #6        | integration + unit | complete     | `context/changes/testing-compliance-critical-flows/`              |
+| 4   | Quality-gates wiring                     | Lock a migration-drift gate in CI; wire required gates; add an e2e smoke on the AI review flow    | #5            | gates + e2e        | implementing | `context/changes/testing-quality-gates-wiring/`                   |
 
 **Status vocabulary** (fixed — parser literals): `not started` → `change opened` → `researched` → `planned` → `implementing` → `complete`.
 
