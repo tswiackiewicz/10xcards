@@ -1,0 +1,69 @@
+name: Rehearse migration gate (temporary)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  rehearse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: supabase/setup-cli@v2
+        with:
+          version: latest
+
+      - name: Link to production project
+        run: supabase link --project-ref "$SUPABASE_PROJECT_ID"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
+      # Verbatim copy of the real gate step in .github/workflows/ci.yml's
+      # deploy job, run here first against the real (currently synced) state.
+      - name: Real gate script — baseline (expect pass)
+        id: baseline_gate
+        run: |
+          output=$(supabase db push --dry-run 2>&1)
+          echo "$output"
+          if ! grep -q "is up to date" <<< "$output"; then
+            echo "::error::Pending migrations remain after db push — aborting before deploy."
+            exit 1
+          fi
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
+      # Ephemeral only — exists in this runner's checkout, never committed,
+      # never pushed for real. --dry-run never mutates the database.
+      - name: Introduce a fake never-applied migration
+        run: |
+          echo "-- fake drift-rehearsal migration; dry-run only, never applied" \
+            > supabase/migrations/99999999999999_drift_rehearsal.sql
+
+      # Same verbatim script, now against the drifted local state.
+      # continue-on-error so a correct (expected) failure doesn't fail the job;
+      # the next step verifies the outcome was actually "failure".
+      - name: Real gate script — drift (expect fail)
+        id: drift_gate
+        continue-on-error: true
+        run: |
+          output=$(supabase db push --dry-run 2>&1)
+          echo "$output"
+          if ! grep -q "is up to date" <<< "$output"; then
+            echo "::error::Pending migrations remain after db push — aborting before deploy."
+            exit 1
+          fi
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
+      - name: Verify the rehearsal outcome
+        run: |
+          if [ "${{ steps.drift_gate.outcome }}" != "failure" ]; then
+            echo "::error::REHEARSAL FAILED — the gate script did not fail on deliberate drift. It would NOT catch real drift."
+            exit 1
+          fi
+          echo "REHEARSAL PASSED — gate correctly failed-closed on deliberate drift."
