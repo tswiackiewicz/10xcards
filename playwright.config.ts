@@ -9,6 +9,10 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
+  // CI runners are slower and astro dev compiles each route on first hit —
+  // the auth setup's first-ever POST /api/auth/signin can outrun the
+  // default 30s action timeout on a cold route. Local dev stays at 30s.
+  timeout: process.env.CI ? 60_000 : 30_000,
   reporter: "html",
 
   // Reuses the same env-population helper Vitest uses — a plain, Vitest-agnostic
