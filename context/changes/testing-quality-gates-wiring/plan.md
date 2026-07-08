@@ -199,8 +199,8 @@ Not applicable — no schema changes in this plan; it hardens the process that s
 
 #### Manual
 
-- [ ] 1.3 Scratch-project rehearsal: check passes when migrations are fully applied
-- [ ] 1.4 Scratch-project rehearsal: check fails when drift is deliberately introduced
+- [x] 1.3 Scratch-project rehearsal: check passes when migrations are fully applied — 09c56b6
+- [x] 1.4 Scratch-project rehearsal: check fails when drift is deliberately introduced — 09c56b6
 
 ### Phase 2: Extend e2e smoke to cover the reject path (Risk #2 negative space)
 
