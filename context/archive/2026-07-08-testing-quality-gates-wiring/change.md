@@ -1,10 +1,10 @@
 ---
 change_id: testing-quality-gates-wiring
 title: Wire quality gates — migration-drift CI check and AI review flow e2e smoke
-status: impl_reviewed
+status: archived
 created: 2026-07-08
 updated: 2026-07-08
-archived_at: null
+archived_at: 2026-07-08T19:38:16Z
 ---
 
 ## Notes
