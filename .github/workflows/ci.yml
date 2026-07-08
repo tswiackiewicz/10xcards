@@ -25,6 +25,15 @@ jobs:
       - run: supabase start
       - run: npm test
 
+      - name: Export Supabase credentials for the e2e web server
+        run: |
+          status=$(supabase status -o env)
+          api_url=$(grep '^API_URL=' <<< "$status" | sed -E 's/^API_URL="(.*)"$/\1/')
+          anon_key=$(grep '^ANON_KEY=' <<< "$status" | sed -E 's/^ANON_KEY="(.*)"$/\1/')
+          {
+            echo "SUPABASE_URL=$api_url"
+            echo "SUPABASE_KEY=$anon_key"
+          } >> "$GITHUB_ENV"
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
 
