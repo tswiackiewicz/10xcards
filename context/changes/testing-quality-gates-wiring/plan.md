@@ -33,13 +33,15 @@ The `deploy` job fails (before `wrangler deploy` runs) if any migration remains 
 - Not touching the `ci` job's existing dry-run check (`:30-37`) — it's a different, complementary check (pre-merge preview vs. post-push proof) and stays as-is.
 - Not configuring GitHub branch-protection required-status-checks via API/code — that's a manual, repo-external action; this plan only reminds.
 
+> **Addendum (2026-07-08):** the boundary above moved during implementation. While verifying 3.3, `master` was found to have zero branch protection (`gh api` returned 404 "Branch not protected"). With explicit user consent, branch protection requiring the `ci` status check was configured live via `gh api PUT .../branches/master/protection` — otherwise a red `ci` run would never have blocked anything, defeating the point of Phase 3. This was a deliberate, consented scope change, not drift; kept here rather than reverted since it's live, verified, and closes the exact gap 3.3 exists to catch.
+
 ## Implementation Approach
 
 Three phases, each independently shippable: the migration gate (pure CI YAML, no app code), the e2e coverage extension (test-writing against an already-built feature — routed through `/10x-e2e` per this repo's `CLAUDE.md`, not written directly here), then the CI wiring that actually runs the extended suite on every push/PR. Coverage extension is sequenced before CI wiring so the very first CI run already protects the full risk, not just the accept-only half.
 
 ## Critical Implementation Details
 
-**Migration-gate detection is a stdout-sentinel dependency, not an API contract.** The Supabase CLI exposes no `--json`/exit-code-based way to assert "zero pending migrations" (confirmed by reading `internal/migration/list/list.go` and `internal/db/push/push.go` directly). The gate in Phase 1 therefore greps `db push --dry-run`'s own `"is up to date"` string. Match on `"is up to date"` without the trailing period, to reduce (not eliminate) sensitivity to minor wording changes across future CLI releases — this is a real, accepted coupling to the CLI's current output, not a design flaw to engineer around.
+**Migration-gate detection is a stdout-sentinel dependency, not an API contract.** The Supabase CLI exposes no `--json`/exit-code-based way to assert "zero pending migrations" (confirmed by reading `internal/migration/list/list.go` and `internal/db/push/push.go` directly). The gate in Phase 1 therefore greps `db push --dry-run`'s own `"is up to date"` string, anchored to end-of-line (`grep -qE "is up to date\.?$"`) to reduce (not eliminate) the chance of a coincidental unrelated substring match — this is a real, accepted coupling to the CLI's current output, not a design flaw to engineer around.
 
 ## Phase 1: Migration-drift CI gate (Risk #5)
 
@@ -132,14 +134,23 @@ Run the full (now accept+reject) Playwright suite on every push/PR to `master`, 
 
 **Intent**: After `npm test` (`:26`) and before `npm run build` (`:28`), install the chromium browser with OS dependencies (needed on a bare `ubuntu-latest` runner) and run the e2e suite, reusing the `supabase start` (`:25`) already running for Vitest.
 
-**Contract**: Two new steps in the `ci` job:
+**Contract**: Three new steps in the `ci` job:
 
 ```yaml
+- name: Export Supabase credentials for the e2e web server
+  run: |
+    status=$(supabase status -o env)
+    api_url=$(grep '^API_URL=' <<< "$status" | sed -E 's/^API_URL="(.*)"$/\1/')
+    anon_key=$(grep '^ANON_KEY=' <<< "$status" | sed -E 's/^ANON_KEY="(.*)"$/\1/')
+    {
+      echo "SUPABASE_URL=$api_url"
+      echo "SUPABASE_KEY=$anon_key"
+    } >> "$GITHUB_ENV"
 - run: npx playwright install --with-deps chromium
 - run: npm run test:e2e
 ```
 
-No new env vars: `playwright.config.ts`'s `globalSetup` already sources Supabase credentials via `tests/setup/env.ts`, the same helper Vitest uses, and the `webServer`'s `npm run dev` child process inherits them.
+**Correction (2026-07-08, commit `a40e578`):** the original contract claimed "no new env vars," assuming `playwright.config.ts`'s `globalSetup` would propagate Supabase credentials to the `webServer`'s `npm run dev` child process. A real CI run showed this doesn't hold — `globalSetup` and `webServer` are separate spawned processes and don't share env. The export step above writes `SUPABASE_URL`/`SUPABASE_KEY` (non-secret local values from `supabase status`) to `$GITHUB_ENV` so the `npm run dev` process picks them up. No stdout leak — only written to `$GITHUB_ENV`, never echoed.
 
 ### Success Criteria:
 
@@ -199,8 +210,8 @@ Not applicable — no schema changes in this plan; it hardens the process that s
 
 #### Manual
 
-- [x] 1.3 Scratch-project rehearsal: check passes when migrations are fully applied — 09c56b6
-- [x] 1.4 Scratch-project rehearsal: check fails when drift is deliberately introduced — 09c56b6
+- [x] 1.3 Rehearsal: check passes when migrations are fully applied — 09c56b6 (actual method: temporary `workflow_dispatch` workflow ran the gate's `--dry-run` check against the real production project, never mutating; removed after — 302527c. Not a disposable scratch project as originally planned, but a stronger proof since it exercised the real target.)
+- [x] 1.4 Rehearsal: check fails when drift is deliberately introduced — 09c56b6 (same rehearsal method as 1.3)
 
 ### Phase 2: Extend e2e smoke to cover the reject path (Risk #2 negative space)
 
