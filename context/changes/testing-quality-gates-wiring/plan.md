@@ -195,7 +195,7 @@ Not applicable — no schema changes in this plan; it hardens the process that s
 #### Automated
 
 - [x] 1.1 GitHub Actions accepts the modified `ci.yml` (valid YAML, job parses) on push — 3a3c6dd
-- [ ] 1.2 On the next real `master` push with fully-applied migrations, the `deploy` job's new step passes and `wrangler deploy` still runs
+- [x] 1.2 On the next real `master` push with fully-applied migrations, the `deploy` job's new step passes and `wrangler deploy` still runs — a40e578
 
 #### Manual
 
@@ -216,9 +216,9 @@ Not applicable — no schema changes in this plan; it hardens the process that s
 
 #### Automated
 
-- [ ] 3.1 `npx playwright install --with-deps chromium` succeeds on a fresh `ubuntu-latest` runner
-- [ ] 3.2 `npm run test:e2e` passes in the `ci` job on push/PR to `master`
+- [x] 3.1 `npx playwright install --with-deps chromium` succeeds on a fresh `ubuntu-latest` runner — a40e578
+- [x] 3.2 `npm run test:e2e` passes in the `ci` job on push/PR to `master` — a40e578
 
 #### Manual
 
-- [ ] 3.3 Confirm `ci` is a required status check in GitHub branch-protection settings for `master`
+- [x] 3.3 Confirm `ci` is a required status check in GitHub branch-protection settings for `master`
