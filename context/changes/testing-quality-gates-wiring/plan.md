@@ -194,7 +194,7 @@ Not applicable — no schema changes in this plan; it hardens the process that s
 
 #### Automated
 
-- [x] 1.1 GitHub Actions accepts the modified `ci.yml` (valid YAML, job parses) on push
+- [x] 1.1 GitHub Actions accepts the modified `ci.yml` (valid YAML, job parses) on push — 3a3c6dd
 - [ ] 1.2 On the next real `master` push with fully-applied migrations, the `deploy` job's new step passes and `wrangler deploy` still runs
 
 #### Manual
@@ -206,11 +206,11 @@ Not applicable — no schema changes in this plan; it hardens the process that s
 
 #### Automated
 
-- [ ] 2.1 `npm run test:e2e` passes locally with the extended accept+reject assertion
+- [x] 2.1 `npm run test:e2e` passes locally with the extended accept+reject assertion
 
 #### Manual
 
-- [ ] 2.2 Deliberately breaking the accept-filter makes the extended test fail
+- [x] 2.2 Deliberately breaking the accept-filter makes the extended test fail
 
 ### Phase 3: Wire the e2e suite into CI
 
