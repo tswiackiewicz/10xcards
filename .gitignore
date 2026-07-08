@@ -25,6 +25,11 @@ pnpm-debug.log*
 # playwright mcp scratch output (console logs, page snapshots)
 .playwright-mcp/
 
+# playwright (test runner)
+/playwright-report/
+/test-results/
+/playwright/.auth/
+
 # stryker mutation testing output
 .stryker-tmp/
 reports/
