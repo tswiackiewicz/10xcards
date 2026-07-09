@@ -144,12 +144,25 @@ generation).
 **File**: `astro.config.mjs`
 
 **Intent**: Give `@astrojs/sitemap` the `site` it needs to generate output instead
-of silently skipping.
+of silently skipping, without hardcoding the URL into committed source.
 
-**Contract**: Add a top-level `site: "https://10x-cards.tommy-swiacek-1fb.workers.dev/"`
-string to the `defineConfig({...})` object (alongside `output`, `security`,
-`integrations`, etc.). Literal string — this is a single fixed deployment target,
-there's no per-environment value to derive it from.
+**Contract**: In `astro.config.mjs`, import `loadEnv` from `vite` and call
+`loadEnv("", process.cwd(), "")` at module top level (before `defineConfig`),
+then set `site: SITE_URL` (destructured from that result) — no literal
+fallback anywhere in the file. `astro:env` doesn't work for this: it's a Vite
+virtual module resolved for app code at request time, not accessible inside
+`defineConfig()`, which runs as a plain Node script before Vite exists.
+`loadEnv()` reads `.env`/`.env.local` directly and is itself overridden by a
+real process env var of the same name if one is set (confirmed by direct
+testing) — so a real CI/shell `SITE_URL` always wins over whatever `.env`
+says. Local dev/build gets the value from `.env` (`SITE_URL=https://10x-cards.tommy-swiacek-1fb.workers.dev/`,
+documented as a placeholder in `.env.example`); CI gets it from the GitHub
+Actions repository **variable** `SITE_URL` (not a secret — the value is
+public, ends up in `sitemap.xml`), wired into both the `ci` and `deploy`
+jobs' `npm run build` steps via `env: { SITE_URL: ${{ vars.SITE_URL }} }`.
+With no value from either source, `site` is `undefined` and
+`@astrojs/sitemap` cleanly logs its original skip warning — confirmed by
+direct testing, not a crash.
 
 #### 2. Supabase local SMTP section rename
 
@@ -262,6 +275,9 @@ only affects local `supabase db reset` / `supabase start` runs, not production d
 - `supabase/config.toml:60-65,97-107` — seed and local SMTP sections
 - `eslint.config.js:14-38,62-69` — baseConfig and astroConfig blocks
 - `package.json:63`, `package-lock.json:13901-13904` — supabase devDependency
+- `.github/workflows/ci.yml` — `ci`/`deploy` jobs' `npm run build` steps, wired with `SITE_URL: ${{ vars.SITE_URL }}`
+- GitHub Actions repository variable `SITE_URL` — created via `gh variable set`, value `https://10x-cards.tommy-swiacek-1fb.workers.dev/`
+- `.env.example` — documents `SITE_URL` as a required-for-sitemap local placeholder
 
 ## Progress
 

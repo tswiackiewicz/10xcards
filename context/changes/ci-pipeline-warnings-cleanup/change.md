@@ -36,3 +36,10 @@ during implementation (staging Supabase project, staging Cloudflare Worker,
 GitHub Environments), then explicitly reverted back to dev (local) + production
 only. All provisioned cloud resources were torn down. See `plan.md`'s "Staging
 exploration, abandoned" section for what was learned along the way.
+
+Post-review follow-up: the `site` URL was moved out of source entirely — no
+literal anywhere in `astro.config.mjs`. It now reads `SITE_URL` via Vite's
+`loadEnv()` (from `.env` locally) and via a new GitHub Actions repository
+**variable** `SITE_URL` in CI, wired into both jobs' build steps. Verdict from
+the earlier impl-review (APPROVED) still holds — this is a refinement of
+already-reviewed work, not new scope.

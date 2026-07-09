@@ -38,6 +38,8 @@ jobs:
       - run: npm run test:e2e
 
       - run: npm run build
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
 
       - name: Check Supabase migrations apply cleanly
         run: |
@@ -64,6 +66,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
 
       - uses: supabase/setup-cli@v2
         with:
