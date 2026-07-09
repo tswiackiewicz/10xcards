@@ -1,7 +1,7 @@
 ---
 change_id: ci-pipeline-warnings-cleanup
 title: CI pipeline warnings cleanup
-status: implementing
+status: implemented
 created: 2026-07-09
 updated: 2026-07-09
 archived_at: null
@@ -30,3 +30,9 @@ surfaced. Scope for this change:
 Not in scope (noise, not actionable): transitive `@babel/plugin-proposal-private-methods`
 deprecation warning, `npm warn allow-scripts` notice, GitHub Actions runner's
 `git init` default-branch hint.
+
+A staging + production deployment pipeline was explored and partially built
+during implementation (staging Supabase project, staging Cloudflare Worker,
+GitHub Environments), then explicitly reverted back to dev (local) + production
+only. All provisioned cloud resources were torn down. See `plan.md`'s "Staging
+exploration, abandoned" section for what was learned along the way.
