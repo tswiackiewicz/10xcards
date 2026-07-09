@@ -247,10 +247,10 @@ No schema migration is required for the primary fix. If the PostgREST delete+ord
 
 #### Automated
 
-- [ ] 3.1 Type check + lint pass
-- [ ] 3.2 Unit + integration tests pass
-- [ ] 3.3 Build passes
+- [x] 3.1 Type check + lint pass
+- [x] 3.2 Unit + integration tests pass
+- [x] 3.3 Build passes
 
 #### Manual
 
-- [ ] 3.4 Studying the same card twice in `/study` shows a differing second interval hint
+- [x] 3.4 Studying the same card twice in `/study` shows a differing second interval hint
