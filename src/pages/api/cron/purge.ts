@@ -29,7 +29,7 @@ function safeEqual(a: string, b: string): boolean {
 // Bearer-guarded (GitHub Actions cron posts the shared secret). Idempotent — a run
 // with nothing eligible deletes nothing. Bounded batch per invocation keeps us under
 // the Workers free-tier 50-subrequest cap; the daily cadence drains any backlog.
-// BATCH deletes + 1 select = 36 subrequests, leaving headroom under the 50 cap.
+// BATCH deletes + 1 advisory count + 1 claim = 37 subrequests, leaving headroom under the 50 cap.
 const RETENTION_DAYS = 30;
 const BATCH = 35;
 
@@ -48,12 +48,33 @@ export const POST: APIRoute = async (context) => {
   }
 
   const cutoff = new Date(Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000).toISOString();
-  const { data, count, error } = await admin
+
+  // Advisory-only: total backlog size for the `skipped` metric, independent of BATCH.
+  // Never used for eligibility — the claim below is the sole source of truth for which
+  // rows this invocation is committed to purging.
+  const { count, error: countError } = await admin
     .from("account_deletions")
-    .select("user_id", { count: "exact" })
+    .select("user_id", { count: "exact", head: true })
+    .lt("requested_at", cutoff);
+
+  if (countError) {
+    // eslint-disable-next-line no-console -- Workers Logs: a silent failure retains data past the promised window (GDPR).
+    console.error(JSON.stringify({ event: "account_purge", ok: false, error: countError.message }));
+    return fail(500, "purge_failed");
+  }
+
+  // Atomic claim: eligibility-check and claim are a single delete-and-return, so a
+  // concurrent cancellation landing before this row's turn always wins for that row —
+  // there's no separate select-then-loop window for it to land in. PostgREST requires
+  // the `order` column in the `select` list on a DELETE — omitting it 42703s (verified
+  // empirically against the local instance; not documented).
+  const { data, error } = await admin
+    .from("account_deletions")
+    .delete()
     .lt("requested_at", cutoff)
     .order("requested_at", { ascending: true })
-    .limit(BATCH);
+    .limit(BATCH)
+    .select("user_id, requested_at");
 
   if (error) {
     // eslint-disable-next-line no-console -- Workers Logs: a silent failure retains data past the promised window (GDPR).
@@ -65,8 +86,8 @@ export const POST: APIRoute = async (context) => {
   let deleted = 0;
   let errors = 0;
   for (const row of data) {
-    // The on-delete-cascade FKs erase the user's flashcards and their
-    // account_deletions row automatically.
+    // The on-delete-cascade FKs erase the user's flashcards automatically; the
+    // account_deletions row is already gone — the claim above deleted it.
     const { error: delErr } = await admin.auth.admin.deleteUser(row.user_id);
     if (delErr) errors++;
     else deleted++;

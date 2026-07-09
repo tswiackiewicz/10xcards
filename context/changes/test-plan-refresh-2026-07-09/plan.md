@@ -118,7 +118,7 @@ Replace `purge.ts`'s stale select-then-loop with an atomic claim-and-consume que
 
 **Intent**: Prove both real, sequential orderings behave correctly against a real local Supabase instance — cancellation-before-purge always survives, and purge-before-cancellation is a deterministic, documented no-op for the late reactivation, not data loss in either direction.
 
-**Contract**: Reuse `seedUser`/`cleanupUser`/`adminClient` (`tests/helpers/auth.ts`), `seedAccountDeletion` (`tests/helpers/account-deletion.ts`), and `buildContext` (`tests/helpers/api-context.ts`), following `risk4-purge-boundary.test.ts`'s `userExists` helper pattern. Two cases: (a) seed an eligible (>30d) row for a real user, call the real `reactivate.ts` `POST` handler (authenticated via `getAuthCookieHeader`) to cancel, then call the real `purge.ts` `POST` handler — assert the user still exists and purge's `deleted` count excludes them; (b) seed an eligible row, call `purge.ts` first (erasing the user), then call `reactivate.ts` — assert `reactivate` still returns `200 { ok: true }` (0-row delete is defined success) and the user is genuinely already gone, documenting the deterministic outcome.
+**Contract**: Reuse `seedUser`/`cleanupUser`/`adminClient` (`tests/helpers/auth.ts`), `seedAccountDeletion` (`tests/helpers/account-deletion.ts`), and `buildContext` (`tests/helpers/api-context.ts`), following `risk4-purge-boundary.test.ts`'s `userExists` helper pattern. Two cases: (a) seed an eligible (>30d) row for a real user, call the real `reactivate.ts` `POST` handler (authenticated via `getAuthCookieHeader`) to cancel, then call the real `purge.ts` `POST` handler — assert the user still exists and purge's `deleted` count excludes them; (b) seed an eligible row, call `purge.ts` first (erasing the user), then call `reactivate.ts` — assert `reactivate` returns `401 { error: "unauthorized" }` and the user is genuinely already gone. **Correction from plan (verified empirically):** purge deleting the auth user invalidates the session before `reactivate.ts`'s own delete-and-check-0-rows logic is ever reached — `supabase.auth.getUser()` itself fails against GoTrue once the user record is gone, so the route 401s at the auth gate rather than returning the originally-assumed `200 { ok: true }`. Still a deterministic, documented no-op: there's no window where a late cancellation could act on an already-purged account.
 
 ### Success Criteria:
 
@@ -233,15 +233,15 @@ No schema migration is required for the primary fix. If the PostgREST delete+ord
 
 #### Automated
 
-- [ ] 2.1 Type check + lint pass
-- [ ] 2.2 Unit + integration tests pass
-- [ ] 2.3 Build passes
-- [ ] 2.4 Existing risk4 purge tests still pass unmodified
+- [x] 2.1 Type check + lint pass
+- [x] 2.2 Unit + integration tests pass
+- [x] 2.3 Build passes
+- [x] 2.4 Existing risk4 purge tests still pass, behaviorally unmodified — `risk4-purge-partial-failure-hermetic.test.ts`'s mock needed a mechanical update to the new two-call query shape (count + claim), anticipated by Critical Implementation Details; its assertions/intent are unchanged. `risk4-purge-boundary.test.ts` needed no changes.
 
 #### Manual
 
-- [ ] 2.5 Manual purge trigger with mixed eligible/non-eligible rows matches expected counts
-- [ ] 2.6 Local Supabase logs confirm the claim query executes without a chaining error
+- [x] 2.5 Manual purge trigger with mixed eligible/non-eligible rows matches expected counts
+- [x] 2.6 Local Supabase logs confirm the claim query executes without a chaining error
 
 ### Phase 3: SRS repeat-review scheduling (Risk #10)
 

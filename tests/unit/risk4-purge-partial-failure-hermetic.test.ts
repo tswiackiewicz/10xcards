@@ -20,13 +20,17 @@ describe("Risk #4 — purge partial-batch-failure reporting (hermetic)", () => {
   });
 
   it("returns 500 with correct deleted/errors counts when one row's deleteUser fails", async () => {
-    const accountDeletionsQuery = {
+    const advisoryQuery = {
       select: vi.fn().mockReturnThis(),
+      lt: vi.fn().mockResolvedValue({ count: 2, error: null }),
+    };
+    const claimQuery = {
+      delete: vi.fn().mockReturnThis(),
       lt: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue({
+      limit: vi.fn().mockReturnThis(),
+      select: vi.fn().mockResolvedValue({
         data: [{ user_id: "user-fails" }, { user_id: "user-succeeds" }],
-        count: 2,
         error: null,
       }),
     };
@@ -35,8 +39,12 @@ describe("Risk #4 — purge partial-batch-failure reporting (hermetic)", () => {
       .mockImplementation((id: string) =>
         id === "user-fails" ? Promise.resolve({ error: { message: "boom" } }) : Promise.resolve({ error: null }),
       );
+    let call = 0;
     const fakeAdmin = {
-      from: vi.fn().mockReturnValue(accountDeletionsQuery),
+      from: vi.fn().mockImplementation(() => {
+        call++;
+        return call === 1 ? advisoryQuery : claimQuery;
+      }),
       auth: { admin: { deleteUser } },
     };
     vi.mocked(createAdminClient).mockReturnValue(fakeAdmin as unknown as ReturnType<typeof createAdminClient>);

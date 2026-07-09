@@ -71,5 +71,12 @@ export default defineConfig({
     // inherited by forked test-worker processes, not just the setup process itself.
     globalSetup: ["tests/setup/env.ts"],
     include: ["tests/**/*.test.ts"],
+    // account_deletions/purge is a real, globally-batched endpoint against one shared
+    // local Supabase instance — two test files calling it concurrently can each claim
+    // rows the other seeded, corrupting `deleted`/`skipped` counts. File-level
+    // parallelism buys nothing here (tests are fast; the DB is the bottleneck either
+    // way), so serialize files to keep every real-Supabase integration test hermetic
+    // relative to the others.
+    fileParallelism: false,
   },
 });
