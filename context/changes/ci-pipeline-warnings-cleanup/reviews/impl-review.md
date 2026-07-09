@@ -29,7 +29,7 @@
 - **Location**: `package.json:63` (causal change), environment-level effect
 - **Detail**: Bumping the `supabase` devDependency to `2.109.1` (Phase 1 item #5) causes `supabase start` to pull newer service container images. The `vector` (observability sidecar) container now fails to start under this developer's Colima setup: `error while creating mount source path '.../docker.sock': mkdir ... operation not supported`, which aborts the entire local stack and blocks `npm test`'s `globalSetup` (which shells out to `supabase status`). This is a local Colima incompatibility, not a code defect — GitHub Actions CI (real Docker) ran `npm test` successfully twice post-merge (runs `29016535376` and `29027041538`, 45/45 tests passed both times, zero warnings in either). The user hit this exact issue during Phase 1's own manual verification and explicitly chose "Adapt and continue" rather than block on it — this finding is surfacing it in the formal review record, not raising it as new.
 - **Fix**: No code change needed. Optionally add a short note to `AGENTS.md`'s Environment section flagging that `supabase start` may need Docker Desktop (or a Colima VM-type change) instead of default Colima once the CLI is on `2.109.x`+, so a future contributor hitting the same failure isn't confused by it.
-- **Decision**: PENDING
+- **Decision**: FIXED — added a note to `AGENTS.md`'s Environment section.
 
 ## Notes
 

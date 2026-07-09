@@ -33,6 +33,7 @@ Standard scripts (`dev`, `lint`, `lint:fix`, `format`, `build`): see `@package.j
 
 - Required, **server-only secrets**: `SUPABASE_URL`, `SUPABASE_KEY` (see `@.env.example`). Never expose them to client code — the Astro env schema marks both `context: "server", access: "secret"`.
 - Local dev needs both a `.env` and a `.dev.vars` (Wrangler reads the latter). Local Supabase: `npx supabase start` (requires Docker). Production secrets: `npx wrangler secret put <NAME>`; CI needs them as GitHub repo secrets.
+- On Colima (not Docker Desktop): `supabase start` on CLI `2.109.x`+ can fail to start the `vector` sidecar container (`mkdir .../docker.sock: operation not supported`), aborting the whole local stack — a Colima/Docker-socket-mount incompatibility, not a project bug. CI (real Docker) is unaffected. If hit, try a different Colima VM type or Docker Desktop for local `supabase start`.
 
 ## Git & CI
 
