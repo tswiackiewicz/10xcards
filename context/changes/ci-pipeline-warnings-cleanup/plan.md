@@ -300,3 +300,4 @@ only affects local `supabase db reset` / `supabase start` runs, not production d
 - [x] 1.8 `npx supabase start` shows no [inbucket] / seed.sql warnings, then `npx supabase stop` — 6cf555f
 - [x] 1.9 `npm test` no longer logs a pending Supabase CLI update — 6cf555f
 - [x] 1.10 Next `ci.yml` run on `master` shows none of the five warnings — 6cf555f
+- [x] 1.11 `SITE_URL` externalization (loadEnv + GH Actions variable) verified end-to-end in real CI run `29030359295`: zero skip warnings, correct sitemap URL in both `ci` and `deploy` jobs — 2b9377e
