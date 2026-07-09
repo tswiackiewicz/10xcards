@@ -19,6 +19,11 @@ export default defineConfig({
   // Destructive cookie-authed endpoints (POST /api/account/delete) depend on this —
   // pin it explicitly rather than relying on Astro's implicit default (see impl-review F5).
   security: { checkOrigin: true },
+  // The toolbar's Inspect app dumps every island's props into an in-DOM <pre><code>
+  // tooltip on init, regardless of whether it's opened. e2e tests run against
+  // `astro dev` (playwright.config.ts) and assert on visible flashcard text with
+  // getByText, which strict-mode-matches that dump too (it contains the same text).
+  devToolbar: { enabled: false },
   integrations: [react(), sitemap()],
   vite: {
     plugins: [tailwindcss()],
