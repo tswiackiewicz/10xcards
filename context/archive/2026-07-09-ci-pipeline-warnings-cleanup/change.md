@@ -1,10 +1,10 @@
 ---
 change_id: ci-pipeline-warnings-cleanup
 title: CI pipeline warnings cleanup
-status: impl_reviewed
+status: archived
 created: 2026-07-09
 updated: 2026-07-09
-archived_at: null
+archived_at: 2026-07-09T15:47:35Z
 ---
 
 ## Notes
