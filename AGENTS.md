@@ -11,9 +11,9 @@ Astro 6 (server-first, `output: server` on Cloudflare) · React 19 islands · Ty
 Standard scripts (`dev`, `lint`, `lint:fix`, `format`, `build`): see `@package.json`. The non-obvious ones:
 
 - **`npx astro sync`** — regenerate `.astro/` types after touching `astro.config.mjs`, content collections, or env schema. CI runs this before lint; run it locally if types look stale. (Or `/verify` to mirror CI: sync → lint → build.)
-- `npx wrangler deploy` — ship `./dist` to Cloudflare Workers (manual; CI does not auto-deploy).
+- `npx wrangler deploy` — ship `./dist` to Cloudflare Workers manually (ad-hoc/local); CI also runs this automatically on every push to `master` (see Git & CI).
 
-No `test` script exists yet — there is no test framework wired up.
+`npm test` runs the Vitest unit/integration suite; `npm run test:e2e` runs the Playwright e2e suite. Both are wired into CI (see Git & CI).
 
 ## Conventions
 
@@ -37,7 +37,7 @@ No `test` script exists yet — there is no test framework wired up.
 ## Git & CI
 
 - Pre-commit (`.husky/pre-commit` → lint-staged): `eslint --fix` on `*.{ts,tsx,astro}`, `prettier --write` on `*.{json,css,md}`. A lint failure blocks the commit.
-- CI (`@.github/workflows/ci.yml`) runs on push/PR to **`master`**: `npm ci` → `astro sync` → lint → build → Supabase migration dry-run (`supabase db push --dry-run`, catches migrations that fail against prod before merge). Note the default branch here is `main` but CI targets `master` — confirm the intended branch before relying on CI.
+- CI (`@.github/workflows/ci.yml`) runs on push/PR to **`master`**: `npm ci` → `astro sync` → lint → start a local Supabase stack → `npm test` (Vitest) → `npm run test:e2e` (Playwright) → build → Supabase migration dry-run (`supabase db push --dry-run`, catches migrations that fail against prod before merge). Note the default branch here is `main` but CI targets `master` — confirm the intended branch before relying on CI.
 - On push to `master`, the `deploy` job additionally pushes pending Supabase migrations for real (`supabase db push`) before `wrangler deploy`, so prod schema stays in sync with the repo. Requires repo secrets `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_ID`.
 - Commit style: Conventional Commits.
 
