@@ -6,7 +6,8 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-07-09 (Phase 5 opened via --refresh)
+> Last updated: 2026-07-09 (Phase 5 complete; impl-reviewed with a
+> post-implementation fix — see `context/changes/test-plan-refresh-2026-07-09/reviews/impl-review.md`)
 
 ## 1. Strategy
 
@@ -92,21 +93,23 @@ Each row is a discrete rollout phase that will open its own change folder
 via `/10x-new`. Status moves left-to-right through the values below; the
 orchestrator updates Status as artifacts appear on disk.
 
-| #   | Phase name                               | Goal (one line)                                                                                                                        | Risks covered | Test types         | Status   | Change folder                                                     |
-| --- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------ | -------- | ----------------------------------------------------------------- |
-| 1   | Critical-path coverage                   | Bootstrap the test runner and prove the no-loss/no-leak and human-gating guardrails actually hold                                      | #1, #2        | unit + integration | complete | `context/changes/testing-critical-path-coverage/`                 |
-| 2   | Authorization & input-boundary hardening | Prove per-resource ownership checks and input-boundary handling are enforced, not assumed                                              | #3, #7        | integration + unit | complete | `context/changes/testing-authorization-input-boundary-hardening/` |
-| 3   | Compliance-critical flows                | Prove the 30-day retention boundary and AI-error-response data hygiene                                                                 | #4, #6        | integration + unit | complete | `context/changes/testing-compliance-critical-flows/`              |
-| 4   | Quality-gates wiring                     | Lock a migration-drift gate in CI; wire required gates; add an e2e smoke on the AI review flow                                         | #5            | gates + e2e        | complete | `context/changes/testing-quality-gates-wiring/`                   |
-| 5   | Lifecycle & route-protection hardening   | Close route-protection drift, the reactivation/purge race, and the SRS repeat-review scheduling gap surfaced by the 2026-07-09 refresh | #8, #9, #10   | integration + unit | complete | `context/changes/test-plan-refresh-2026-07-09/`                   |
+| #   | Phase name                               | Goal (one line)                                                                                                                        | Risks covered | Test types         | Status   | Change folder                                                                     |
+| --- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------ | -------- | --------------------------------------------------------------------------------- |
+| 1   | Critical-path coverage                   | Bootstrap the test runner and prove the no-loss/no-leak and human-gating guardrails actually hold                                      | #1, #2        | unit + integration | complete | `context/archive/2026-07-04-testing-critical-path-coverage/`                      |
+| 2   | Authorization & input-boundary hardening | Prove per-resource ownership checks and input-boundary handling are enforced, not assumed                                              | #3, #7        | integration + unit | complete | `context/archive/2026-07-05-testing-authorization-input-boundary-hardening/`      |
+| 3   | Compliance-critical flows                | Prove the 30-day retention boundary and AI-error-response data hygiene                                                                 | #4, #6        | integration + unit | complete | `context/archive/2026-07-07-testing-compliance-critical-flows/`                   |
+| 4   | Quality-gates wiring                     | Lock a migration-drift gate in CI; wire required gates; add an e2e smoke on the AI review flow                                         | #5            | gates + e2e        | complete | `context/archive/2026-07-08-testing-quality-gates-wiring/`                        |
+| 5   | Lifecycle & route-protection hardening   | Close route-protection drift, the reactivation/purge race, and the SRS repeat-review scheduling gap surfaced by the 2026-07-09 refresh | #8, #9, #10   | integration + unit | complete | `context/changes/test-plan-refresh-2026-07-09/` (impl-reviewed; not yet archived) |
 
 **Status vocabulary** (fixed — parser literals): `not started` → `change opened` → `researched` → `planned` → `implementing` → `complete`.
 
 ## 4. Stack
 
 The classic test base for this project. Every row below was bootstrapped by
-the named rollout phase; Phases 1–4 are now `complete` (§3), so the tooling
-below is installed and wired, not aspirational.
+the named rollout phase; all five rollout phases are now `complete` (§3), so
+the tooling below is installed and wired, not aspirational. Phase 5 didn't
+add a new stack layer — it reused Vitest + the local Supabase CLI already
+wired by Phases 1–3.
 
 | Layer                          | Tool                                                                 | Version    | Notes                                                                                                                                                                                                                                                                               |
 | ------------------------------ | -------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
