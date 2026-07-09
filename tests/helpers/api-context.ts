@@ -57,6 +57,7 @@ export function buildContext({
       headers,
       body: requestBody,
     }),
+    url: new URL(url),
     cookies: { set: () => undefined },
     params: params ?? {},
     locals: {},

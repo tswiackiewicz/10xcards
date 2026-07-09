@@ -35,8 +35,30 @@ function astroEnvServerStub(): Plugin {
   };
 }
 
+// src/middleware.ts imports `defineMiddleware` from `astro:middleware`, another virtual
+// module the skipped Astro Vite plugin normally resolves. Astro's own implementation
+// (astro/dist/core/middleware/defineMiddleware.js) is just `(fn) => fn` — stub it
+// identically so middleware tests can import the real `onRequest` export directly.
+const ASTRO_MIDDLEWARE_ID = "astro:middleware";
+
+function astroMiddlewareStub(): Plugin {
+  return {
+    name: "astro-middleware-stub",
+    resolveId(id) {
+      if (id === ASTRO_MIDDLEWARE_ID) {
+        return `\0${ASTRO_MIDDLEWARE_ID}`;
+      }
+    },
+    load(id) {
+      if (id === `\0${ASTRO_MIDDLEWARE_ID}`) {
+        return "export const defineMiddleware = (fn) => fn;";
+      }
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [astroEnvServerStub()],
+  plugins: [astroEnvServerStub(), astroMiddlewareStub()],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
