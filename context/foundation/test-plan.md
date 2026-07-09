@@ -104,23 +104,25 @@ orchestrator updates Status as artifacts appear on disk.
 
 ## 4. Stack
 
-The classic test base for this project. No test runner exists yet — every
-row below is bootstrapped by the named rollout phase.
+The classic test base for this project. Every row below was bootstrapped by
+the named rollout phase; Phases 1–4 are now `complete` (§3), so the tooling
+below is installed and wired, not aspirational.
 
-| Layer                          | Tool                            | Version                    | Notes                                                                                                                                                                                                                                       |
-| ------------------------------ | ------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| unit + integration             | Vitest                          | none yet — see Phase 1     | Astro's own docs recommend Vitest; not independently re-verified this session (Context7 quota exceeded)                                                                                                                                     |
-| API mocking                    | MSW                             | none yet — see Phase 1     | Mock the OpenRouter HTTP edge only; never mock internal modules or the Supabase RLS layer                                                                                                                                                   |
-| local DB for integration tests | Supabase CLI (`supabase start`) | already used for local dev | Real RLS policies exercised in integration tests, per the no-mocking-the-DB rule under Risk #1/#3                                                                                                                                           |
-| e2e                            | Playwright                      | none yet — see Phase 4     | Scoped to the AI review flow smoke only, per cost × signal — not a full-app e2e suite                                                                                                                                                       |
-| accessibility                  | none planned                    | n/a                        | No accessibility risk surfaced this rollout; revisit at `--refresh` if one does                                                                                                                                                             |
-| (optional) AI-native           | none planned                    | n/a                        | No visual-heavy or ambiguous-output risk surfaced that a deterministic test can't already catch; when NOT to use: this project's flashcard content is exactly the kind of non-deterministic output the interview said not to assert on (Q5) |
+| Layer                          | Tool                                                                 | Version    | Notes                                                                                                                                                                                                                                                                               |
+| ------------------------------ | -------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| unit + integration             | Vitest                                                               | `^4.1.9`   | Astro's own docs recommend Vitest; not independently re-verified this session (Context7 quota exceeded). Wired since §3 Phase 1                                                                                                                                                     |
+| mutation testing               | Stryker (`@stryker-mutator/core` + `@stryker-mutator/vitest-runner`) | `^9.6.1`   | Ad hoc, not a CI gate — see §6.7 Phase 1/2 mutation-testing passes and `stryker.conf.json`                                                                                                                                                                                          |
+| API mocking                    | MSW                                                                  | `^2.14.7`  | Mock the OpenRouter HTTP edge only; never mock internal modules or the Supabase RLS layer. Wired since §3 Phase 3                                                                                                                                                                   |
+| local DB for integration tests | Supabase CLI (`supabase start`)                                      | `^2.109.1` | Real RLS policies exercised in integration tests, per the no-mocking-the-DB rule under Risk #1/#3                                                                                                                                                                                   |
+| e2e                            | Playwright (`@playwright/test`)                                      | `^1.61.1`  | Wired since §3 Phase 4, scoped to the AI review flow smoke (`tests/e2e/seed.spec.ts`) per cost × signal — not a full-app e2e suite. `tests/e2e/risk1-flashcard-persists-after-reload.spec.ts` later extended coverage beyond Phase 4's declared scope to Risk #1's persistence half |
+| accessibility                  | none planned                                                         | n/a        | No accessibility risk surfaced this rollout; revisit at `--refresh` if one does                                                                                                                                                                                                     |
+| (optional) AI-native           | none planned                                                         | n/a        | No visual-heavy or ambiguous-output risk surfaced that a deterministic test can't already catch; when NOT to use: this project's flashcard content is exactly the kind of non-deterministic output the interview said not to assert on (Q5)                                         |
 
 **Stack grounding tools (current session):**
 
 - Docs: Context7 — attempted for Vitest/Playwright + Astro setup guidance; returned "monthly quota exceeded." Treated as unavailable; checked: 2026-07-03.
 - Search: none available in current session; checked: 2026-07-03.
-- Runtime/browser: Playwright MCP — available (browser automation tools present); earmarked for the Phase 4 e2e smoke, not used yet; checked: 2026-07-03.
+- Runtime/browser: Playwright MCP — available (browser automation tools present); Phase 4 shipped the e2e smoke via `@playwright/test` directly, not via this MCP; checked: 2026-07-03.
 - Provider/platform: no authenticated GitHub/Cloudflare/Supabase MCP in this session; not used; checked: 2026-07-03.
 
 ## 5. Quality Gates
@@ -133,8 +135,8 @@ phase lands; before that, the gate is `planned`.
 | ------------------------------------------------------------------- | -------------------- | ----------------------------------------- | ------------------------------------- |
 | lint + typecheck                                                    | local + CI           | required (already wired)                  | syntactic / type drift                |
 | unit + integration                                                  | local + CI           | required (wired in CI since §3 Phase 1)   | logic + isolation regressions         |
-| migration-live gate (pending migrations = 0 before deploy proceeds) | CI (deploy job)      | required after §3 Phase 4                 | schema/production drift (see Risk #5) |
-| e2e on AI review flow                                               | CI on PR             | required after §3 Phase 4                 | broken critical review/save path      |
+| migration-live gate (pending migrations = 0 before deploy proceeds) | CI (deploy job)      | required (wired in CI since §3 Phase 4)   | schema/production drift (see Risk #5) |
+| e2e on AI review flow                                               | CI on PR             | required (wired in CI since §3 Phase 4)   | broken critical review/save path      |
 | post-edit hook                                                      | local (agent loop)   | not this rollout — configured in Lesson 3 | —                                     |
 | visual diff (deterministic)                                         | CI on PR             | optional, not planned                     | rendering regressions                 |
 | multimodal visual review                                            | CI on PR             | optional, not planned                     | visual issues classic diff misses     |
@@ -340,8 +342,8 @@ contributors should respect these unless the underlying assumption changes.
 
 ## 8. Freshness Ledger
 
-- Strategy (§1–§5) last reviewed: 2026-07-03
-- Stack versions last verified: 2026-07-03 (Context7 unavailable — quota exceeded; local manifest inspection only)
+- Strategy (§1–§5) last reviewed: 2026-07-09
+- Stack versions last verified: 2026-07-09 (Context7 unavailable — quota exceeded; local manifest inspection only)
 - AI-native tool references last verified: 2026-07-03 (none planned this rollout)
 
 Refresh (`/10x-test-plan --refresh`) when:
