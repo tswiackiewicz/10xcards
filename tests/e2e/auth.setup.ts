@@ -2,8 +2,8 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { test as setup } from "@playwright/test";
 import { seedUser } from "../helpers/auth";
+import { gotoAndWaitForHydration } from "./navigate";
 import { SEEDED_USER_PATH, STORAGE_STATE_PATH } from "./paths";
-import { waitForAstroHydration } from "./wait-for-hydration";
 
 setup("authenticate", async ({ page }) => {
   const user = await seedUser();
@@ -13,8 +13,7 @@ setup("authenticate", async ({ page }) => {
   mkdirSync(dirname(SEEDED_USER_PATH), { recursive: true });
   writeFileSync(SEEDED_USER_PATH, JSON.stringify({ id: user.id }));
 
-  await page.goto("/auth/signin");
-  await waitForAstroHydration(page);
+  await gotoAndWaitForHydration(page, "/auth/signin");
   await page.getByLabel("Email", { exact: true }).fill(user.email);
   await page.getByLabel("Password", { exact: true }).fill(user.password);
   await page.getByRole("button", { name: "Sign in" }).click();

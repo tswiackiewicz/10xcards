@@ -22,6 +22,7 @@ Standard scripts (`dev`, `lint`, `lint:fix`, `format`, `build`): see `@package.j
 - **ESLint is strict + type-checked** (`typescript-eslint` strict + stylistic, react-compiler as error, astro plugin). `no-console` warns. Unused vars error unless prefixed `_`. Config: `@eslint.config.js`.
 - shadcn/ui components live in `src/components/ui/`; add new ones via the shadcn CLI, don't hand-roll. Auth UI in `src/components/auth/`.
 - Make React interactive only with explicit `client:*` directives.
+- **E2E: navigate via the hydration-safe helpers.** `client:load` islands render server-side first and hydrate asynchronously; clicking before hydration completes can silently no-op. Always call `gotoAndWaitForHydration`/`reloadAndWaitForHydration` from `tests/e2e/navigate.ts` — never call `page.goto()`/`page.reload()` directly in `tests/e2e/**`.
 
 ## Architecture notes
 

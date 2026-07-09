@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import type { Candidate } from "@/lib/flashcards/schemas";
-import { waitForAstroHydration } from "./wait-for-hydration";
+import { gotoAndWaitForHydration } from "./navigate";
 
 // Risk #2 (context/foundation/test-plan.md:45): "A rejected or un-actioned AI
 // candidate is silently saved to the deck, or an explicitly accepted one is
@@ -33,8 +33,7 @@ test("accepted AI candidate persists to the saved deck; rejected candidate does 
     });
   });
 
-  await page.goto("/generate");
-  await waitForAstroHydration(page);
+  await gotoAndWaitForHydration(page, "/generate");
 
   const sourceText = "Any source text — the generate call is mocked above, so content doesn't matter.";
   await page.getByRole("textbox", { name: "Paste your source text here…" }).fill(sourceText);
@@ -62,7 +61,7 @@ test("accepted AI candidate persists to the saved deck; rejected candidate does 
   // /generate itself never refetches the saved list — prove real persistence
   // (and real omission) via /cards, which is server-rendered fresh on every
   // request.
-  await page.goto("/cards");
+  await gotoAndWaitForHydration(page, "/cards");
   await expect(page.getByText(acceptedQuestion)).toBeVisible();
   await expect(page.getByText(rejectedQuestion)).not.toBeVisible();
 });

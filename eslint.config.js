@@ -69,6 +69,21 @@ const astroConfig = tseslint.config({
   },
 });
 
+const e2eNavigationGuard = tseslint.config({
+  files: ["tests/e2e/**/*.ts"],
+  ignores: ["tests/e2e/navigate.ts"],
+  rules: {
+    "no-restricted-syntax": [
+      "error",
+      {
+        selector: "CallExpression[callee.type='MemberExpression'][callee.property.name=/^(goto|reload)$/]",
+        message:
+          "Use gotoAndWaitForHydration/reloadAndWaitForHydration from ./navigate instead of calling page.goto/page.reload directly — see AGENTS.md.",
+      },
+    ],
+  },
+});
+
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
   { ignores: ["src/db/database.types.ts", "scripts/**"] },
@@ -77,5 +92,6 @@ export default tseslint.config(
   eslintPluginAstro.configs["flat/recommended"],
   ...eslintPluginAstro.configs["flat/jsx-a11y-recommended"],
   astroConfig,
+  e2eNavigationGuard,
   eslintPluginPrettier,
 );
