@@ -219,38 +219,38 @@ No schema migration is required for the primary fix. If the PostgREST delete+ord
 
 #### Automated
 
-- [x] 1.1 Type check + lint pass
-- [x] 1.2 Unit + integration tests pass
-- [x] 1.3 Build passes
-- [x] 1.4 Existing risk4 purge tests unaffected
+- [x] 1.1 Type check + lint pass — 5606727
+- [x] 1.2 Unit + integration tests pass — 5606727
+- [x] 1.3 Build passes — 5606727
+- [x] 1.4 Existing risk4 purge tests unaffected — 5606727
 
 #### Manual
 
-- [x] 1.5 Signed-out `/dashboard` redirects to sign-in; signed-in loads normally
-- [x] 1.6 Signed-out `/studying` (fabricated path) 404s, does not redirect
+- [x] 1.5 Signed-out `/dashboard` redirects to sign-in; signed-in loads normally — 5606727
+- [x] 1.6 Signed-out `/studying` (fabricated path) 404s, does not redirect — 5606727
 
 ### Phase 2: Reactivation/purge race fix (Risk #9)
 
 #### Automated
 
-- [x] 2.1 Type check + lint pass
-- [x] 2.2 Unit + integration tests pass
-- [x] 2.3 Build passes
-- [x] 2.4 Existing risk4 purge tests still pass, behaviorally unmodified — `risk4-purge-partial-failure-hermetic.test.ts`'s mock needed a mechanical update to the new two-call query shape (count + claim), anticipated by Critical Implementation Details; its assertions/intent are unchanged. `risk4-purge-boundary.test.ts` needed no changes.
+- [x] 2.1 Type check + lint pass — babd4b2
+- [x] 2.2 Unit + integration tests pass — babd4b2
+- [x] 2.3 Build passes — babd4b2
+- [x] 2.4 Existing risk4 purge tests still pass, behaviorally unmodified — `risk4-purge-partial-failure-hermetic.test.ts`'s mock needed a mechanical update to the new two-call query shape (count + claim), anticipated by Critical Implementation Details; its assertions/intent are unchanged. `risk4-purge-boundary.test.ts` needed no changes. — babd4b2
 
 #### Manual
 
-- [x] 2.5 Manual purge trigger with mixed eligible/non-eligible rows matches expected counts
-- [x] 2.6 Local Supabase logs confirm the claim query executes without a chaining error
+- [x] 2.5 Manual purge trigger with mixed eligible/non-eligible rows matches expected counts — babd4b2
+- [x] 2.6 Local Supabase logs confirm the claim query executes without a chaining error — babd4b2
 
 ### Phase 3: SRS repeat-review scheduling (Risk #10)
 
 #### Automated
 
-- [x] 3.1 Type check + lint pass
-- [x] 3.2 Unit + integration tests pass
-- [x] 3.3 Build passes
+- [x] 3.1 Type check + lint pass — 0e087ba
+- [x] 3.2 Unit + integration tests pass — 0e087ba
+- [x] 3.3 Build passes — 0e087ba
 
 #### Manual
 
-- [x] 3.4 Studying the same card twice in `/study` shows a differing second interval hint
+- [x] 3.4 Studying the same card twice in `/study` shows a differing second interval hint — 0e087ba
