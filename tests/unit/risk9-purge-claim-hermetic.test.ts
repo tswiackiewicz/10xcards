@@ -67,4 +67,53 @@ describe("Risk #9 — purge claim hermetic regression guard", () => {
     // skipped = advisory count (3) minus what the claim actually returned (2)
     expect(body.skipped).toBe(1);
   });
+
+  it("re-inserts the claimed row when deleteUser fails, so a future run can retry it", async () => {
+    // deleteUser failing after the claim already deleted the tracking row must not
+    // permanently drop the user from the purge backlog — without a re-insert, the
+    // account would silently lose its pending-deletion state (is_pending_deletion()
+    // keys off the row's presence) despite never actually being deleted or reactivated.
+    const advisoryQuery = {
+      select: vi.fn().mockReturnThis(),
+      lt: vi.fn().mockResolvedValue({ count: 1, error: null }),
+    };
+    const claimQuery = {
+      delete: vi.fn().mockReturnThis(),
+      lt: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      select: vi.fn().mockResolvedValue({
+        data: [{ user_id: "user-c", requested_at: "2026-01-03T00:00:00.000Z" }],
+        error: null,
+      }),
+    };
+    const insert = vi.fn().mockResolvedValue({ error: null });
+    const reinsertQuery = { insert };
+    let call = 0;
+    const from = vi.fn().mockImplementation(() => {
+      call++;
+      if (call === 1) return advisoryQuery;
+      if (call === 2) return claimQuery;
+      return reinsertQuery;
+    });
+    const deleteUser = vi.fn().mockResolvedValue({ error: { message: "boom" } });
+    const fakeAdmin = { from, auth: { admin: { deleteUser } } };
+    vi.mocked(createAdminClient).mockReturnValue(fakeAdmin as unknown as ReturnType<typeof createAdminClient>);
+
+    const response = await PURGE(
+      buildContext({
+        method: "POST",
+        url: "http://localhost/api/cron/purge",
+        headers: { Authorization: "Bearer test-purge-secret" },
+      }),
+    );
+
+    expect(response.status).toBe(500);
+    expect(deleteUser).toHaveBeenCalledWith("user-c");
+    expect(insert).toHaveBeenCalledWith({ user_id: "user-c", requested_at: "2026-01-03T00:00:00.000Z" });
+
+    const body = (await response.json()) as { deleted: number; errors: number };
+    expect(body.deleted).toBe(0);
+    expect(body.errors).toBe(1);
+  });
 });

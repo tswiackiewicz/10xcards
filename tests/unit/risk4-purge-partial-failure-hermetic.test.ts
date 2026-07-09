@@ -30,10 +30,14 @@ describe("Risk #4 — purge partial-batch-failure reporting (hermetic)", () => {
       order: vi.fn().mockReturnThis(),
       limit: vi.fn().mockReturnThis(),
       select: vi.fn().mockResolvedValue({
-        data: [{ user_id: "user-fails" }, { user_id: "user-succeeds" }],
+        data: [
+          { user_id: "user-fails", requested_at: "2026-01-01T00:00:00.000Z" },
+          { user_id: "user-succeeds", requested_at: "2026-01-02T00:00:00.000Z" },
+        ],
         error: null,
       }),
     };
+    const reinsertQuery = { insert: vi.fn().mockResolvedValue({ error: null }) };
     const deleteUser = vi
       .fn()
       .mockImplementation((id: string) =>
@@ -43,7 +47,9 @@ describe("Risk #4 — purge partial-batch-failure reporting (hermetic)", () => {
     const fakeAdmin = {
       from: vi.fn().mockImplementation(() => {
         call++;
-        return call === 1 ? advisoryQuery : claimQuery;
+        if (call === 1) return advisoryQuery;
+        if (call === 2) return claimQuery;
+        return reinsertQuery;
       }),
       auth: { admin: { deleteUser } },
     };

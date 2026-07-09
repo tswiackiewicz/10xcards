@@ -205,6 +205,8 @@ The atomic-claim fix for Risk #9 adds exactly one advisory-only subrequest to th
 
 No schema migration is required for the primary fix. If the PostgREST delete+order+limit chain (Critical Implementation Details) proves unsupported by the pinned library version, the fallback requires one new migration adding a Postgres claim function — write that migration only if the chain check fails.
 
+**Addendum (post-implementation, impl-review F2):** one migration did land — `supabase/migrations/20260709190500_grant_flashcards_select_service_role.sql`, granting read-only `select` on `flashcards` to `service_role`. Unrelated to the primary fix above; it closes a previously-missing ACL grant discovered when Risk #10's integration test needed an admin-client verification read of `reps` (`tests/integration/risk10-review-repeat-scheduling.test.ts`) and got a 42501. Narrowly scoped (single table, single privilege) and low-risk since `service_role` already bypasses RLS.
+
 ## References
 
 - Research: `context/changes/test-plan-refresh-2026-07-09/research.md`

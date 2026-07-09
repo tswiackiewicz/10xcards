@@ -89,8 +89,27 @@ export const POST: APIRoute = async (context) => {
     // The on-delete-cascade FKs erase the user's flashcards automatically; the
     // account_deletions row is already gone — the claim above deleted it.
     const { error: delErr } = await admin.auth.admin.deleteUser(row.user_id);
-    if (delErr) errors++;
-    else deleted++;
+    if (delErr) {
+      errors++;
+      // deleteUser failed after the claim already removed the tracking row. Without
+      // re-tracking, is_pending_deletion() would silently unblock this account's
+      // flashcards RLS and there'd be no path left to retry the purge.
+      const { error: reinsertError } = await admin
+        .from("account_deletions")
+        .insert({ user_id: row.user_id, requested_at: row.requested_at });
+      if (reinsertError) {
+        // eslint-disable-next-line no-console -- Workers Logs: row lost with no retry path — must stay visible.
+        console.error(
+          JSON.stringify({
+            event: "account_purge_reinsert_failed",
+            user_id: row.user_id,
+            error: reinsertError.message,
+          }),
+        );
+      }
+    } else {
+      deleted++;
+    }
   }
   const skipped = Math.max(0, eligible - data.length);
 
