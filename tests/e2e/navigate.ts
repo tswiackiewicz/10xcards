@@ -10,7 +10,7 @@ export async function gotoAndWaitForHydration(
   await waitForAstroHydration(page);
 }
 
-export async function reloadAndWaitForHydration(page: Page, options?: Parameters<Page["reload"]>[1]): Promise<void> {
+export async function reloadAndWaitForHydration(page: Page, options?: Parameters<Page["reload"]>[0]): Promise<void> {
   await page.reload(options);
   await waitForAstroHydration(page);
 }
