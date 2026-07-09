@@ -1,10 +1,10 @@
 ---
 change_id: test-plan-refresh-2026-07-09
 title: Lifecycle & route-protection hardening (test-plan refresh)
-status: impl_reviewed
+status: archived
 created: 2026-07-09
 updated: 2026-07-09
-archived_at: null
+archived_at: 2026-07-09T17:49:20Z
 ---
 
 ## Notes
