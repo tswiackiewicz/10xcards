@@ -510,19 +510,19 @@ any change in this plan beyond the sitemap `site` fix.
 
 #### Automated
 
-- [x] 1.1 Lint passes with no projectService warning
-- [x] 1.2 Build succeeds
-- [x] 1.3 Build output contains no sitemap-skip warning
-- [x] 1.4 Build emits a sitemap file
-- [x] 1.5 `npx astro sync` still succeeds
-- [x] 1.6 `npm test` passes
-- [x] 1.7 Supabase migration dry-run gate produces no [inbucket] warning
+- [x] 1.1 Lint passes with no projectService warning — 6cf555f
+- [x] 1.2 Build succeeds — 6cf555f
+- [x] 1.3 Build output contains no sitemap-skip warning — 6cf555f
+- [x] 1.4 Build emits a sitemap file — 6cf555f
+- [x] 1.5 `npx astro sync` still succeeds — 6cf555f
+- [x] 1.6 `npm test` passes — 6cf555f
+- [x] 1.7 Supabase migration dry-run gate produces no [inbucket] warning — 6cf555f
 
 #### Manual
 
-- [x] 1.8 `npx supabase start` shows no [inbucket] / seed.sql warnings, then `npx supabase stop`
-- [x] 1.9 `npm test` no longer logs a pending Supabase CLI update
-- [ ] 1.10 Next `ci.yml` run on `master` shows none of the five warnings
+- [x] 1.8 `npx supabase start` shows no [inbucket] / seed.sql warnings, then `npx supabase stop` — 6cf555f
+- [x] 1.9 `npm test` no longer logs a pending Supabase CLI update — 6cf555f
+- [x] 1.10 Next `ci.yml` run on `master` shows none of the five warnings — 6cf555f
 
 ### Phase 2: Provision staging infrastructure
 
