@@ -165,12 +165,12 @@ Not applicable — no schema or data changes.
 
 #### Automated
 
-- [x] 2.1 New spec passes: `npm run test:e2e -- risk8-route-protection-smoke`
-- [x] 2.2 Full e2e suite still passes: `npm run test:e2e`
-- [x] 2.3 Lint passes: `npm run lint`
-- [x] 2.4 Existing integration tests unaffected: `npm run test`
+- [x] 2.1 New spec passes: `npm run test:e2e -- risk8-route-protection-smoke` — 83a4e1c
+- [x] 2.2 Full e2e suite still passes: `npm run test:e2e` — 83a4e1c
+- [x] 2.3 Lint passes: `npm run lint` — 83a4e1c
+- [x] 2.4 Existing integration tests unaffected: `npm run test` — 83a4e1c
 
 #### Manual
 
-- [x] 2.5 Confirm the `/cards` navigation actually followed a redirect to `/auth/signin`
-- [x] 2.6 Confirm the empty-storageState override didn't leak into other spec files' runs
+- [x] 2.5 Confirm the `/cards` navigation actually followed a redirect to `/auth/signin` — 83a4e1c
+- [x] 2.6 Confirm the empty-storageState override didn't leak into other spec files' runs — 83a4e1c
