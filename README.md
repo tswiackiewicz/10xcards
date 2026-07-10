@@ -1,8 +1,28 @@
-# 10x Astro Starter
+# 10xCards
 
-![](./public/template.png)
+Paste your notes, get AI-generated flashcards, study them with spaced repetition.
 
-A modern, opinionated starter template for building fast, accessible web applications.
+## What it is
+
+Manually turning notes into good flashcards is slow enough that most self-directed
+learners never get around to spaced repetition in the first place. 10xCards removes that
+friction: paste text you already have (an article, a chapter, your own notes) and the app
+proposes candidate question/answer flashcards. You review each candidate — accept, edit,
+or reject it — and only accepted cards join your deck. From there, a spaced-repetition
+schedule decides which card to show you next based on how well you've recalled it before.
+
+It's built for a single self-directed learner managing their own study, not a
+team/classroom tool — every user sees only their own deck.
+
+## Core features
+
+- **AI-generated flashcards** from pasted text, with per-card accept/edit/reject review
+  before anything is saved
+- **Manual flashcard authoring** for cards AI generation doesn't fit
+- **Deck management** — view, edit, and delete your saved flashcards
+- **Spaced-repetition study loop** (FSRS scheduling algorithm) that picks the next due card
+- **Account** with email/password sign-up and sign-in, and self-service account deletion
+  with a 30-day recovery window before permanent erasure
 
 ## Tech Stack
 
