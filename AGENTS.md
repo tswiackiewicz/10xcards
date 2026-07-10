@@ -22,13 +22,15 @@ Standard scripts (`dev`, `lint`, `lint:fix`, `format`, `build`): see `@package.j
 - **ESLint is strict + type-checked** (`typescript-eslint` strict + stylistic, react-compiler as error, astro plugin). `no-console` warns. Unused vars error unless prefixed `_`. Config: `@eslint.config.js`.
 - shadcn/ui components live in `src/components/ui/`; add new ones via the shadcn CLI, don't hand-roll. Auth UI in `src/components/auth/`.
 - Make React interactive only with explicit `client:*` directives.
+- **Tailwind class merging:** use the `cn()` helper from `@/lib/utils` (clsx + tailwind-merge) for conditional/merged class names — don't concatenate class strings manually.
+- **API routes validate input with zod** (e.g. `src/pages/api/flashcards/generate.ts`, `[id].ts`) before touching Supabase.
 - **E2E: navigate via the hydration-safe helpers.** `client:load` islands render server-side first and hydrate asynchronously; clicking before hydration completes can silently no-op. Always call `gotoAndWaitForHydration`/`reloadAndWaitForHydration` from `tests/e2e/navigate.ts` — never call `page.goto()`/`page.reload()` directly in `tests/e2e/**`.
 
 ## Architecture notes
 
 - API endpoints live under `src/pages/api/` (e.g. `auth/signin.ts`).
 - **Auth & route protection:** `src/middleware.ts` guards routes listed in its `PROTECTED_ROUTES` array and attaches the user to `context.locals.user`. Supabase SSR client (cookie-based, `@supabase/ssr`) lives in `src/lib/supabase.ts`.
-- **DB migrations** live in `supabase/migrations/` (flashcards, SRS state, account deletions). Apply locally with `npx supabase db reset` or `start`; pushed to production automatically by the `deploy` job in CI (see Git & CI).
+- **DB migrations** live in `supabase/migrations/`, named `YYYYMMDDHHmmss_short_description.sql` (flashcards, SRS state, account deletions). Apply locally with `npx supabase db reset` or `start`; pushed to production automatically by the `deploy` job in CI (see Git & CI).
 
 ## Environment
 
