@@ -1,9 +1,10 @@
 ---
 change_id: swallowed-error-audit
 title: Swallowed error audit (try/catch log-without-propagate pattern)
-status: preparing
+status: archived
 created: 2026-07-10
 updated: 2026-07-10
+archived_at: 2026-07-10T13:08:33Z
 ---
 
 ## Notes
