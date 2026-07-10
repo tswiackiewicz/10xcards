@@ -64,4 +64,14 @@ test("accepted AI candidate persists to the saved deck; rejected candidate does 
   await gotoAndWaitForHydration(page, "/cards");
   await expect(page.getByText(acceptedQuestion)).toBeVisible();
   await expect(page.getByText(rejectedQuestion)).not.toBeVisible();
+
+  // --- Cleanup: delete the saved card via the real UI delete flow ---
+  const card = page.getByRole("listitem").filter({ hasText: acceptedQuestion });
+  await card.getByRole("button", { name: "Delete" }).click();
+
+  const dialog = page.getByRole("alertdialog", { name: "Delete this card?" });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Delete" }).click();
+
+  await expect(page.getByText(acceptedQuestion)).not.toBeVisible();
 });
