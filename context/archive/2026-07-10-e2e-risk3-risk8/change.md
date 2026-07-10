@@ -1,10 +1,10 @@
 ---
 change_id: e2e-risk3-risk8
 title: Add e2e coverage for Risk #3 (IDOR) and Risk #8 (route-protection drift)
-status: impl_reviewed
+status: archived
 created: 2026-07-10
 updated: 2026-07-10
-archived_at: null
+archived_at: 2026-07-10T11:42:37Z
 ---
 
 ## Notes
