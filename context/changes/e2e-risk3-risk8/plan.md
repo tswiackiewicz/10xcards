@@ -151,26 +151,26 @@ Not applicable — no schema or data changes.
 
 #### Automated
 
-- [x] 1.1 New spec passes: `npm run test:e2e -- risk3-idor-cross-user-delete`
-- [x] 1.2 Full e2e suite still passes: `npm run test:e2e`
-- [x] 1.3 Lint passes: `npm run lint`
-- [x] 1.4 Existing integration tests unaffected: `npm run test`
+- [x] 1.1 New spec passes: `npm run test:e2e -- risk3-idor-cross-user-delete` — e254037
+- [x] 1.2 Full e2e suite still passes: `npm run test:e2e` — e254037
+- [x] 1.3 Lint passes: `npm run lint` — e254037
+- [x] 1.4 Existing integration tests unaffected: `npm run test` — e254037
 
 #### Manual
 
-- [x] 1.5 Confirm in the Playwright HTML report that the DELETE request was sent with userB's session cookie
-- [x] 1.6 Confirm no orphaned Supabase Auth user remains after a full local run
+- [x] 1.5 Confirm in the Playwright HTML report that the DELETE request was sent with userB's session cookie — e254037
+- [x] 1.6 Confirm no orphaned Supabase Auth user remains after a full local run — e254037
 
 ### Phase 2: Risk #8 — route-protection drift e2e smoke
 
 #### Automated
 
-- [ ] 2.1 New spec passes: `npm run test:e2e -- risk8-route-protection-smoke`
-- [ ] 2.2 Full e2e suite still passes: `npm run test:e2e`
-- [ ] 2.3 Lint passes: `npm run lint`
-- [ ] 2.4 Existing integration tests unaffected: `npm run test`
+- [x] 2.1 New spec passes: `npm run test:e2e -- risk8-route-protection-smoke`
+- [x] 2.2 Full e2e suite still passes: `npm run test:e2e`
+- [x] 2.3 Lint passes: `npm run lint`
+- [x] 2.4 Existing integration tests unaffected: `npm run test`
 
 #### Manual
 
-- [ ] 2.5 Confirm the `/cards` navigation actually followed a redirect to `/auth/signin`
-- [ ] 2.6 Confirm the empty-storageState override didn't leak into other spec files' runs
+- [x] 2.5 Confirm the `/cards` navigation actually followed a redirect to `/auth/signin`
+- [x] 2.6 Confirm the empty-storageState override didn't leak into other spec files' runs
