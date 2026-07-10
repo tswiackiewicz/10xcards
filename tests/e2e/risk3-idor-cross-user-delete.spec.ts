@@ -19,6 +19,8 @@ test("a real HTTP DELETE, authenticated as a second user, against another user's
   page,
   baseURL,
 }) => {
+  if (!baseURL) throw new Error("baseURL is required");
+
   const suffix = Date.now();
   const question = `What is the IDOR-equivalence question ${suffix}?`;
   const answer = `IDOR-equivalence answer ${suffix}`;
@@ -34,37 +36,39 @@ test("a real HTTP DELETE, authenticated as a second user, against another user's
   if (error) throw error;
   const cardId = data.id;
 
-  // --- Action + assertion: a fresh second user (userB) DELETEs userA's card over real HTTP ---
-  const userB = await seedUser();
   try {
-    const cookieB = await getAuthCookieHeader(userB.email, userB.password);
-    // Astro's security.checkOrigin (astro.config.mjs) rejects unsafe-method requests whose
-    // Origin doesn't match the request URL — a fresh APIRequestContext sends no Origin by
-    // default, so it must be set explicitly to reach the app's actual 404 logic instead of
-    // its CSRF guard.
-    const apiContext = await playwrightRequest.newContext({
-      baseURL,
-      extraHTTPHeaders: { Cookie: cookieB, Origin: baseURL },
-    });
+    // --- Action + assertion: a fresh second user (userB) DELETEs userA's card over real HTTP ---
+    const userB = await seedUser();
     try {
-      const response = await apiContext.delete(`/api/flashcards/${cardId}`);
-      expect(response.status()).toBe(404);
-      expect(await response.json()).toEqual({ error: "not_found" });
+      const cookieB = await getAuthCookieHeader(userB.email, userB.password);
+      // Astro's security.checkOrigin (astro.config.mjs) rejects unsafe-method requests whose
+      // Origin doesn't match the request URL — a fresh APIRequestContext sends no Origin by
+      // default, so it must be set explicitly to reach the app's actual 404 logic instead of
+      // its CSRF guard.
+      const apiContext = await playwrightRequest.newContext({
+        baseURL,
+        extraHTTPHeaders: { Cookie: cookieB, Origin: baseURL },
+      });
+      try {
+        const response = await apiContext.delete(`/api/flashcards/${cardId}`);
+        expect(response.status()).toBe(404);
+        expect(await response.json()).toEqual({ error: "not_found" });
+      } finally {
+        await apiContext.dispose();
+      }
     } finally {
-      await apiContext.dispose();
+      await cleanupUser(userB.id);
     }
   } finally {
-    await cleanupUser(userB.id);
+    // --- Cleanup: delete userA's card via the real UI delete flow, even if the assertions above threw ---
+    await gotoAndWaitForHydration(page, "/cards");
+    const card = page.getByRole("listitem").filter({ hasText: question });
+    await card.getByRole("button", { name: "Delete" }).click();
+
+    const dialog = page.getByRole("alertdialog", { name: "Delete this card?" });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "Delete" }).click();
+
+    await expect(page.getByText(question)).not.toBeVisible();
   }
-
-  // --- Cleanup: delete userA's card via the real UI delete flow ---
-  await gotoAndWaitForHydration(page, "/cards");
-  const card = page.getByRole("listitem").filter({ hasText: question });
-  await card.getByRole("button", { name: "Delete" }).click();
-
-  const dialog = page.getByRole("alertdialog", { name: "Delete this card?" });
-  await expect(dialog).toBeVisible();
-  await dialog.getByRole("button", { name: "Delete" }).click();
-
-  await expect(page.getByText(question)).not.toBeVisible();
 });
