@@ -13,7 +13,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:e2e:install": "playwright install chromium"
+    "test:e2e:install": "playwright install chromium",
+    "clean": "rm -rf dist .astro playwright-report test-results .playwright-mcp .stryker-tmp reports",
+    "clean:all": "npm run clean && rm -rf node_modules .wrangler supabase/.branches supabase/.temp"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.8",
