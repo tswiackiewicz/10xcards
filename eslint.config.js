@@ -86,7 +86,10 @@ const e2eNavigationGuard = tseslint.config({
 
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
-  { ignores: ["src/db/database.types.ts", "scripts/**"] },
+  // packages/* are standalone (no npm workspaces), so their deps are not installed
+  // by the root `npm ci` — type-aware linting cannot resolve them here. Each package
+  // lints and type-checks itself.
+  { ignores: ["src/db/database.types.ts", "scripts/**", "packages/**"] },
   baseConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],
