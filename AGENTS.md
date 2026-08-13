@@ -19,7 +19,7 @@ Standard scripts (`dev`, `lint`, `lint:fix`, `format`, `build`): see `@package.j
 
 - **Imports use the `@/*` alias** → `src/*` (e.g. `@/lib/supabase`, `@/components/ui/button`). Defined in both `tsconfig.json` and `components.json`. Don't write deep relative paths.
 - **Formatting (enforced, do not fight it):** double quotes, 2-space indent, `printWidth: 120`, semicolons, `trailingComma: "all"`. Config: `@.prettierrc.json`.
-- **ESLint is strict + type-checked** (`typescript-eslint` strict + stylistic, react-compiler as error, astro plugin). `no-console` warns. Unused vars error unless prefixed `_`. Config: `@eslint.config.js`.
+- **ESLint is strict + type-checked** (`typescript-eslint` strict + stylistic, react-compiler as error, astro plugin). `no-console` warns. Unused vars error unless prefixed `_`. Config: `@eslint.config.js`. **Exception:** everything under `packages/` is ignored — see Standalone packages.
 - shadcn/ui components live in `src/components/ui/`; add new ones via the shadcn CLI, don't hand-roll. Auth UI in `src/components/auth/`.
 - Make React interactive only with explicit `client:*` directives.
 - **Tailwind class merging:** use the `cn()` helper from `@/lib/utils` (clsx + tailwind-merge) for conditional/merged class names — don't concatenate class strings manually.
@@ -44,6 +44,21 @@ Standard scripts (`dev`, `lint`, `lint:fix`, `format`, `build`): see `@package.j
 - CI (`@.github/workflows/ci.yml`) runs on push/PR to **`master`**: `npm ci` → `astro sync` → lint → start a local Supabase stack → `npm test` (Vitest) → `npm run test:e2e` (Playwright) → build → Supabase migration dry-run (`supabase db push --dry-run`, catches migrations that fail against prod before merge). Note the default branch here is `main` but CI targets `master` — confirm the intended branch before relying on CI.
 - On push to `master`, the `deploy` job additionally pushes pending Supabase migrations for real (`supabase db push`) before `wrangler deploy`, so prod schema stays in sync with the repo. Requires repo secrets `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_ID`.
 - Commit style: Conventional Commits.
+- **CI covers the root app only.** Nothing under `packages/` is installed, linted, type-checked, built or tested by the pipeline — a green CI says nothing about those packages (see Standalone packages).
+
+## Standalone packages
+
+`packages/*` are **not npm workspaces**. Each carries its own `package.json`, lockfile, `node_modules`, `tsconfig.json` and `eslint.config.js`, and is installed and verified from inside its own directory:
+
+```bash
+cd packages/<name> && npm ci && npm run lint && npm run typecheck
+```
+
+Consequences worth knowing before you touch one:
+
+- Root `eslint .` ignores everything under `packages/` **on purpose**: root lint is type-aware, and the root `npm ci` does not install package dependencies, so every import there resolves to an error type and the `no-unsafe-…` rules fail the build. Don't "fix" this by removing the ignore — either install the package's deps in CI first, or convert the repo to workspaces.
+- Root `npm ci` does not touch them. **Run `npm install` from inside the package directory** — a stray install at the root silently rewrites the root manifest and lockfile instead.
+- Their own `lint`/`typecheck` are not wired into the pipeline. If a package stops being throwaway, it needs its own CI job.
 
 ## Don't touch
 
