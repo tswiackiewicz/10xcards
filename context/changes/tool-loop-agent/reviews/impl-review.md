@@ -1,0 +1,84 @@
+<!-- IMPL-REVIEW-REPORT -->
+# Implementation Review: Tool Loop Agent — Modular Code Review Agent
+
+- **Plan**: `context/changes/tool-loop-agent/plan.md`
+- **Scope**: Full plan (Phase 1 + Phase 2, 16/16 Progress rows `[x]`)
+- **Date**: 2026-08-14
+- **Verdict**: APPROVED (1 warning, 3 observations)
+- **Findings**: 0 critical, 1 warning, 3 observations
+
+## Verdicts
+
+| Dimension           | Verdict |
+| ------------------- | ------- |
+| Plan Adherence      | WARNING |
+| Scope Discipline    | PASS    |
+| Safety & Quality    | PASS    |
+| Architecture        | PASS    |
+| Pattern Consistency | PASS    |
+| Success Criteria    | PASS    |
+
+## Evidence
+
+Commits reviewed: `109dda5` (p1), `51a2043` (p2), `6604af6` (epilogue) on `feat/code-review-tool-loop-agent`. 19 files changed vs `master`.
+
+Success criteria re-run at review time — all green:
+
+- 1.1 / 2.3 lint ✓ · 1.2 / 2.4 typecheck ✓ · 1.3 clean import with no key ✓
+- 1.4 exports exactly `buildReviewPrompt,createReviewAgent,reviewDiff,reviewInstructions,reviewSchema` ✓
+- 2.1 / 2.2 11 tests pass with `OPENROUTER_API_KEY` unset ✓ · 2.5 root manifest untouched ✓
+
+Safety: no real credential in any commit (the only `sk-or-v1-` hit is the `xxxxxxxx` placeholder in `.env.example`); `.env` is gitignored and uncommitted. No injection surface, no destructive I/O, no unbounded iteration. `installed-versions.ts` reads only manifests under the passed `cwd`, as specified.
+
+Architecture: dependency direction verified one-way (`cli → index → agent → {model, prompts, schema, installed-versions}`); nothing imports `cli.ts`. `model.ts` is the sole `process.env` reader, `installed-versions.ts` the sole filesystem toucher — both confirmed by criterion 1.3 passing with no key present.
+
+## Findings
+
+### F1 — The versions path is untested; all 11 tests pass when it is dropped
+
+- **Severity**: ⚠️ WARNING
+- **Impact**: 🏃 LOW — quick decision; fix is obvious and narrowly scoped
+- **Dimension**: Plan Adherence
+- **Location**: `packages/code-review/src/agent.test.ts:33,41,60` (all three tests use `tmpdir()`)
+- **Detail**: Phase 2 §4's stated Intent is to prove "the diff reaches the model as user content … **that the versions block lands in the same prompt**, and that a JSON response parses into a typed `Review`". Its Contract, however, mandates a `cwd` with no `package.json` (`os.tmpdir()`) so `collectInstalledVersions` takes its empty path. The plan contradicts itself, and the implementation followed the Contract — so nothing asserts that collected versions reach the prompt.
+
+  Verified empirically: replacing `buildReviewPrompt({ diff, versions })` with `buildReviewPrompt({ diff, versions: [] })` in `agent.ts:33` leaves **all 11 tests passing**. The ground-truth block — the whole reason `collectInstalledVersions` exists — has no regression guard.
+- **Fix**: Add a fourth case to `agent.test.ts` that passes `cwd: process.cwd()` (the package has a real `package.json` and `node_modules`) and asserts the user prompt contains `Installed versions (ground truth):` and at least one `name@version` row. This closes the gap and incidentally covers `collectInstalledVersions`' happy path (see F3).
+- **Decision**: FIXED — versions-path assertion added to agent.test.ts (verified by break-and-revert)
+
+### F2 — `readStdin()` sits outside the try/catch, bypassing the readable-error path
+
+- **Severity**: 📝 OBSERVATION
+- **Impact**: 🏃 LOW — quick decision; fix is obvious and narrowly scoped
+- **Dimension**: Safety & Quality
+- **Location**: `packages/code-review/src/cli.ts:22`
+- **Detail**: `const diff = await readStdin();` is outside the `try` block that formats errors into one readable line. A stdin read failure (EIO, prematurely closed pipe) therefore rejects out of `main()` at the top-level `await`, producing exactly the stack dump criterion 1.6 exists to eliminate. Rare in practice — piping from `git diff` doesn't normally fail — which is why this is an observation rather than a warning.
+- **Fix**: Move the `readStdin()` call inside the existing `try`, or wrap `await main()` in a `.catch()` that routes through `toMessage`.
+- **Decision**: PENDING
+
+### F3 — `collectInstalledVersions` has no direct test despite being the designated test seam
+
+- **Severity**: 📝 OBSERVATION
+- **Impact**: 🏃 LOW — quick decision; fix is obvious and narrowly scoped
+- **Dimension**: Plan Adherence
+- **Location**: `packages/code-review/src/installed-versions.ts`
+- **Detail**: Phase 1 §3's Intent calls this module "the single seam to fake in tests", and it carries two deliberate silent-failure paths (unreadable `package.json` → `[]`; unresolvable dependency → dropped). Phase 2 scoped tests to prompts, schema, and agent only, so this is not a deviation from the plan as written — but the module the plan singled out as the testing seam ended up with zero direct coverage, and its swallow-all-errors behavior is exactly the kind that rots silently.
+- **Fix**: If F1's fix is applied it covers the happy path; add one case asserting `collectInstalledVersions(tmpdir())` returns `[]` to pin the missing-manifest path.
+- **Decision**: PENDING
+
+### F4 — `allowImportingTsExtensions` was added outside the plan's anticipated scope
+
+- **Severity**: 📝 OBSERVATION
+- **Impact**: 🏃 LOW — quick decision; fix is obvious and narrowly scoped
+- **Dimension**: Scope Discipline
+- **Location**: `packages/code-review/tsconfig.json:11`
+- **Detail**: The plan's only sanctioned tsconfig edit (Phase 2 §5) was for keeping test files inside the typecheck gate, "adjust only if a real error appears". A real error did appear — `TS5097` on the `.ts` import specifiers — but in Phase 1, not the test-coverage context the escape hatch described. The flag is legal here (`noEmit` is set) and consistent with the plan's "no build step, no packaging" commitment. Recorded because it is a durable constraint, not a passing detail: with `.ts` specifiers baked into every import, the package cannot emit JS later without rewriting all of them.
+- **Fix**: No code change needed. Note the constraint in the plan's Migration Notes so a future packaging decision doesn't rediscover it.
+- **Decision**: PENDING
+
+## What held up
+
+- **Prompt text is byte-identical to the original**, proven against `git show HEAD:packages/code-review/src/index.ts` rather than a remembered copy — instructions and both `buildReviewPrompt` branches. The plan's "no prompt rewriting" guarantee holds.
+- **Every "What We're NOT Doing" boundary respected**: no promptfoo config, no tools on the agent, no `runtimeContext`/`prepareCall`/streaming, no `ai` upgrade, no schema change, no `exports`/`main`/build step, no CI wiring, no README.
+- **Break-and-revert checks are genuine.** The 2.8 break (diff spliced into `instructions`) compiles cleanly at `tsc` exit 0 yet fails the agent test — confirming the test covers what types cannot, which was the point of the pre-implementation plan-review fix.
+- **CLI contract preserved and improved**: empty stdin → usage message, exit 1; missing key → exactly one line (`OPENROUTER_API_KEY is missing — copy .env.example to .env`), exit 1, empty stdout.

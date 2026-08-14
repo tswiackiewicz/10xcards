@@ -51,6 +51,17 @@ describe("reviewDiff", () => {
     expect(systemText).not.toContain("items.length");
   });
 
+  it("puts the installed versions into the prompt as ground truth", async () => {
+    const model = mockModel(JSON.stringify(review));
+
+    // This package's own directory: a real package.json with resolvable dependencies.
+    await reviewDiff(diff, { model, cwd: process.cwd() });
+
+    const userText = JSON.stringify(model.doGenerateCalls[0]?.prompt.filter((message) => message.role === "user"));
+    expect(userText).toContain("Installed versions (ground truth):");
+    expect(userText).toMatch(/zod@\d+\./);
+  });
+
   it("needs no API key when a model is injected", async () => {
     const previous = process.env.OPENROUTER_API_KEY;
     delete process.env.OPENROUTER_API_KEY;
