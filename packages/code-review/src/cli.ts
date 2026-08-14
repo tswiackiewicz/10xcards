@@ -19,15 +19,17 @@ async function readStdin(): Promise<string> {
 }
 
 async function main() {
-  const diff = await readStdin();
-
-  if (diff.trim() === "") {
-    console.error("Usage: git diff | npm start");
-    process.exitCode = 1;
-    return;
-  }
-
   try {
+    // Inside the try: a stdin read failure must reach the same one-line error
+    // path as everything else, not escape as a stack trace from the top-level await.
+    const diff = await readStdin();
+
+    if (diff.trim() === "") {
+      console.error("Usage: git diff | npm start");
+      process.exitCode = 1;
+      return;
+    }
+
     const review = await reviewDiff(diff);
     console.log(JSON.stringify(review, null, 2));
   } catch (error) {

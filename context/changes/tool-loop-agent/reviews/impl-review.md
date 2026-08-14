@@ -54,17 +54,17 @@ Architecture: dependency direction verified one-way (`cli → index → agent �
 - **Location**: `packages/code-review/src/cli.ts:22`
 - **Detail**: `const diff = await readStdin();` is outside the `try` block that formats errors into one readable line. A stdin read failure (EIO, prematurely closed pipe) therefore rejects out of `main()` at the top-level `await`, producing exactly the stack dump criterion 1.6 exists to eliminate. Rare in practice — piping from `git diff` doesn't normally fail — which is why this is an observation rather than a warning.
 - **Fix**: Move the `readStdin()` call inside the existing `try`, or wrap `await main()` in a `.catch()` that routes through `toMessage`.
-- **Decision**: PENDING
+- **Decision**: FIXED — `readStdin()` moved inside the try/catch; empty-stdin and missing-key paths re-verified (usage message + exit 1; one stderr line + exit 1, empty stdout)
 
 ### F3 — `collectInstalledVersions` has no direct test despite being the designated test seam
 
 - **Severity**: 📝 OBSERVATION
 - **Impact**: 🏃 LOW — quick decision; fix is obvious and narrowly scoped
 - **Dimension**: Plan Adherence
-- **Location**: `packages/code-review/src/installed-versions.ts`
+- **Location**: `packages/code-review/src/agents/reviewer/installed-versions.ts` (was `src/installed-versions.ts` before the by-feature restructure)
 - **Detail**: Phase 1 §3's Intent calls this module "the single seam to fake in tests", and it carries two deliberate silent-failure paths (unreadable `package.json` → `[]`; unresolvable dependency → dropped). Phase 2 scoped tests to prompts, schema, and agent only, so this is not a deviation from the plan as written — but the module the plan singled out as the testing seam ended up with zero direct coverage, and its swallow-all-errors behavior is exactly the kind that rots silently.
 - **Fix**: If F1's fix is applied it covers the happy path; add one case asserting `collectInstalledVersions(tmpdir())` returns `[]` to pin the missing-manifest path.
-- **Decision**: PENDING
+- **Decision**: FIXED — `tests/unit/installed-versions.test.ts` pins both silent-failure paths (no `package.json` → `[]`, unresolvable dependency dropped) plus the happy path. Verified by break-and-revert: making the missing-manifest path throw fails the test
 
 ### F4 — `allowImportingTsExtensions` was added outside the plan's anticipated scope
 
