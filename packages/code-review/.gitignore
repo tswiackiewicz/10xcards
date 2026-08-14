@@ -1,3 +1,7 @@
 node_modules/
 .env
 skills-lock.json
+# 10x-cli tool profile: symlinks into .agents/ (itself ignored repo-wide).
+# Regenerable via `10x-cli get`, and tool-specific — the root .gitignore
+# ignores the same paths, but its pattern is anchored to the repo root.
+.claude/
