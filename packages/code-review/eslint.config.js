@@ -7,7 +7,7 @@ export default tseslint.config(
   js.configs.recommended,
   {
     // Type-aware rules only for sources the tsconfig covers — this config file is not one of them.
-    files: ["src/**/*.ts"],
+    files: ["src/**/*.ts", "tests/**/*.ts"],
     extends: [tseslint.configs.strictTypeChecked, tseslint.configs.stylisticTypeChecked],
     languageOptions: {
       parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },

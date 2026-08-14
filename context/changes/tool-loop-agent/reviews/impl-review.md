@@ -76,6 +76,19 @@ Architecture: dependency direction verified one-way (`cli → index → agent �
 - **Fix**: No code change needed. Note the constraint in the plan's Migration Notes so a future packaging decision doesn't rediscover it.
 - **Decision**: PENDING
 
+### F5 — Package tests lived in `src/`; project convention is `tests/`
+
+- **Severity**: ⚠️ WARNING
+- **Impact**: 🔎 MEDIUM — real tradeoff; pause to reason through it
+- **Dimension**: Pattern Consistency
+- **Location**: `packages/code-review/tests/{unit,integration}/` (was `src/*.test.ts`)
+- **Detail**: Raised by the user. The root project keeps all 20 test files in `tests/{unit,integration,e2e}/` with vitest `include: ["tests/**/*.test.ts"]` and zero co-located tests; this package deviated. The plan chose `src/` deliberately because the package's gates are narrow (`tsconfig include: ["src/**/*.ts"]`, eslint `files: ["src/**/*.ts"]`), unlike the root's wide ones (`include: ["**/*"]`, `files: ["**/*.{js,ts,…}"]`).
+
+  Measured before moving: a file at `tests/probe.test.ts` containing `const x: number = "string"` passed `npm run typecheck` clean, and eslint reported *"File ignored because no matching configuration was supplied"*. Moving the files alone would have silently dropped all 12 tests out of both gates.
+- **Fix**: Applied — moved to `tests/unit/` (prompts, schema) and `tests/integration/` (agent), mirroring the root layout and the plan's own Testing Strategy taxonomy. Widened `tsconfig.json` `include` and the eslint type-aware `files` to `["src/**/*.ts", "tests/**/*.ts"]`. Gate coverage re-verified by planting the same type error under the new location: `tsc` now fails with `TS2322` and eslint no longer ignores the file.
+- **Correction**: the fix was proposed partly on the claim that `vitest.config.ts` could be deleted, since vitest 4's default include is already `tests/**/*.test.ts`. That was wrong. With no local config, vitest walks up and loads the **repo-root** `vitest.config.ts`, whose `globalSetup: ["tests/setup/env.ts"]` does not exist in this package — the run dies with `ERR_LOAD_URL`. The local config must stay to shadow the root one; it is now empty except for the comment explaining why. Net config change is neutral, not −8 lines.
+- **Decision**: FIXED
+
 ## What held up
 
 - **Prompt text is byte-identical to the original**, proven against `git show HEAD:packages/code-review/src/index.ts` rather than a remembered copy — instructions and both `buildReviewPrompt` branches. The plan's "no prompt rewriting" guarantee holds.

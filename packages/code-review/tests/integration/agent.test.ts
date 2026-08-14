@@ -2,8 +2,8 @@ import { MockLanguageModelV4 } from "ai/test";
 import { tmpdir } from "node:os";
 import { describe, expect, it } from "vitest";
 
-import { reviewDiff } from "./agent.ts";
-import { reviewInstructions } from "./prompts.ts";
+import { reviewDiff } from "../../src/agent.ts";
+import { reviewInstructions } from "../../src/prompts.ts";
 
 const review = {
   summary: "One real defect in the changed lines.",

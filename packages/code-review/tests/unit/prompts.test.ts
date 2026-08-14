@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildReviewPrompt } from "./prompts.ts";
+import { buildReviewPrompt } from "../../src/prompts.ts";
 
 const diff = "diff --git a/src/cart.ts b/src/cart.ts\n+  sum += items[i].price;";
 
