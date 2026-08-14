@@ -7,8 +7,9 @@
     "node": ">=22"
   },
   "scripts": {
-    "start": "node --env-file-if-exists=.env --import tsx src/index.ts",
-    "dev": "node --env-file-if-exists=.env --import tsx --watch src/index.ts",
+    "start": "node --env-file-if-exists=.env --import tsx src/cli.ts",
+    "dev": "node --env-file-if-exists=.env --import tsx --watch src/cli.ts",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
@@ -27,6 +28,7 @@
     "prettier": "^3.9.6",
     "tsx": "^4.23.12",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.67.0"
+    "typescript-eslint": "^8.67.0",
+    "vitest": "^4.1.10"
   }
 }
