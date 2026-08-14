@@ -2,7 +2,7 @@ import type { LanguageModel } from "ai";
 import { Output, ToolLoopAgent } from "ai";
 
 import { collectInstalledVersions } from "./installed-versions.ts";
-import { resolveModel } from "./model.ts";
+import { resolveModel } from "../../providers/model.ts";
 import { buildReviewPrompt, reviewInstructions } from "./prompts.ts";
 import { reviewSchema, type Review } from "./schema.ts";
 

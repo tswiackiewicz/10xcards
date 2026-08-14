@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { reviewSchema } from "../../src/schema.ts";
+import { reviewSchema } from "../../src/agents/reviewer/schema.ts";
 
 const validReview = {
   summary: "One real defect in the changed lines.",

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { reviewDiff } from "./agent.ts";
+import { reviewDiff } from "./agents/reviewer/agent.ts";
 
 /** One readable line. ZodError.message is a serialized issue array — unwrap it instead. */
 function toMessage(error: unknown): string {

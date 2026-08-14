@@ -89,6 +89,44 @@ Architecture: dependency direction verified one-way (`cli → index → agent �
 - **Correction**: the fix was proposed partly on the claim that `vitest.config.ts` could be deleted, since vitest 4's default include is already `tests/**/*.test.ts`. That was wrong. With no local config, vitest walks up and loads the **repo-root** `vitest.config.ts`, whose `globalSetup: ["tests/setup/env.ts"]` does not exist in this package — the run dies with `ERR_LOAD_URL`. The local config must stay to shadow the root one; it is now empty except for the comment explaining why. Net config change is neutral, not −8 lines.
 - **Decision**: FIXED
 
+### F6 — Flat layout does not mark the agent-specific / shared boundary
+
+- **Severity**: 📝 OBSERVATION
+- **Impact**: 🔬 HIGH — architectural stakes; think carefully before deciding
+- **Dimension**: Architecture
+- **Location**: `packages/code-review/src/` (whole layout)
+- **Detail**: Raised by the user, whose stated intent is that the package should host **multiple agents / other tools**, not just the reviewer. The current flat layout does not distinguish which modules belong to the reviewer and which are shared infrastructure:
+
+  | Module | Scope | Lines |
+  | --- | --- | --- |
+  | `schema.ts`, `prompts.ts`, `agent.ts`, `installed-versions.ts`, `cli.ts` | reviewer-specific | 151 |
+  | `model.ts` (`resolveModel`) | agent-agnostic / shared | 18 |
+  | `index.ts` | barrel | 3 |
+
+  5 of 7 modules are reviewer-specific. Their names (`agent.ts`, `prompts.ts`, `schema.ts`) read as if only one agent will ever exist — when a second arrives, `prompts.ts` becomes ambiguous. The instinct behind the question is correct.
+
+  However the **by-kind** structure proposed (`agents/`, `prompts/`, `schemas/`, `providers/`) optimizes the wrong axis for that goal:
+  - Every directory would hold exactly one file at current size (172 lines total, largest module 40 lines).
+  - Adding a second agent would touch 3–4 directories; reading one agent would require visiting all of them.
+  - `installed-versions.ts` fits none of the four buckets cleanly — a diagnostic sign that the taxonomy does not match the domain. It is reviewer-specific context gathering (a diff reviewer needs dependency versions; a summarizer would not).
+
+  A **by-feature** structure serves the same goal better: `agents/reviewer/{agent,prompts,schema,installed-versions}.ts` plus a shared `providers/model.ts`. Adding agent #2 becomes one new directory with zero edits elsewhere, and the shared/specific boundary becomes visible in the tree.
+
+  Relevant history: this exact choice was made during planning. "Directory-per-concern (`src/agent/`, `src/schemas/`, `src/prompts/`)" was offered and rejected in favour of "Seven flat modules", with the tradeoff recorded as *"Pure ceremony at current size — one file per directory."* Nothing in the code has changed since. What is new is the explicit multi-agent intent.
+
+  No evidence of a concrete second agent exists anywhere in `context/foundation/` or `context/changes/`.
+- **Fix A ⭐ Recommended**: Keep flat now; restructure by-feature when agent #2 actually arrives.
+  - Strength: Deferring costs one `git mv` of 4 files plus import updates — mechanical and safe, with 12 tests guarding it. Restructuring now means guessing the shared/specific boundary from a single example, which is how premature layering goes wrong. Matches the project's own rule: "No abstractions for single-use code. Nothing speculative."
+  - Tradeoff: Module names stay agent-implicit until then; a newcomer cannot tell from the tree which parts are reusable.
+  - Confidence: HIGH — 172 lines across 7 modules is well below the size where layout costs anything.
+  - Blind spot: If agent #2 is already scheduled, deferring just moves the same work later at slightly higher cost.
+- **Fix B**: Restructure now, by-feature — `agents/reviewer/` + `providers/` — skipping by-kind entirely.
+  - Strength: Makes the extension point explicit immediately; agent #2 is then a pure addition. Keeps each agent cohesive, unlike by-kind.
+  - Tradeoff: Deeper import paths and a directory tree heavier than 172 lines of code warrants; the shared/specific split is inferred from one example.
+  - Confidence: MEDIUM — the structure is sound, but the shared boundary is a guess until a second agent exists to generalize from.
+  - Blind spot: Whether agent #2 would actually reuse `resolveModel` as-is, or need per-agent model config.
+- **Decision**: FIXED via Fix B — restructured to `agents/reviewer/` + `providers/`, with a per-agent barrel so the root re-exports one path per agent. Public API surface unchanged; all 12 tests and both break-and-revert guards re-verified after the move.
+
 ## What held up
 
 - **Prompt text is byte-identical to the original**, proven against `git show HEAD:packages/code-review/src/index.ts` rather than a remembered copy — instructions and both `buildReviewPrompt` branches. The plan's "no prompt rewriting" guarantee holds.
