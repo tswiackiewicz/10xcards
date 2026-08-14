@@ -324,30 +324,30 @@ Nothing imports `src/index.ts` today, so there is no consumer migration. The one
 
 #### Automated
 
-- [x] 1.1 Lint passes: `npm run lint`
-- [x] 1.2 Type checking passes: `npm run typecheck`
-- [x] 1.3 No module reads env or does I/O at import time (clean import with `OPENROUTER_API_KEY` unset)
-- [x] 1.4 `src/index.ts` exports the full public surface
+- [x] 1.1 Lint passes: `npm run lint` — 109dda5
+- [x] 1.2 Type checking passes: `npm run typecheck` — 109dda5
+- [x] 1.3 No module reads env or does I/O at import time (clean import with `OPENROUTER_API_KEY` unset) — 109dda5
+- [x] 1.4 `src/index.ts` exports the full public surface — 109dda5
 
 #### Manual
 
-- [x] 1.5 `npm start` prints schema-valid JSON for a real diff
-- [x] 1.6 Missing API key (with `.env` moved aside) prints one readable line, not a zod stack dump
-- [x] 1.7 Empty stdin still prints the usage message and exits non-zero
-- [x] 1.8 Review quality on the baseline diff unchanged from the captured baseline
+- [x] 1.5 `npm start` prints schema-valid JSON for a real diff — 109dda5
+- [x] 1.6 Missing API key (with `.env` moved aside) prints one readable line, not a zod stack dump — 109dda5
+- [x] 1.7 Empty stdin still prints the usage message and exits non-zero — 109dda5
+- [x] 1.8 Review quality on the baseline diff unchanged from the captured baseline — 109dda5
 
 ### Phase 2: Vitest harness
 
 #### Automated
 
-- [ ] 2.1 Tests pass: `npm test`
-- [ ] 2.2 Agent test makes no network call (`npm test` passes with `OPENROUTER_API_KEY` unset)
-- [ ] 2.3 Lint still passes with test files present
-- [ ] 2.4 Type checking still passes with test files present
-- [ ] 2.5 Root lockfile untouched by the vitest install
+- [x] 2.1 Tests pass: `npm test`
+- [x] 2.2 Agent test makes no network call (`npm test` passes with `OPENROUTER_API_KEY` unset)
+- [x] 2.3 Lint still passes with test files present
+- [x] 2.4 Type checking still passes with test files present
+- [x] 2.5 Root lockfile untouched by the vitest install
 
 #### Manual
 
-- [ ] 2.6 Inverting the versions-block condition makes a prompt test fail (revert after)
-- [ ] 2.7 Widening the `severity` enum makes a schema test fail (revert after)
-- [ ] 2.8 Moving the diff into `instructions` makes the agent test fail (revert after)
+- [x] 2.6 Inverting the versions-block condition makes a prompt test fail (revert after)
+- [x] 2.7 Widening the `severity` enum makes a schema test fail (revert after)
+- [x] 2.8 Moving the diff into `instructions` makes the agent test fail (revert after)
