@@ -1,7 +1,7 @@
 ---
 change_id: tool-loop-agent
 title: Tool loop agent
-status: plan_reviewed
+status: implemented
 created: 2026-08-14
 updated: 2026-08-14
 archived_at: null

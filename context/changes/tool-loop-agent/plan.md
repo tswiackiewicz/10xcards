@@ -340,14 +340,14 @@ Nothing imports `src/index.ts` today, so there is no consumer migration. The one
 
 #### Automated
 
-- [x] 2.1 Tests pass: `npm test`
-- [x] 2.2 Agent test makes no network call (`npm test` passes with `OPENROUTER_API_KEY` unset)
-- [x] 2.3 Lint still passes with test files present
-- [x] 2.4 Type checking still passes with test files present
-- [x] 2.5 Root lockfile untouched by the vitest install
+- [x] 2.1 Tests pass: `npm test` — 51a2043
+- [x] 2.2 Agent test makes no network call (`npm test` passes with `OPENROUTER_API_KEY` unset) — 51a2043
+- [x] 2.3 Lint still passes with test files present — 51a2043
+- [x] 2.4 Type checking still passes with test files present — 51a2043
+- [x] 2.5 Root lockfile untouched by the vitest install — 51a2043
 
 #### Manual
 
-- [x] 2.6 Inverting the versions-block condition makes a prompt test fail (revert after)
-- [x] 2.7 Widening the `severity` enum makes a schema test fail (revert after)
-- [x] 2.8 Moving the diff into `instructions` makes the agent test fail (revert after)
+- [x] 2.6 Inverting the versions-block condition makes a prompt test fail (revert after) — 51a2043
+- [x] 2.7 Widening the `severity` enum makes a schema test fail (revert after) — 51a2043
+- [x] 2.8 Moving the diff into `instructions` makes the agent test fail (revert after) — 51a2043
