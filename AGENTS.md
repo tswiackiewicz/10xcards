@@ -41,10 +41,11 @@ Standard scripts (`dev`, `lint`, `lint:fix`, `format`, `build`): see `@package.j
 ## Git & CI
 
 - Pre-commit (`.husky/pre-commit` → lint-staged): `eslint --fix` on `*.{ts,tsx,astro}`, `prettier --write` on `*.{json,css,md}`. A lint failure blocks the commit.
-- CI (`@.github/workflows/ci.yml`) runs on push/PR to **`master`**: `npm ci` → `astro sync` → lint → start a local Supabase stack → `npm test` (Vitest) → `npm run test:e2e` (Playwright) → build → Supabase migration dry-run (`supabase db push --dry-run`, catches migrations that fail against prod before merge). Note the default branch here is `main` but CI targets `master` — confirm the intended branch before relying on CI.
+- CI (`@.github/workflows/ci.yml`) runs on push/PR to **`master`** — which is also the repository's default branch. The `ci` job: `npm ci` → `astro sync` → `actionlint` (validates everything under `.github/workflows/`, and local composite actions transitively through their `uses:`) → lint → start a local Supabase stack → `npm test` (Vitest) → `npm run test:e2e` (Playwright) → build → Supabase migration dry-run (`supabase db push --dry-run`, catches migrations that fail against prod before merge).
 - On push to `master`, the `deploy` job additionally pushes pending Supabase migrations for real (`supabase db push`) before `wrangler deploy`, so prod schema stays in sync with the repo. Requires repo secrets `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_ID`.
 - Commit style: Conventional Commits.
-- **CI covers the root app only.** Nothing under `packages/` is installed, linted, type-checked, built or tested by the pipeline — a green CI says nothing about those packages (see Standalone packages).
+- **CI covers the root app plus one package.** A second job, `code-review-package`, installs `packages/code-review` and runs its lint, typecheck and tests in parallel with `ci`. Nothing else under `packages/` is touched by the pipeline. Two limits worth internalizing: the job is **not a required check** and `deploy` does not depend on it, so a green `ci` — and a merge — still says nothing about the package; and no package is ever *built* by CI (the code-review package runs from source via `tsx`).
+- AI code review (`@.github/workflows/ai-code-review.yml`) runs on every non-draft, same-repo PR to `master`: it posts one sticky comment and applies exactly one of `ai-cr:passed` / `ai-cr:failed`. It is **advisory** — it never blocks a merge. Re-run it by adding the `ai-cr:review` label. A PR whose reviewable diff is empty, or whose review could not run, gets a comment and **no** verdict label, so a green label never certifies an unreviewed change. Needs the `OPENROUTER_API_KEY` repo secret; the three `ai-cr:*` labels are provisioned by a one-off `workflow_dispatch` run of `ai-review-labels.yml`.
 
 ## Standalone packages
 
@@ -58,7 +59,8 @@ Consequences worth knowing before you touch one:
 
 - Root `eslint .` ignores everything under `packages/` **on purpose**: root lint is type-aware, and the root `npm ci` does not install package dependencies, so every import there resolves to an error type and the `no-unsafe-…` rules fail the build. Don't "fix" this by removing the ignore — either install the package's deps in CI first, or convert the repo to workspaces.
 - Root `npm ci` does not touch them. **Run `npm install` from inside the package directory** — a stray install at the root silently rewrites the root manifest and lockfile instead.
-- Their own `lint`/`typecheck` are not wired into the pipeline. If a package stops being throwaway, it needs its own CI job.
+- `code-review` is the exception to the line above: it is load-bearing (its failure breaks AI review on every PR), so it now has its own non-required CI job. Every other package's `lint`/`typecheck` is still wired into nothing.
+- **Fork PRs get no AI review.** This repository is PUBLIC, so a fork PR receives a read-only token and no secrets — the review cannot run, and even a "skipped" comment would 403 and read as a bot failure. The job skips silently by design, which makes this line the only record of the limitation. Dependabot PRs skip for the same reason (same-repo branches, but still no secrets).
 
 ## Don't touch
 

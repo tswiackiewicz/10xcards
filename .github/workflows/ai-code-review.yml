@@ -1,0 +1,175 @@
+name: AI code review
+
+# Advisory only — never a required status check, never blocking a merge.
+on:
+  pull_request:
+    branches: [master]
+    # `types:` replaces the defaults, so opened/synchronize/reopened are re-listed.
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
+
+# All-or-nothing: naming only pull-requests would zero `contents` and break checkout.
+permissions:
+  contents: read
+  pull-requests: write
+
+# Keyed on the PR number, not github.ref, so every activity type — `labeled` included —
+# collapses into one group.
+concurrency:
+  group: ai-code-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    # Four load-bearing clauses:
+    # - fork guard: a PUBLIC repo gives fork PRs no secrets and a read-only token, so the
+    #   review cannot run and even a "skipped" comment would 403 and read as a bot failure.
+    #   The job skips silently; the limitation is documented in AGENTS.md.
+    # - Dependabot is not redundant with it: its branches live in this repo, so the fork
+    #   guard passes, yet secrets are still withheld and the token is still read-only.
+    # - `labeled` runs only for the retry label; everything else runs only on a ready PR.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository
+      && github.actor != 'dependabot[bot]'
+      && ((github.event.action == 'labeled' && github.event.label.name == 'ai-cr:review')
+          || (github.event.action != 'labeled' && github.event.pull_request.draft == false))
+    runs-on: ubuntu-latest
+    # The default is 360 and the CLI sets no request timeout.
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      PR: ${{ github.event.pull_request.number }}
+    steps:
+      # First, before checkout: `labeled` fires on transition only, so a run that failed
+      # later would leave ai-cr:review stuck and block every further retry.
+      - name: Consume the retry label
+        if: github.event.action == 'labeled'
+        run: gh api -X DELETE "repos/$GH_REPO/issues/$PR/labels/ai-cr:review" || true
+
+      # fetch-depth: 0 because the default single-branch depth-1 checkout has no
+      # origin/master ref for the merge base. head.sha rather than the merge ref, because
+      # GitHub does not create refs/pull/N/merge for PRs with conflicts.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Compute the reviewable diff
+        id: diff
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          # Three-dot: a two-dot diff would re-review other people's merged work every
+          # time the base moves. The pathspec must be single-quoted — this is bash -e,
+          # where a bare :(exclude) is subject to paren interpretation.
+          git diff --merge-base "origin/$BASE_REF" HEAD -- . ':(exclude)context/**' > "$RUNNER_TEMP/pr.diff"
+          if [ -s "$RUNNER_TEMP/pr.diff" ]; then
+            echo "empty=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "empty=true" >> "$GITHUB_OUTPUT"
+          fi
+          wc -c < "$RUNNER_TEMP/pr.diff"
+
+      # Into files, so PR text never passes through ${{ }} interpolation.
+      - name: Fetch the PR title and description
+        run: |
+          gh pr view "$PR" --json title --jq .title > "$RUNNER_TEMP/title.txt"
+          gh pr view "$PR" --json body --jq .body > "$RUNNER_TEMP/body.txt"
+
+      - id: review
+        if: steps.diff.outputs.empty == 'false'
+        uses: ./.github/actions/ai-code-review
+        with:
+          diff-path: ${{ runner.temp }}/pr.diff
+          title-path: ${{ runner.temp }}/title.txt
+          body-path: ${{ runner.temp }}/body.txt
+          openrouter-key: ${{ secrets.OPENROUTER_API_KEY }}
+          cwd: ${{ github.workspace }}
+
+      # The single source of truth for the two steps below, and the fix for the otherwise
+      # undefined skip paths: without it the comment step would run `-F body=@""`.
+      - name: Resolve outputs
+        id: resolved
+        if: always()
+        env:
+          ACTION_VERDICT: ${{ steps.review.outputs.verdict }}
+          ACTION_COMMENT: ${{ steps.review.outputs.comment-path }}
+          DIFF_EMPTY: ${{ steps.diff.outputs.empty }}
+        run: |
+          verdict="$ACTION_VERDICT"
+          comment="$ACTION_COMMENT"
+
+          if [ -n "$verdict" ] && [ -n "$comment" ] && [ -s "$comment" ]; then
+            :
+          elif [ "$DIFF_EMPTY" = "true" ]; then
+            verdict="empty"
+            comment="$RUNNER_TEMP/review-comment.md"
+            {
+              echo "<!-- ai-code-review -->"
+              echo "## AI code review — no reviewable changes"
+              echo ""
+              echo "Every changed path is excluded from review (\`context/**\` carries process"
+              echo "artifacts), so there was nothing to score. No verdict label was applied."
+            } > "$comment"
+          else
+            verdict="error"
+            comment="$RUNNER_TEMP/review-comment.md"
+            {
+              echo "<!-- ai-code-review -->"
+              echo "## AI code review — ⚠️ could not run"
+              echo ""
+              echo "The review step did not run to completion, so no verdict exists and no"
+              echo "label was applied. Check the workflow run, then re-trigger by adding the"
+              echo "\`ai-cr:review\` label."
+            } > "$comment"
+          fi
+
+          echo "verdict=$verdict" >> "$GITHUB_OUTPUT"
+          echo "comment-path=$comment" >> "$GITHUB_OUTPUT"
+
+      # Marker-scoped, not `gh pr comment --edit-last`, which is viewerDidAuthor-based and
+      # edits whatever bot comment is newest. Body as a file: no $(cat), no quoting hazard.
+      - name: Post or update the sticky comment
+        if: always()
+        env:
+          COMMENT_PATH: ${{ steps.resolved.outputs.comment-path }}
+        run: |
+          ids=$(gh api --paginate "repos/$GH_REPO/issues/$PR/comments" \
+            --jq '.[] | select(.body | contains("<!-- ai-code-review -->")) | .id')
+          comment_id=$(sed -n 1p <<< "$ids")
+
+          if [ -n "$comment_id" ]; then
+            gh api -X PATCH "repos/$GH_REPO/issues/comments/$comment_id" -F "body=@$COMMENT_PATH" --silent
+            echo "Updated comment $comment_id"
+          else
+            gh api -X POST "repos/$GH_REPO/issues/$PR/comments" -F "body=@$COMMENT_PATH" --silent
+            echo "Posted a new comment"
+          fi
+
+      # A verdict label is applied only when a review actually produced a verdict, so a
+      # green label never certifies an unreviewed change. `empty` and `error` clear both.
+      - name: Apply the verdict label
+        if: always()
+        env:
+          VERDICT: ${{ steps.resolved.outputs.verdict }}
+        run: |
+          add() { gh api -X POST "repos/$GH_REPO/issues/$PR/labels" -f "labels[]=$1" --silent; }
+          remove() { gh api -X DELETE "repos/$GH_REPO/issues/$PR/labels/$1" --silent || true; }
+
+          case "$VERDICT" in
+            passed)
+              add "ai-cr:passed"
+              remove "ai-cr:failed"
+              ;;
+            failed)
+              add "ai-cr:failed"
+              remove "ai-cr:passed"
+              ;;
+            *)
+              # empty or error: leaving a stale ai-cr:passed on a PR nothing reviewed is
+              # worse than no label at all.
+              remove "ai-cr:passed"
+              remove "ai-cr:failed"
+              ;;
+          esac
+          echo "Verdict: $VERDICT"

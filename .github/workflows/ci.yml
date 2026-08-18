@@ -58,6 +58,29 @@ jobs:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
 
+  # A sibling of `ci`, not a step inside it, and deliberately not required. A step would be
+  # blocking immediately (required_status_checks.contexts is exactly ["ci"]) — but `ci` is
+  # also what `deploy` depends on, so a flaky test in the review tool would block production
+  # deploys, not merely merges. The price, stated plainly: a broken packages/code-review can
+  # be merged to master, because nothing requires this job.
+  code-review-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: packages/code-review
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: packages/code-review/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+
   deploy:
     needs: ci
     if: github.ref == 'refs/heads/master'

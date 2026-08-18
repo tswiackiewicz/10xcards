@@ -188,7 +188,13 @@ Set `SUPABASE_URL` and `SUPABASE_KEY` as secrets in your Cloudflare dashboard or
 
 ## CI
 
-GitHub Actions runs lint + build on every push and PR to `master`. Configure `SUPABASE_URL` and `SUPABASE_KEY` as repository secrets in GitHub for the build step.
+GitHub Actions runs on every push and PR to `master`:
+
+- **`ci`** (the only required check) — `astro sync`, `actionlint`, lint, Vitest and Playwright against a local Supabase stack, build, and a Supabase migration dry-run. `SUPABASE_URL` and `SUPABASE_KEY` are **not** repository secrets: the workflow reads them from `supabase status` into `$GITHUB_ENV`. Repo secrets it does need: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_ID`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
+- **`code-review-package`** — lint, typecheck and tests for `packages/code-review`, in parallel with `ci` and not required.
+- **AI code review** (`.github/workflows/ai-code-review.yml`) — reviews every non-draft, same-repo PR against a six-criterion rubric, posts a sticky comment and applies `ai-cr:passed` / `ai-cr:failed`. Advisory; never blocks a merge. Needs the `OPENROUTER_API_KEY` repo secret.
+
+On push to `master`, `deploy` pushes pending Supabase migrations and then `wrangler deploy`.
 
 ## License
 

@@ -1202,32 +1202,32 @@ change, which runs from source by design.
 
 #### Automated
 
-- [x] 2.1 Package lint, typecheck and tests pass
-- [x] 2.2 CLI end-to-end from a real diff emits a valid envelope
-- [x] 2.3 CLI size-cap boundary behaves in both directions
-- [x] 2.4 Lockfile fallback proven by break-and-revert
+- [x] 2.1 Package lint, typecheck and tests pass — bac1174
+- [x] 2.2 CLI end-to-end from a real diff emits a valid envelope — bac1174
+- [x] 2.3 CLI size-cap boundary behaves in both directions — bac1174
+- [x] 2.4 Lockfile fallback proven by break-and-revert — bac1174
 
 #### Manual
 
-- [x] 2.5 Rendered markdown displays correctly in a GitHub comment box
-- [x] 2.6 Review quality is sane on a real diff, including n/a placement
-- [x] 2.7 Instruction-shaped PR body does not move the verdict
-- [x] 2.8 Forced schema miss produces a one-line error naming the finish reason
+- [x] 2.5 Rendered markdown displays correctly in a GitHub comment box — bac1174
+- [x] 2.6 Review quality is sane on a real diff, including n/a placement — bac1174
+- [x] 2.7 Instruction-shaped PR body does not move the verdict — bac1174
+- [x] 2.8 Forced schema miss produces a one-line error naming the finish reason — bac1174
 
 ### Phase 3: Composite action, label bootstrap, YAML validation
 
 #### Automated
 
-- [ ] 3.1 Smoke workflow completes green with a passed/failed verdict
-- [ ] 3.2 Smoke workflow with an invalid key reports verdict error and a non-empty comment body
-- [ ] 3.3 actionlint reports no errors across workflows and actions
-- [ ] 3.4 ci.yml still passes with the new actionlint step
+- [x] 3.1 Smoke workflow completes green with a passed/failed verdict — 254a08d
+- [x] 3.2 Smoke workflow with an invalid key reports verdict error and a non-empty comment body — 254a08d
+- [x] 3.3 actionlint reports no errors across workflows and actions — 254a08d
+- [x] 3.4 ci.yml still passes with the new actionlint step — 254a08d
 
 #### Manual
 
-- [ ] 3.5 Bootstrap creates all three labels with intended colors
-- [ ] 3.6 Re-running the bootstrap is a no-op
-- [ ] 3.7 setup-node cache hits on the second run
+- [x] 3.5 Bootstrap creates all three labels with intended colors — 254a08d
+- [x] 3.6 Re-running the bootstrap is a no-op — 254a08d
+- [x] 3.7 setup-node cache hits on the second run — 254a08d
 
 ### Phase 4: Review workflow, package CI job, documentation
 
@@ -1235,16 +1235,16 @@ change, which runs from source by design.
 
 - [ ] 4.1 ci.yml passes end-to-end with the actionlint step green
 - [ ] 4.2 code-review-package job passes and runs in parallel with ci
-- [ ] 4.3 Root sync, lint and build unaffected
-- [ ] 4.4 actionlint reports no errors on ai-code-review.yml
+- [x] 4.3 Root sync, lint and build unaffected
+- [x] 4.4 actionlint reports no errors on ai-code-review.yml
 - [ ] 4.5 Package job goes red on a deliberate break while ci and deploy stay unaffected
-- [ ] 4.6 Diff pathspec excludes `context/**` on a mixed branch
+- [x] 4.6 Diff pathspec excludes `context/**` on a mixed branch
 
 #### Manual
 
 - [ ] 4.7 Review job resolves OPENROUTER_API_KEY from repo secrets
 - [ ] 4.8 AGENTS.md and README.md match what CI actually does, including branch name and fork limitation
-- [ ] 4.9 Branch protection unchanged — required contexts still exactly ["ci"]
+- [x] 4.9 Branch protection unchanged — required contexts still exactly ["ci"]
 
 ### Phase 5: Live verification and gate calibration
 
