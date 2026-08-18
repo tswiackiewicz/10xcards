@@ -11,6 +11,7 @@ on:
     - cron: "0 3 * * *"
   workflow_dispatch: {}
 
+# Scratch: a workflow-config-only change, to confirm testCoverage scores n/a.
 jobs:
   purge:
     runs-on: ubuntu-latest
