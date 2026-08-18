@@ -1233,34 +1233,34 @@ change, which runs from source by design.
 
 #### Automated
 
-- [ ] 4.1 ci.yml passes end-to-end with the actionlint step green
-- [ ] 4.2 code-review-package job passes and runs in parallel with ci
-- [x] 4.3 Root sync, lint and build unaffected
-- [x] 4.4 actionlint reports no errors on ai-code-review.yml
-- [ ] 4.5 Package job goes red on a deliberate break while ci and deploy stay unaffected
-- [x] 4.6 Diff pathspec excludes `context/**` on a mixed branch
+- [x] 4.1 ci.yml passes end-to-end with the actionlint step green — b3c1756
+- [x] 4.2 code-review-package job passes and runs in parallel with ci — b3c1756
+- [x] 4.3 Root sync, lint and build unaffected — b3c1756
+- [x] 4.4 actionlint reports no errors on ai-code-review.yml — b3c1756
+- [x] 4.5 Package job goes red on a deliberate break while ci and deploy stay unaffected — b3c1756
+- [x] 4.6 Diff pathspec excludes `context/**` on a mixed branch — b3c1756
 
 #### Manual
 
-- [ ] 4.7 Review job resolves OPENROUTER_API_KEY from repo secrets
-- [ ] 4.8 AGENTS.md and README.md match what CI actually does, including branch name and fork limitation
+- [x] 4.7 Review job resolves OPENROUTER_API_KEY from repo secrets — b3c1756
+- [x] 4.8 AGENTS.md and README.md match what CI actually does, including branch name and fork limitation — b3c1756
 - [x] 4.9 Branch protection unchanged — required contexts still exactly ["ci"]
 
 ### Phase 5: Live verification and gate calibration
 
 #### Automated
 
-- [ ] 5.1 Every row of the verification table exercised, run URLs recorded
-- [ ] 5.2 No workflow run ends in an unexpected failure state
-- [ ] 5.3 All five calibration PRs produce a parseable envelope with six scored criteria
-- [ ] 5.4 Chore PRs #1 and #6 score testCoverage as n/a
-- [ ] 5.5 Re-running one calibration PR twice produces identical scores
+- [x] 5.1 Every row of the verification table exercised, run URLs recorded — 7629ed9
+- [x] 5.2 No workflow run ends in an unexpected failure state — 7629ed9
+- [x] 5.3 All five calibration PRs produce a parseable envelope with six scored criteria — 7629ed9
+- [x] 5.4 Chore PRs #1 and #6 score testCoverage as n/a — 7629ed9
+- [x] 5.5 Re-running one calibration PR twice produces identical scores — 7629ed9
 
 #### Manual
 
-- [ ] 5.6 Comment formatting readable; findings anchored to real files and lines
-- [ ] 5.7 Label colors correct
-- [ ] 5.8 Calibration verdicts compared against baseline; keep-or-escalate decision on the model recorded
-- [ ] 5.9 Review latency and cost per PR acceptable, including markdown-only PRs
-- [ ] 5.10 MAX_DIFF_BYTES and MAX_BODY_CHARS calibrated against observed sizes
-- [ ] 5.11 Scratch PR closed and labels cleaned up
+- [x] 5.6 Comment formatting readable; findings anchored to real files and lines — 7629ed9
+- [x] 5.7 Label colors correct — 7629ed9
+- [x] 5.8 Calibration verdicts compared against baseline; keep-or-escalate decision on the model recorded — 7629ed9
+- [x] 5.9 Review latency and cost per PR acceptable, including markdown-only PRs — 7629ed9
+- [x] 5.10 MAX_DIFF_BYTES and MAX_BODY_CHARS calibrated against observed sizes — 7629ed9
+- [x] 5.11 Scratch PR closed and labels cleaned up — 7629ed9

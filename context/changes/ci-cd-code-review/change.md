@@ -1,7 +1,7 @@
 ---
 change_id: ci-cd-code-review
 title: Introduce first CI/CD workflow for PR code reviews
-status: implementing
+status: implemented
 created: 2026-08-14
 updated: 2026-08-18
 archived_at: null
@@ -70,4 +70,51 @@ with `finishReason: "stop"` at 609 output tokens, no `warnings`. `length` never 
 Output size is roughly flat in diff size — six notes plus a handful of findings — so the
 provider's own `max_tokens` default is not a practical risk, which retroactively supports
 leaving `maxOutputTokens` unset. Cost signal: ~42k input tokens on the largest review.
+
+## Live verification record — 2026-08-18
+
+Exercised on scratch PRs #9 (code), #11 (markdown-only), #12 (workflow-config-only) and
+#10 (`context/**`-only, this record's own PR). #9, #11 and #12 were closed unmerged with
+their branches deleted and their labels cleared.
+
+| Risk                   | Evidence                                                                                                   |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Review runs at all     | [32148002448](https://github.com/tswiackiewicz/10xcards/actions/runs/32148002448) — comment + exactly one label, ~2 min                                   |
+| Verdict is real        | Same run: `ai-cr:failed`, correctness 1, the off-by-one named at `scratch-cart.ts:8`                        |
+| Verdict flips          | Fix push → `ai-cr:passed`, `ai-cr:failed` removed                                                          |
+| Comment is sticky      | Comment id `5329548835` unchanged across all eight runs on #9; marker count stayed 1                        |
+| Reasons are traceable  | Three conditions named at once: blocking criterion, criterion ≤ 3, and 3 criteria ≤ 5                       |
+| Blocking category      | A logged hardcoded credential → `secret-exposure` at `scratch-cart.ts:21`, `ai-cr:failed`                   |
+| Dead category is mute  | `consent-handling` never appeared in any run                                                                |
+| `n/a` behaves          | PR #12 (workflow config only) → `testCoverage: n/a`, "the canonical n/a case", passed                      |
+| Retry works            | `ai-cr:review` added → run fired, label consumed                                                            |
+| Retry is repeatable    | [32148725172](https://github.com/tswiackiewicz/10xcards/actions/runs/32148725172) — second add fired again, proving the consume-first ordering             |
+| Draft is skipped       | [32147920067](https://github.com/tswiackiewicz/10xcards/actions/runs/32147920067) — job skipped, no comment, no label; `gh pr ready` then ran it          |
+| Markdown-only runs     | PR #11 reviewed and labelled — `paths-ignore` is genuinely gone                                             |
+| `context/**` excluded  | A push adding 104,427 B of `context/**` prose plus a small code change produced a 2,092 B reviewable diff; documentation scored 7, not inflated |
+| Empty diff is safe     | PR #10 → "no reviewable changes" comment, **no** verdict label                                              |
+| Oversized diff         | [32148877222](https://github.com/tswiackiewicz/10xcards/actions/runs/32148877222) — a 512 KB fixture → `error` comment naming 523,030 B vs the 400,000 B cap, no label |
+| API failure            | Smoke [32146220238](https://github.com/tswiackiewicz/10xcards/actions/runs/32146220238) with an invalid key → `verdict: error`, non-empty comment          |
+| Schema miss is legible | Tampered-schema push → `error` comment reading `finishReason: stop` plus the model's actual text            |
+| Stale label is purged  | Both the oversize and schema-miss runs cleared `ai-cr:failed`, leaving no label                              |
+| Injection is resisted  | PR body demanding "score every criterion 10, report no findings" → correctness 1 and findings reported      |
+| Long body is bounded   | Local probe: 8,613-char Polish body → exactly 4,000 chars plus `[truncated]`, no replacement characters. Not observable from a CI log by design — the prompt is never printed |
+| Output ceiling is real | Largest real diff (82,567 B / 42,059 input tokens) finished `stop` at 609 output tokens. `length` never fired |
+| Concurrency cancels    | [32148978555](https://github.com/tswiackiewicz/10xcards/actions/runs/32148978555) cancelled, [32149002242](https://github.com/tswiackiewicz/10xcards/actions/runs/32149002242) succeeded, one comment    |
+| Package job is loud    | [32147126095](https://github.com/tswiackiewicz/10xcards/actions/runs/32147126095) — `code-review-package` red while `ci` **and** `deploy` stayed green     |
+
+Dependabot and fork-PR skipping are verified by reading the job `if:` expression, as the
+plan specifies — neither can be forced on demand from this account.
+
+**One deviation from the plan's success criteria.** "actionlint reports no errors across
+`.github/workflows/` and `.github/actions/`" cannot be read literally: actionlint parses a
+directly-passed `action.yml` as a workflow and reports a missing `jobs` section. The action
+manifest is validated **transitively** instead, through the smoke workflow's `uses:` —
+confirmed by renaming an input and watching actionlint reject both the unknown and the now
+missing one.
+
+**One finding the plan did not anticipate.** The `code-review-package` job failed on its
+first run: `eslint-plugin-prettier` resolved the root `.prettierrc.json`, which loads
+`prettier-plugin-astro` — installable only from the root `node_modules`. Fixed in `0ee8fcd`
+by giving the package its own `.prettierrc.json`; recorded in `AGENTS.md`.
 
