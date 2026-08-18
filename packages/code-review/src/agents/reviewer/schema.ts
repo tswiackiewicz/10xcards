@@ -69,6 +69,11 @@ export const reviewSchema = z.object({
   ),
 });
 
+// SCRATCH: an always-failing refinement. Invisible to JSON Schema, so the provider still
+// sees the real document and returns a well-formed review that then fails validation —
+// the schema-miss path exactly as production would hit it.
+export const tamperedForVerification = reviewSchema.refine(() => false, "forced miss");
+
 export type Review = z.infer<typeof reviewSchema>;
 export type Criterion = keyof Review["criteria"];
 export type BlockingCategory = (typeof BLOCKING_CATEGORIES)[number];

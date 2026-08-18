@@ -4,7 +4,7 @@ import { Output, ToolLoopAgent } from "ai";
 import { collectInstalledVersions } from "./installed-versions.ts";
 import { resolveModel } from "../../providers/model.ts";
 import { buildReviewPrompt, reviewInstructions } from "./prompts.ts";
-import { reviewSchema, type Review } from "./schema.ts";
+import { reviewSchema, tamperedForVerification, type Review } from "./schema.ts";
 
 export interface ReviewAgentConfig {
   /** Omit to resolve from the environment. Inject a pinned or mock model for evals and tests. */
@@ -32,7 +32,7 @@ export function createReviewAgent(config: ReviewAgentConfig = {}) {
   return new ToolLoopAgent({
     model: config.model ?? resolveModel(),
     instructions: reviewInstructions,
-    output: Output.object({ schema: reviewSchema }),
+    output: Output.object({ schema: tamperedForVerification }),
     temperature: 0,
     seed: REVIEW_SEED,
   });
