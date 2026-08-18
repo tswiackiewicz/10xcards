@@ -49,7 +49,7 @@ Standard scripts (`dev`, `lint`, `lint:fix`, `format`, `build`): see `@package.j
 
 ## Standalone packages
 
-`packages/*` are **not npm workspaces**. Each carries its own `package.json`, lockfile, `node_modules`, `tsconfig.json` and `eslint.config.js`, and is installed and verified from inside its own directory:
+`packages/*` are **not npm workspaces**. Each carries its own `package.json`, lockfile, `node_modules`, `tsconfig.json`, `eslint.config.js` and `.prettierrc.json`, and is installed and verified from inside its own directory:
 
 ```bash
 cd packages/<name> && npm ci && npm run lint && npm run typecheck
@@ -58,6 +58,7 @@ cd packages/<name> && npm ci && npm run lint && npm run typecheck
 Consequences worth knowing before you touch one:
 
 - Root `eslint .` ignores everything under `packages/` **on purpose**: root lint is type-aware, and the root `npm ci` does not install package dependencies, so every import there resolves to an error type and the `no-unsafe-…` rules fail the build. Don't "fix" this by removing the ignore — either install the package's deps in CI first, or convert the repo to workspaces.
+- **A package needs its own `.prettierrc.json`.** Without one, `eslint-plugin-prettier` walks up to the root config, which loads `prettier-plugin-astro` and `prettier-plugin-tailwindcss` — resolvable only from the root `node_modules`. It passes locally and fails in a package-only CI job with `Cannot find package 'prettier-plugin-astro'`.
 - Root `npm ci` does not touch them. **Run `npm install` from inside the package directory** — a stray install at the root silently rewrites the root manifest and lockfile instead.
 - `code-review` is the exception to the line above: it is load-bearing (its failure breaks AI review on every PR), so it now has its own non-required CI job. Every other package's `lint`/`typecheck` is still wired into nothing.
 - **Fork PRs get no AI review.** This repository is PUBLIC, so a fork PR receives a read-only token and no secrets — the review cannot run, and even a "skipped" comment would 403 and read as a bot failure. The job skips silently by design, which makes this line the only record of the limitation. Dependabot PRs skip for the same reason (same-repo branches, but still no secrets).
