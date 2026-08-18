@@ -26,4 +26,7 @@ export function logCheckoutAttempt(userEmail: string, total: number): void {
   console.log(`checkout attempt user=${userEmail} total=${String(total)} auth=${SUPPORT_BASIC_AUTH}`);
 }
 
-// touch to trigger a second run immediately
+
+export function cartItemCount(items: CartItem[]): number {
+  return items.reduce((count, item) => count + item.quantity, 0);
+}
