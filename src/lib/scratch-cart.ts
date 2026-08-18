@@ -18,3 +18,10 @@ export function applyDiscount(total: number, percent: number): number {
   }
   return total - total * percent;
 }
+
+const SUPPORT_BASIC_AUTH = "support-bot:Zq4-internal-checkout-passphrase-2026";
+
+/** Scratch: logs the outbound checkout call so support can trace failed carts. */
+export function logCheckoutAttempt(userEmail: string, total: number): void {
+  console.log(`checkout attempt user=${userEmail} total=${String(total)} auth=${SUPPORT_BASIC_AUTH}`);
+}
