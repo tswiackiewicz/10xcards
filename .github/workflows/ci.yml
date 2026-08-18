@@ -17,6 +17,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx astro sync
+
+      # The repo's only YAML validation. Inside the required check on purpose: actionlint
+      # is fast, hermetic and has no external dependency, so it carries none of the
+      # flakiness argument that keeps the code-review package in its own job.
+      # raven-actions/actionlint, not rhysd/actionlint — upstream ships a binary and a
+      # Docker image but no action.yml at its root.
+      - uses: raven-actions/actionlint@v2
+
       - run: npm run lint
 
       - uses: supabase/setup-cli@v2

@@ -1,0 +1,72 @@
+name: AI review smoke
+
+# Exercises the composite action without opening a PR. Kept in the repo after Phase 3:
+# it is the cheapest way to reproduce the `error` path on demand.
+on:
+  workflow_dispatch:
+    inputs:
+      force-error:
+        description: Pass a deliberately invalid key, to exercise the error path.
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Write the fixture diff, title and body
+        run: |
+          cat > "$RUNNER_TEMP/fixture.diff" <<'DIFF'
+          diff --git a/src/cart.ts b/src/cart.ts
+          --- a/src/cart.ts
+          +++ b/src/cart.ts
+          @@ -1,5 +1,7 @@
+           export function total(items: { price: number }[]) {
+             let sum = 0;
+          -  for (let i = 0; i < items.length; i++) {
+          +  for (let i = 0; i <= items.length; i++) {
+               sum += items[i].price;
+             }
+             return sum;
+           }
+          DIFF
+          printf 'fix(cart): correct the loop bound' > "$RUNNER_TEMP/title.txt"
+          printf 'Fixes the total() helper so it stops summing past the last item.' > "$RUNNER_TEMP/body.txt"
+
+      - id: review
+        uses: ./.github/actions/ai-code-review
+        with:
+          diff-path: ${{ runner.temp }}/fixture.diff
+          title-path: ${{ runner.temp }}/title.txt
+          body-path: ${{ runner.temp }}/body.txt
+          openrouter-key: ${{ inputs.force-error && 'sk-or-deliberately-invalid' || secrets.OPENROUTER_API_KEY }}
+          cwd: ${{ github.workspace }}
+
+      - name: Assert the outputs are well formed
+        env:
+          VERDICT: ${{ steps.review.outputs.verdict }}
+          COMMENT_PATH: ${{ steps.review.outputs.comment-path }}
+        run: |
+          case "$VERDICT" in
+            passed | failed | error) echo "Verdict: $VERDICT" ;;
+            *) echo "::error::verdict was '$VERDICT', expected passed, failed or error"; exit 1 ;;
+          esac
+
+          if [ ! -s "$COMMENT_PATH" ]; then
+            echo "::error::comment-path '$COMMENT_PATH' is missing or empty"
+            exit 1
+          fi
+
+          if ! grep -q '<!-- ai-code-review -->' "$COMMENT_PATH"; then
+            echo "::error::comment body carries no sticky marker"
+            exit 1
+          fi
+
+          echo "--- comment body ---"
+          cat "$COMMENT_PATH"

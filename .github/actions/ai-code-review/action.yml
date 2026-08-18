@@ -1,0 +1,129 @@
+name: AI code review
+description: Reviews a unified diff with packages/code-review and returns a verdict plus a comment body.
+
+# The directory name must not start with `10x-`: .gitignore ignores `.github/**/10x-*`,
+# which would take this whole subtree with it and leave the workflow silently unable to
+# resolve the action — with no error anywhere, since eslint's includeIgnoreFile hides it too.
+
+inputs:
+  diff-path:
+    description: File holding the unified diff to review.
+    required: true
+  title-path:
+    description: File holding the PR title. A file, never an expression — no PR text through a shell.
+    required: true
+  body-path:
+    description: File holding the PR description.
+    required: true
+  openrouter-key:
+    description: OpenRouter API key. Secrets must arrive as inputs; the secrets context is unavailable here.
+    required: true
+  model:
+    description: OpenRouter model id. Empty means the package default.
+    required: false
+    default: ""
+  cwd:
+    description: Repository whose installed dependency versions are ground truth. Defaults to the workspace.
+    required: false
+    default: ""
+
+outputs:
+  verdict:
+    description: passed | failed | error. `error` means no review outcome exists.
+    value: ${{ steps.review.outputs.verdict }}
+  comment-path:
+    description: File holding the PR comment body. Always written, including on error.
+    value: ${{ steps.review.outputs.comment-path }}
+
+runs:
+  using: composite
+  steps:
+    # `required: true` enforces nothing at runtime, so the value is checked here rather
+    # than surfacing as an unreadable provider error three steps later.
+    - name: Check the OpenRouter key arrived
+      shell: bash
+      env:
+        OPENROUTER_API_KEY: ${{ inputs.openrouter-key }}
+      run: |
+        if [ -z "$OPENROUTER_API_KEY" ]; then
+          echo "::error::openrouter-key is empty. On a public repository, fork and Dependabot PRs get no secrets."
+          exit 1
+        fi
+
+    # cache-dependency-path is load-bearing: without it the key derives from a root
+    # lockfile this action never installs, and the cache silently no-ops.
+    - uses: actions/setup-node@v6
+      with:
+        node-version: 24
+        cache: npm
+        cache-dependency-path: packages/code-review/package-lock.json
+
+    - name: Install the reviewer
+      shell: bash
+      working-directory: packages/code-review
+      run: npm ci
+
+    # Never fails the job: a failed review is an `error` verdict with a readable comment,
+    # not a red bot. `timeout-minutes` is unsupported on composite steps and lives on the job.
+    - name: Review the diff
+      id: review
+      shell: bash
+      working-directory: packages/code-review
+      env:
+        OPENROUTER_API_KEY: ${{ inputs.openrouter-key }}
+        REVIEW_MODEL: ${{ inputs.model }}
+        DIFF_PATH: ${{ inputs.diff-path }}
+        TITLE_PATH: ${{ inputs.title-path }}
+        BODY_PATH: ${{ inputs.body-path }}
+        REVIEW_CWD: ${{ inputs.cwd }}
+      run: |
+        if [ -n "$REVIEW_MODEL" ]; then
+          export OPENROUTER_MODEL="$REVIEW_MODEL"
+        fi
+
+        cwd="$REVIEW_CWD"
+        if [ -z "$cwd" ]; then
+          cwd="$GITHUB_WORKSPACE"
+        fi
+
+        envelope="$RUNNER_TEMP/review.json"
+        stderr_log="$RUNNER_TEMP/review.err"
+        comment="$RUNNER_TEMP/review-comment.md"
+
+        set +e
+        node --import tsx src/cli.ts \
+          --cwd "$cwd" \
+          --title-file "$TITLE_PATH" \
+          --body-file "$BODY_PATH" \
+          < "$DIFF_PATH" > "$envelope" 2> "$stderr_log"
+        status=$?
+        set -e
+
+        verdict=""
+        if [ "$status" -eq 0 ]; then
+          verdict=$(jq -r '.verdict // empty' "$envelope")
+        fi
+
+        if [ -z "$verdict" ]; then
+          # The only diagnostic a reviewer gets, since nothing retries automatically.
+          reason=$(tr -d '\r' < "$stderr_log" | tail -n 1)
+          {
+            echo "<!-- ai-code-review -->"
+            echo "## AI code review — ⚠️ could not run"
+            echo ""
+            echo "The review produced no verdict, so no label was applied."
+            echo ""
+            echo '```'
+            echo "${reason:-the reviewer exited with status $status and said nothing}"
+            echo '```'
+            echo ""
+            echo "Re-run it by adding the \`ai-cr:review\` label."
+          } > "$comment"
+          verdict="error"
+        else
+          jq -r .markdown "$envelope" > "$comment"
+        fi
+
+        echo "verdict=$verdict" >> "$GITHUB_OUTPUT"
+        echo "comment-path=$comment" >> "$GITHUB_OUTPUT"
+        echo "Verdict: $verdict"

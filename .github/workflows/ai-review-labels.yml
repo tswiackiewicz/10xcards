@@ -1,0 +1,29 @@
+name: AI review labels
+
+# Bootstrap only. `gh` resolves label names to ids client-side, so the labels must
+# pre-exist before the review job can apply them — and the REST auto-create path both
+# needs `issues: write` and picks a random colour, which defeats the red/green point.
+# Run once by hand; re-running is a no-op thanks to --force.
+on: workflow_dispatch
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  labels:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Create or update the three ai-cr labels
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh label create "ai-cr:passed" --force --color 0e8a16 \
+            --description "AI code review derived a passing verdict from the rubric"
+          gh label create "ai-cr:failed" --force --color d93f0b \
+            --description "AI code review derived a failing verdict from the rubric"
+          gh label create "ai-cr:review" --force --color 1d76db \
+            --description "Add to re-run the AI code review; the workflow consumes the label"
