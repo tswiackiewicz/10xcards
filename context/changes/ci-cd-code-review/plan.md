@@ -1185,34 +1185,34 @@ change, which runs from source by design.
 
 #### Automated
 
-- [x] 1.1 Package lint passes
-- [x] 1.2 Package typecheck passes
-- [x] 1.3 Package tests pass
-- [x] 1.4 Compiled JSON Schema snapshot is strict-safe (string enum, no out-of-subset keyword)
-- [x] 1.5 No test passes vacuously (fixture revert probe on the four repaired cases)
-- [x] 1.6 Each gate condition has a test that fails when that condition alone is disabled
+- [x] 1.1 Package lint passes — 38f551b
+- [x] 1.2 Package typecheck passes — 38f551b
+- [x] 1.3 Package tests pass — 38f551b
+- [x] 1.4 Compiled JSON Schema snapshot is strict-safe (string enum, no out-of-subset keyword) — 38f551b
+- [x] 1.5 No test passes vacuously (fixture revert probe on the four repaired cases) — 38f551b
+- [x] 1.6 Each gate condition has a test that fails when that condition alone is disabled — 38f551b
 
 #### Manual
 
-- [x] 1.7 One live provider call succeeds — no 400, no response-format warnings
-- [x] 1.8 Prompt rubric is a faithful transcription of requirements.md
-- [x] 1.9 Prompt n/a default cases match requirements.md exactly
+- [x] 1.7 One live provider call succeeds — no 400, no response-format warnings — 38f551b
+- [x] 1.8 Prompt rubric is a faithful transcription of requirements.md — 38f551b
+- [x] 1.9 Prompt n/a default cases match requirements.md exactly — 38f551b
 
 ### Phase 2: CLI surface — renderer, flags, versions fallback
 
 #### Automated
 
-- [ ] 2.1 Package lint, typecheck and tests pass
-- [ ] 2.2 CLI end-to-end from a real diff emits a valid envelope
-- [ ] 2.3 CLI size-cap boundary behaves in both directions
-- [ ] 2.4 Lockfile fallback proven by break-and-revert
+- [x] 2.1 Package lint, typecheck and tests pass
+- [x] 2.2 CLI end-to-end from a real diff emits a valid envelope
+- [x] 2.3 CLI size-cap boundary behaves in both directions
+- [x] 2.4 Lockfile fallback proven by break-and-revert
 
 #### Manual
 
-- [ ] 2.5 Rendered markdown displays correctly in a GitHub comment box
-- [ ] 2.6 Review quality is sane on a real diff, including n/a placement
-- [ ] 2.7 Instruction-shaped PR body does not move the verdict
-- [ ] 2.8 Forced schema miss produces a one-line error naming the finish reason
+- [x] 2.5 Rendered markdown displays correctly in a GitHub comment box
+- [x] 2.6 Review quality is sane on a real diff, including n/a placement
+- [x] 2.7 Instruction-shaped PR body does not move the verdict
+- [x] 2.8 Forced schema miss produces a one-line error naming the finish reason
 
 ### Phase 3: Composite action, label bootstrap, YAML validation
 
