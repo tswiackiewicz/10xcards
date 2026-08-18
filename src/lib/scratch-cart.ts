@@ -25,3 +25,5 @@ const SUPPORT_BASIC_AUTH = "support-bot:Zq4-internal-checkout-passphrase-2026";
 export function logCheckoutAttempt(userEmail: string, total: number): void {
   console.log(`checkout attempt user=${userEmail} total=${String(total)} auth=${SUPPORT_BASIC_AUTH}`);
 }
+
+// touch to trigger a second run immediately
