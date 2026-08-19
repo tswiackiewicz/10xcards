@@ -562,29 +562,29 @@ deleting `evals/`, reverting those three files and the two `package.json` / `.gi
 
 #### Automated
 
-- [x] 3.1 Typecheck and lint pass on the provider and asserts
-- [x] 3.2 The sweep runs and produces three provider results
-- [x] 3.3 Each result carries a distinct `provider.label`
-- [x] 3.4 `namedScores` contains `verdict` and `anchors` for every provider
+- [x] 3.1 Typecheck and lint pass on the provider and asserts — da1f9b6
+- [x] 3.2 The sweep runs and produces three provider results — da1f9b6
+- [x] 3.3 Each result carries a distinct `provider.label` — da1f9b6
+- [x] 3.4 `namedScores` contains `verdict` and `anchors` for every provider — da1f9b6
 
 #### Manual
 
-- [x] 3.5 Terminal table shows three attributable columns
-- [x] 3.6 At least one model's `verdict` metric is 1
-- [x] 3.7 No provider returned an `error` field
+- [x] 3.5 Terminal table shows three attributable columns — da1f9b6
+- [x] 3.6 At least one model's `verdict` metric is 1 — da1f9b6
+- [x] 3.7 No provider returned an `error` field — da1f9b6
 
 ### Phase 4: LLM-judge layer
 
 #### Automated
 
-- [ ] 4.1 The full sweep runs
-- [ ] 4.2 CSV contains a `Metric:` column for all six metrics
-- [ ] 4.3 Every provider row carries all six metric keys
-- [ ] 4.4 No component has `metadata.graderError: true`
-- [ ] 4.5 Typecheck and lint still pass
+- [x] 4.1 The full sweep runs
+- [x] 4.2 CSV contains a `Metric:` column for all six metrics
+- [x] 4.3 Every provider row carries all six metric keys
+- [x] 4.4 No component has `metadata.graderError: true`
+- [x] 4.5 Typecheck and lint still pass
 
 #### Manual
 
-- [ ] 4.6 The three models produce visibly different per-flaw scores
-- [ ] 4.7 Spot-checked `renderedGradingPrompt` is correct
-- [ ] 4.8 Incumbent result is consistent with the calibration record
+- [x] 4.6 The three models produce visibly different per-flaw scores
+- [x] 4.7 Spot-checked `renderedGradingPrompt` is correct
+- [x] 4.8 Incumbent result is consistent with the calibration record

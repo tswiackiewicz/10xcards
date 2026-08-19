@@ -84,12 +84,21 @@ If you go into `results.json`, the two `namedScores` shapes are easy to confuse:
 
 - `results.results[i].namedScores` — **raw per-run values**. This is what you want.
 - `results.prompts[i].metrics.namedScores` — **weight-multiplied sums** across tests and
-  repeats, not means. Divide by the matching `namedScoreWeights` entry to get a mean.
+  repeats, not means. Each entry is `Σ(score × weight)`, so a mean is
+  `namedScores[m] / (namedScoresCount[m] × namedScoreWeights[m])`. Easy to misread: `verdict`
+  carries `weight: 2`, so a model that scored a perfect raw 1 shows up here as **2**.
 
 **Rule out a dead judge before believing an all-zero row.** A grader transport failure (401,
 rate limit, model unavailable) presents as an ordinary assertion failure scoring 0. The only
 signal is `metadata.graderError: true`. Any run where one model scores 0 on all four rubrics
 should be checked for it first — three "bad models" and one dead judge look identical.
+
+**A missing row is not a zero row.** A candidate whose structured-output call fails —
+observed once as `"No output generated."` from `z-ai/glm-5.1`, after a retry sequence that
+stretched one run to twenty minutes — produces a result with an `error` and **no
+`namedScores` at all**, not a row of zeros. Check that every provider carries all six metric
+keys before comparing models; a silently absent row otherwise reads as "that model wasn't
+worse". Re-running is the fix — it is a transient model-side failure, not a harness bug.
 
 **`metadata.renderedGradingPrompt`** holds the exact text sent to the judge for every
 model-graded component. It is the audit trail when a rubric misfires, and the place to start

@@ -22,6 +22,16 @@ providers:
     config:
       model: deepseek/deepseek-v4-flash
 
+# One neutral judge for every model-graded assert, sharing a vendor with none of the three
+# candidates. `openrouter:` is a native promptfoo prefix reading OPENROUTER_API_KEY, so the
+# judge needs no new secret. No per-assert `provider:` overrides.
+defaultTest:
+  options:
+    provider:
+      id: openrouter:openai/gpt-5
+      config:
+        temperature: 0
+
 tests:
   # NO test-level `threshold:` key, deliberately. Setting one converts every per-assert
   # pass/fail into advisory input to a weighted mean, which silently absorbs a hard assert
@@ -43,3 +53,106 @@ tests:
         value: file://./asserts/anchors.ts
         metric: anchors
         weight: 1
+
+      # One binary judgement per planted flaw, reported separately — the question this sweep
+      # answers is "which flaw did this model miss", not "how good was this review".
+      #
+      # Rubric text is transcribed verbatim from fixtures/react19-migration.flaws.ts; that
+      # file is the source of truth, edit it first.
+      #
+      # EVERY rubric assert carries an explicit `threshold`. Without one, a grader response
+      # that omits `pass` — e.g. a bare `{"score": 0}` — is treated as a pass.
+      #
+      # `g-eval` is deliberately not used: two grader calls per criterion, and its averaged
+      # 0-10 output blurs "caught 2 of 3" into one mushy number.
+      - type: llm-rubric
+        metric: flaw_cleanup
+        weight: 1
+        threshold: 0.7
+        value: |
+          The output is a code review of a React 16 to React 19 migration diff.
+          The class component's componentWillUnmount called this.unsubscribe() and
+          window.removeEventListener("focus", ...). The useEffect that replaces it registers both the
+          deckStore subscription and the focus listener but returns no cleanup function, so both leak on
+          unmount and on every deck.id change.
+
+          Pass ONLY if the review reports this defect: at least one finding or criterion note must say
+          that the effect in src/components/DeckSettingsPanel.jsx is missing its cleanup / teardown /
+          return function, or that the subscription or the focus listener is never removed.
+
+          Naming the effect, the subscription or the listener without saying that cleanup is missing is a
+          fail. A generic remark that effects should have cleanup, not tied to this diff, is a fail.
+
+      - type: llm-rubric
+        metric: flaw_authz
+        weight: 1
+        threshold: 0.7
+        value: |
+          The output is a code review of a React 16 to React 19 migration diff.
+          The class component's handleSave began with an authorization check —
+          `if (deck.ownerId !== currentUser.id)` refuse and set an error — before calling
+          updateDeckSettings. The migrated handleSave calls updateDeckSettings with no check at all, so
+          any collaborator can write the deck's settings.
+
+          Pass ONLY if the review reports this defect: at least one finding or criterion note must say
+          that the ownership / authorization / permission check was dropped or is missing from the save
+          path in src/components/DeckSettingsPanel.jsx.
+
+          Noting that the role badge still renders `Owner` / `Collaborator` is not enough on its own —
+          the review must identify that the *save* is now unguarded. A generic security remark with no
+          reference to the removed check is a fail.
+
+      - type: llm-rubric
+        metric: flaw_defaultprops
+        weight: 1
+        threshold: 0.7
+        value: |
+          The output is a code review of a React 16 to React 19 migration diff.
+          The installed React version is given to the reviewer as ground truth in the prompt.
+          `static defaultProps = { pageSize: 25 }` was carried over as
+          `DeckSettingsPanel.defaultProps = { pageSize: 25 }` on a function component. React 19 removed
+          defaultProps support for function components, so pageSize is undefined at runtime and
+          `settings.overrides.slice(page * pageSize, page * pageSize + pageSize)` yields an empty list.
+
+          Pass ONLY if the review reports this defect: at least one finding or criterion note must say
+          that defaultProps does not work on a function component in React 19, or that pageSize will be
+          undefined, or that the default must move to a destructuring default such as `pageSize = 25`.
+
+          Merely mentioning that defaultProps was moved, or preferring destructuring defaults on style
+          grounds, is a fail — the review must convey that this is broken, not merely unfashionable.
+
+      # Catches a model that wins on recall by spraying findings. Deliberately does NOT
+      # penalise additional *true* findings — only claims that misstate what the diff does.
+      # The correct createRoot migration in src/main.jsx is the planted bait.
+      - type: llm-rubric
+        metric: precision
+        weight: 1
+        threshold: 0.7
+        value: |
+          The output is a code review of the unified diff reproduced at the end of this rubric.
+
+          Judge PRECISION only, never recall. A review that missed a real defect is NOT penalised here —
+          that is what the flaw_* rubrics measure.
+
+          Scope: the entries in the review's `findings` array, and nothing else. The `criteria` notes are
+          one-line score justifications that the schema requires for all six criteria including the ones
+          the reviewer scored well, so a note saying nothing is wrong is correct behaviour and must never
+          count against precision. Do not judge the notes.
+
+          Pass ONLY if every entry in `findings` describes something that is genuinely wrong or genuinely
+          risky in the diff's changed lines.
+
+          The change in src/main.jsx is CORRECT: `ReactDOM.render(<App />, container)` became
+          `createRoot(container).render(<App />)`, which is the right React 19 migration. Reporting it as
+          broken, incomplete, unsafe or a regression is a precision failure. Noting that createRoot
+          should be called once, or suggesting a null check on the container, is not.
+
+          Findings beyond the diff's most obvious defects are NOT a precision failure, provided each one
+          is true of the diff. A correct finding does not become imprecise for being minor.
+
+          Fail if any finding misstates what the diff does, describes code absent from the diff, invents
+          a file or symbol, or calls correctly-migrated code broken.
+
+          The diff under review:
+
+          {{diff}}
