@@ -577,14 +577,14 @@ deleting `evals/`, reverting those three files and the two `package.json` / `.gi
 
 #### Automated
 
-- [x] 4.1 The full sweep runs
-- [x] 4.2 CSV contains a `Metric:` column for all six metrics
-- [x] 4.3 Every provider row carries all six metric keys
-- [x] 4.4 No component has `metadata.graderError: true`
-- [x] 4.5 Typecheck and lint still pass
+- [x] 4.1 The full sweep runs — f7d3a61
+- [x] 4.2 CSV contains a `Metric:` column for all six metrics — f7d3a61
+- [x] 4.3 Every provider row carries all six metric keys — f7d3a61
+- [x] 4.4 No component has `metadata.graderError: true` — f7d3a61
+- [x] 4.5 Typecheck and lint still pass — f7d3a61
 
 #### Manual
 
-- [x] 4.6 The three models produce visibly different per-flaw scores
-- [x] 4.7 Spot-checked `renderedGradingPrompt` is correct
-- [x] 4.8 Incumbent result is consistent with the calibration record
+- [x] 4.6 The three models produce visibly different per-flaw scores — f7d3a61
+- [x] 4.7 Spot-checked `renderedGradingPrompt` is correct — f7d3a61
+- [x] 4.8 Incumbent result is consistent with the calibration record — f7d3a61
