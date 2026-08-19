@@ -193,7 +193,7 @@ index 6ddc83e..2cae9c9 100644
 +  pageSize: 25,
 +};
 diff --git a/src/components/DeckSettingsPanel.test.jsx b/src/components/DeckSettingsPanel.test.jsx
-index aaff631..fa32b5c 100644
+index fbd1397..f7cf38e 100644
 --- a/src/components/DeckSettingsPanel.test.jsx
 +++ b/src/components/DeckSettingsPanel.test.jsx
 @@ -1,5 +1,4 @@
@@ -202,7 +202,7 @@ index aaff631..fa32b5c 100644
  import { describe, expect, it, vi } from "vitest";
  
  import { deckStore } from "../stores/deckStore";
-@@ -22,7 +21,7 @@ describe("DeckSettingsPanel", () => {
+@@ -23,7 +22,7 @@ describe("DeckSettingsPanel", () => {
    it("renders the deck name from the store", () => {
      deckStore.getSettings.mockReturnValue(settingsWith(3));
  
@@ -211,7 +211,7 @@ index aaff631..fa32b5c 100644
  
      expect(screen.getByLabelText("Display name")).toHaveValue("Kanji N3");
    });
-@@ -30,7 +29,7 @@ describe("DeckSettingsPanel", () => {
+@@ -31,7 +30,7 @@ describe("DeckSettingsPanel", () => {
    it("subscribes to the store on mount", () => {
      deckStore.getSettings.mockReturnValue(settingsWith(3));
  
@@ -220,16 +220,16 @@ index aaff631..fa32b5c 100644
  
      expect(deckStore.subscribe).toHaveBeenCalledWith("deck-1", expect.any(Function));
    });
-@@ -38,7 +37,7 @@ describe("DeckSettingsPanel", () => {
+@@ -39,7 +38,7 @@ describe("DeckSettingsPanel", () => {
    it("shows a collaborator badge for a non-owner", () => {
      deckStore.getSettings.mockReturnValue(settingsWith(3));
  
--    render(<DeckSettingsPanel deck={deck} currentUser={{ id: "user-2" }} />);
-+    render(<DeckSettingsPanel deck={deck} currentUser={{ id: "user-2" }} pageSize={25} />);
+-    render(<DeckSettingsPanel deck={deck} currentUser={collaborator} />);
++    render(<DeckSettingsPanel deck={deck} currentUser={collaborator} pageSize={25} />);
  
      expect(screen.getByText("Collaborator")).toBeInTheDocument();
    });
-@@ -46,7 +45,7 @@ describe("DeckSettingsPanel", () => {
+@@ -47,7 +46,7 @@ describe("DeckSettingsPanel", () => {
    it("edits a field without saving", () => {
      deckStore.getSettings.mockReturnValue(settingsWith(3));
  
@@ -238,7 +238,7 @@ index aaff631..fa32b5c 100644
      fireEvent.change(screen.getByLabelText("Display name"), { target: { value: "Kanji N2" } });
  
      expect(screen.getByLabelText("Display name")).toHaveValue("Kanji N2");
-@@ -55,7 +54,7 @@ describe("DeckSettingsPanel", () => {
+@@ -56,7 +55,7 @@ describe("DeckSettingsPanel", () => {
    it("pages the override list", () => {
      deckStore.getSettings.mockReturnValue(settingsWith(60));
  

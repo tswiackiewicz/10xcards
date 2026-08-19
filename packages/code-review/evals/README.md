@@ -105,6 +105,28 @@ pipes the fixture through `reviewDiff` once with the incumbent model and prints 
 review plus the derived verdict. No promptfoo involved — use it when a sweep failure might be
 a fixture or prompt problem rather than a harness problem.
 
+## Adding a fixture: the Nunjucks trap
+
+**A `.diff` fixture must not contain `{{` or `{%`.** promptfoo renders a `file://` var's
+contents through Nunjucks before handing them to the provider, so those sequences are parsed
+as template syntax, not as code. Hit during Phase 3 with a perfectly ordinary JSX line —
+
+```jsx
+render(<DeckSettingsPanel deck={deck} currentUser={{ id: "user-2" }} />);
+```
+
+— which failed all three providers with `Template render error: expected variable end` before
+a single model was called. The same trap is waiting in any Vue, Angular, Handlebars or Jinja
+diff.
+
+The fix used here was to hoist the inline object to a named const, which keeps the file a
+valid unified diff. `{% raw %}` would also work but would have to live inside the `.diff`
+itself and would break `git apply`. Check a new fixture with:
+
+```bash
+grep -n '{{\|{%' evals/fixtures/<name>.diff   # must print nothing
+```
+
 ## Known knobs, deliberately not turned
 
 - `--repeat 3` averages out run-to-run variance. It triples the bill; one run per model is

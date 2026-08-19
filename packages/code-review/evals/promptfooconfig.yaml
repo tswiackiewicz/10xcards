@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+description: Code reviewer model sweep — one React 19 migration fixture, three planted flaws
+
+# The provider ignores this and reads the diff from `vars.diff`; promptfoo still requires a
+# prompt, and keeping it a bare `{{diff}}` means the terminal output shows what was reviewed.
+prompts:
+  - "{{diff}}"
+
+# Three entries, one file. `label:` is what makes the output columns attributable — without
+# it the data is still correct but you cannot tell which model produced which row.
+providers:
+  - id: file://./provider.ts
+    label: haiku-4.5
+    config:
+      model: anthropic/claude-haiku-4.5
+  - id: file://./provider.ts
+    label: glm-5.1
+    config:
+      model: z-ai/glm-5.1
+  - id: file://./provider.ts
+    label: deepseek-v4-flash
+    config:
+      model: deepseek/deepseek-v4-flash
+
+tests:
+  # NO test-level `threshold:` key, deliberately. Setting one converts every per-assert
+  # pass/fail into advisory input to a weighted mean, which silently absorbs a hard assert
+  # that failed with score 0. Omitting it restores all-must-pass semantics, which the
+  # "the gate must actually fail" assert depends on to be a real gate.
+  - description: React 16 → 19 migration with three planted flaws
+    vars:
+      # `file://` in a var resolves to the file's *contents* — and those contents ARE run
+      # through Nunjucks, so a diff containing `{{` or `{%` fails the whole run before any
+      # model is called. See the Nunjucks trap section in evals/README.md.
+      diff: file://fixtures/react19-migration.diff
+      expected_verdict: failed
+    assert:
+      - type: javascript
+        value: file://./asserts/verdict.ts
+        metric: verdict
+        weight: 2
+      - type: javascript
+        value: file://./asserts/anchors.ts
+        metric: anchors
+        weight: 1

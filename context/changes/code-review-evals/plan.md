@@ -547,31 +547,31 @@ deleting `evals/`, reverting those three files and the two `package.json` / `.gi
 
 #### Automated
 
-- [x] 2.1 The fixture is a well-formed unified diff
-- [x] 2.2 Manifest and script typecheck
-- [x] 2.3 Lint passes on the new files
-- [x] 2.4 Fixture is 150+ lines and touches exactly three files
+- [x] 2.1 The fixture is a well-formed unified diff — 9e721cc
+- [x] 2.2 Manifest and script typecheck — 9e721cc
+- [x] 2.3 Lint passes on the new files — 9e721cc
+- [x] 2.4 Fixture is 150+ lines and touches exactly three files — 9e721cc
 
 #### Manual
 
-- [x] 2.5 `check-fixture.ts` shows the model saw React 19
-- [x] 2.6 The derived verdict is `failed`
-- [x] 2.7 The three flaws are non-obvious on a cold read
+- [x] 2.5 `check-fixture.ts` shows the model saw React 19 — 9e721cc
+- [x] 2.6 The derived verdict is `failed` — 9e721cc
+- [x] 2.7 The three flaws are non-obvious on a cold read — 9e721cc
 
 ### Phase 3: Provider shim & three-model sweep
 
 #### Automated
 
-- [ ] 3.1 Typecheck and lint pass on the provider and asserts
-- [ ] 3.2 The sweep runs and produces three provider results
-- [ ] 3.3 Each result carries a distinct `provider.label`
-- [ ] 3.4 `namedScores` contains `verdict` and `anchors` for every provider
+- [x] 3.1 Typecheck and lint pass on the provider and asserts
+- [x] 3.2 The sweep runs and produces three provider results
+- [x] 3.3 Each result carries a distinct `provider.label`
+- [x] 3.4 `namedScores` contains `verdict` and `anchors` for every provider
 
 #### Manual
 
-- [ ] 3.5 Terminal table shows three attributable columns
-- [ ] 3.6 At least one model's `verdict` metric is 1
-- [ ] 3.7 No provider returned an `error` field
+- [x] 3.5 Terminal table shows three attributable columns
+- [x] 3.6 At least one model's `verdict` metric is 1
+- [x] 3.7 No provider returned an `error` field
 
 ### Phase 4: LLM-judge layer
 
