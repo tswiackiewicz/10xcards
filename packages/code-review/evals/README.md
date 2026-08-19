@@ -136,6 +136,16 @@ itself and would break `git apply`. Check a new fixture with:
 grep -n '{{\|{%' evals/fixtures/<name>.diff   # must print nothing
 ```
 
+## Is the rubric measuring the flaw, or rewarding review prose?
+
+Verified once, empirically, rather than argued: the cleanup flaw was removed from the fixture
+(the `useEffect` given its `return () => { unsubscribe(); … }`) and the sweep re-run.
+`flaw_cleanup` dropped from 1 to 0 for **all three** models, with every other metric holding.
+The rubric tracks the defect, not generic prose about effects.
+
+Re-run this check whenever a rubric is rewritten. Break one flaw in the fixture, sweep,
+confirm only that flaw's metric moves, then revert the fixture.
+
 ## Known knobs, deliberately not turned
 
 - `--repeat 3` averages out run-to-run variance. It triples the bill; one run per model is
