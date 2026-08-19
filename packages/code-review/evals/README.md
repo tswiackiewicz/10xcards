@@ -97,10 +97,13 @@ when calibrating rubric wording.
 
 ## Diagnostics
 
-`npx tsx evals/check-fixture.ts` pipes the fixture through `reviewDiff` once with the
-incumbent model and prints the parsed review plus the derived verdict. No promptfoo
-involved — use it when a sweep failure might be a fixture or prompt problem rather than a
-harness problem.
+```bash
+node --env-file-if-exists=.env --import tsx evals/check-fixture.ts
+```
+
+pipes the fixture through `reviewDiff` once with the incumbent model and prints the parsed
+review plus the derived verdict. No promptfoo involved — use it when a sweep failure might be
+a fixture or prompt problem rather than a harness problem.
 
 ## Known knobs, deliberately not turned
 

@@ -534,29 +534,29 @@ deleting `evals/`, reverting those three files and the two `package.json` / `.gi
 
 #### Automated
 
-- [x] 1.1 Unit tests still pass and collect the same 7 files
-- [x] 1.2 Type checking passes with the widened include
-- [x] 1.3 Linting passes with the widened files glob
-- [x] 1.4 Vitest does not collect anything under `evals/`
+- [x] 1.1 Unit tests still pass and collect the same 7 files — 7192447
+- [x] 1.2 Type checking passes with the widened include — 7192447
+- [x] 1.3 Linting passes with the widened files glob — 7192447
+- [x] 1.4 Vitest does not collect anything under `evals/` — 7192447
 
 #### Manual
 
-- [x] 1.5 `evals/README.md` reads as useful to a promptfoo newcomer
+- [x] 1.5 `evals/README.md` reads as useful to a promptfoo newcomer — 7192447
 
 ### Phase 2: Fixture & flaw manifest
 
 #### Automated
 
-- [ ] 2.1 The fixture is a well-formed unified diff
-- [ ] 2.2 Manifest and script typecheck
-- [ ] 2.3 Lint passes on the new files
-- [ ] 2.4 Fixture is 150+ lines and touches exactly three files
+- [x] 2.1 The fixture is a well-formed unified diff
+- [x] 2.2 Manifest and script typecheck
+- [x] 2.3 Lint passes on the new files
+- [x] 2.4 Fixture is 150+ lines and touches exactly three files
 
 #### Manual
 
-- [ ] 2.5 `check-fixture.ts` shows the model saw React 19
-- [ ] 2.6 The derived verdict is `failed`
-- [ ] 2.7 The three flaws are non-obvious on a cold read
+- [x] 2.5 `check-fixture.ts` shows the model saw React 19
+- [x] 2.6 The derived verdict is `failed`
+- [x] 2.7 The three flaws are non-obvious on a cold read
 
 ### Phase 3: Provider shim & three-model sweep
 
