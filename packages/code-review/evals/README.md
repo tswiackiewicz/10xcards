@@ -18,15 +18,29 @@ npm run eval
 which is:
 
 ```bash
-npx -y promptfoo@0.122.0 eval -c evals/promptfooconfig.yaml \
+PROMPTFOO_DISABLE_TELEMETRY=1 PROMPTFOO_DISABLE_UPDATE=1 \
+  npx -y promptfoo@0.122.0 eval -c evals/promptfooconfig.yaml \
   -o evals/out/results.csv -o evals/out/results.json
 ```
+
+The two env vars suppress promptfoo's PostHog `eval_ran` event (provider prefixes, assertion
+types, token counts, cost, latency, pass/fail counts, keyed to a persistent id in
+`~/.promptfoo/promptfoo.yaml`) and its version check against `api.promptfoo.dev`. Neither
+payload carries the key or the prompt text, but the sweep is about an internal diff, so both
+are off by default.
 
 Requires `OPENROUTER_API_KEY` — the same variable the package already uses. promptfoo picks
 it up from `.env` in the package directory, and it pays for **both** the three candidate
 models and the judge. **This run costs real money every time.** promptfoo's disk cache wraps
 its own HTTP client and never fires for a custom provider, so a second identical run
 re-executes every call in full.
+
+**A run writes durable state outside the repo.** Beyond the gitignored `evals/out/`, it fills
+`~/.promptfoo/` — `promptfoo.db` (~2 MB per sweep), `logs/`, `cache/` — with the full fixture
+diff, the rendered prompts and every model output. No repo `.gitignore` covers that path;
+clear it by hand if the fixture ever carries something that should not sit on disk. Note also
+that the `@0.122.0` pin binds only the top-level tarball: transitive resolution is unlocked,
+so runs weeks apart can install different trees.
 
 `promptfoo` is deliberately **not** a dependency of this package. It is 500–825 transitive
 packages / ~1.7 GB, and `--omit=optional` makes it refuse to start (missing
