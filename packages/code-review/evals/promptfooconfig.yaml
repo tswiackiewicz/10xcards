@@ -150,8 +150,12 @@ tests:
           Findings beyond the diff's most obvious defects are NOT a precision failure, provided each one
           is true of the diff. A correct finding does not become imprecise for being minor.
 
-          Fail if any finding misstates what the diff does, describes code absent from the diff, invents
-          a file or symbol, or calls correctly-migrated code broken.
+          Judge only what a finding CLAIMS about the diff, never the fix it suggests. A finding whose
+          claim is true stays precise even if its suggested remediation names a symbol, helper or API
+          that does not appear in the diff — remediation accuracy is not this metric.
+
+          Fail if any finding misstates what the diff does, describes code absent from the diff, anchors
+          itself to a file the diff does not touch, or calls correctly-migrated code broken.
 
           The diff under review:
 
