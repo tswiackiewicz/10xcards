@@ -43,6 +43,7 @@ reports/
 .claude/settings.json*
 .claude/skills/
 .claude/prompts/
+.claude/config-templates/
 .agents/
 
 # 10x-cli managed (regenerowalne przez `10x-cli get`)
