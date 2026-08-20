@@ -9,10 +9,10 @@
  * dependency of this package (see evals/README.md); declaring them locally is what lets
  * `npm run typecheck` and `npm run lint` cover this directory with promptfoo absent.
  */
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import path from "node:path";
 
-import { reviewDiff, type Review } from "../src/index.ts";
+import { createModel, reviewDiff, toMessage, type Review } from "../src/index.ts";
+import { checkGroundTruth } from "./ground-truth.ts";
 
 /** What promptfoo passes to the constructor. */
 interface ProviderOptions {
@@ -67,13 +67,23 @@ export default class ReviewProvider {
       return { error: "vars.diff is missing or empty — check the file:// fixture path in the config" };
     }
 
+    // Checked before the key, so a stale ground truth costs nothing and never reads as a
+    // model result: `error` short-circuits the asserts instead of scoring them 0.
+    const groundTruthError = await checkGroundTruth(REPO_ROOT);
+    if (groundTruthError !== null) {
+      return { error: groundTruthError };
+    }
+
+    // Read here rather than through `resolveModel()`: promptfoo needs a returned `{ error }`
+    // rather than a throw, and the model id comes from `config.model`, not from env. Model
+    // construction itself goes through `createModel` so the sweep cannot drift from `src/`.
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (apiKey === undefined || apiKey === "") {
       return { error: "OPENROUTER_API_KEY is missing — the sweep pays for both the candidates and the judge" };
     }
 
     try {
-      const model = createOpenRouter({ apiKey })(this.#model);
+      const model = createModel(apiKey, this.#model);
       // No title or body: the sweep sends the bare diff. Naming the React version in PR
       // metadata would hand the model the one fact flaw 3 tests it for.
       const review = await reviewDiff(diff, { model, cwd: REPO_ROOT });
@@ -81,7 +91,9 @@ export default class ReviewProvider {
       // asserts unparsed, which is what lets the asserts import the real `Review` type.
       return { output: review };
     } catch (cause) {
-      return { error: cause instanceof Error ? cause.message : String(cause) };
+      // `toMessage`, not `cause.message`: a candidate that fails structured output hides its
+      // finish reason and emitted text behind a generic message — see evals/README.md.
+      return { error: toMessage(cause) };
     }
   }
 }

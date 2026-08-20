@@ -8,11 +8,23 @@ const envSchema = z.object({
 });
 
 /**
- * The only place `process.env` is read. Parsing happens inside the call, never at
+ * How a model is constructed, in one place. Callers that bring their own key and model id —
+ * the eval sweep runs three models in one process — go through here rather than re-deriving
+ * it, so a future change (baseURL, HTTP-Referer/X-Title headers, retry config) reaches every
+ * call path instead of silently missing the ones that hand-rolled their own.
+ */
+export function createModel(apiKey: string, modelId: string): LanguageModel {
+  return createOpenRouter({ apiKey })(modelId);
+}
+
+/**
+ * The only place `src/` reads `process.env`. Parsing happens inside the call, never at
  * module scope, so importing the package never requires an API key — that is what
- * lets a caller inject its own model and skip env entirely.
+ * lets a caller inject its own model and skip env entirely. (`evals/provider.ts` reads the
+ * key itself: promptfoo needs a returned `{ error }`, not a throw, and it supplies the model
+ * id per provider — but it constructs the model through `createModel`.)
  */
 export function resolveModel(): LanguageModel {
   const env = envSchema.parse(process.env);
-  return createOpenRouter({ apiKey: env.OPENROUTER_API_KEY })(env.OPENROUTER_MODEL);
+  return createModel(env.OPENROUTER_API_KEY, env.OPENROUTER_MODEL);
 }

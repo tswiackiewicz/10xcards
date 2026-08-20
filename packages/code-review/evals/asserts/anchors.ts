@@ -28,13 +28,34 @@ function changedFiles(diff: string): Set<string> {
   return paths;
 }
 
-export default function assertAnchors(output: Review, context: AssertContext): GradingResult {
-  const diff = context.vars.diff;
+// `output` is whatever the provider returned — see the note in verdict.ts.
+export default function assertAnchors(output: unknown, context: AssertContext): GradingResult {
+  // Harness and config errors get their own reason strings. A score of 0 is only trustworthy
+  // as "the model hallucinated" if every other way of reaching 0 says so out loud.
+  const diff: unknown = context.vars.diff;
   if (typeof diff !== "string") {
-    return { pass: false, score: 0, reason: "vars.diff is not a string — cannot resolve the diff's file list" };
+    return {
+      pass: false,
+      score: 0,
+      reason: "HARNESS ERROR: vars.diff is not a string — cannot resolve the diff's file list",
+    };
   }
 
-  const findings = Array.isArray(output.findings) ? output.findings : [];
+  if (output === null || typeof output !== "object" || !("findings" in output) || !Array.isArray(output.findings)) {
+    return { pass: false, score: 0, reason: "HARNESS ERROR: provider output is not a Review object" };
+  }
+
+  const files = changedFiles(diff);
+  if (files.size === 0) {
+    return {
+      pass: false,
+      score: 0,
+      reason:
+        "HARNESS ERROR: no `+++ b/<path>` headers in vars.diff — the fixture is not a prefixed unified diff, so every finding would read as fabricated",
+    };
+  }
+
+  const { findings } = output as Review;
 
   // Zero findings scores 0 rather than a vacuous 1: the fixture demonstrably contains
   // defects, so an empty review is the worst outcome, not a perfectly precise one.
@@ -42,7 +63,6 @@ export default function assertAnchors(output: Review, context: AssertContext): G
     return { pass: false, score: 0, reason: "review reported no findings, but the fixture contains planted defects" };
   }
 
-  const files = changedFiles(diff);
   const fabricated = findings.filter((finding) => !files.has(finding.file));
   const score = (findings.length - fabricated.length) / findings.length;
 

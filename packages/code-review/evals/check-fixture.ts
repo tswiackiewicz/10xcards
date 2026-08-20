@@ -16,8 +16,9 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-import { deriveVerdict, explainVerdict, reviewDiff } from "../src/index.ts";
+import { deriveVerdict, explainVerdict, reviewDiff, toMessage } from "../src/index.ts";
 import { EXPECTED_VERDICT, PLANTED_FLAWS } from "./fixtures/react19-migration.flaws.ts";
+import { checkGroundTruth } from "./ground-truth.ts";
 
 /**
  * The repo root, not the package directory — `collectInstalledVersions` reads the manifest
@@ -28,24 +29,37 @@ import { EXPECTED_VERDICT, PLANTED_FLAWS } from "./fixtures/react19-migration.fl
 const REPO_ROOT = path.resolve(import.meta.dirname, "../../..");
 const FIXTURE = path.join(import.meta.dirname, "fixtures", "react19-migration.diff");
 
-const diff = await readFile(FIXTURE, "utf8");
-
-// Title and body deliberately never say "React 19": the sweep's provider sends the bare
-// diff, so naming the version here would hand the model the one fact flaw 3 exists to test
-// whether it takes from the ground-truth versions block instead.
-const review = await reviewDiff(diff, {
-  cwd: REPO_ROOT,
-  title: "refactor(decks): migrate DeckSettingsPanel to a function component",
-  body: "Converts the last class component to hooks and moves the root render to createRoot. No behaviour change intended.",
-});
-
-console.log(JSON.stringify(review, null, 2));
-console.log(`\nverdict: ${deriveVerdict(review)} (expected: ${EXPECTED_VERDICT})`);
-for (const reason of explainVerdict(review)) {
-  console.log(`  - ${reason}`);
+const groundTruthError = await checkGroundTruth(REPO_ROOT);
+if (groundTruthError !== null) {
+  console.error(groundTruthError);
+  process.exit(1);
 }
 
-console.log("\nplanted flaws (judge decides these; this list is a reading aid):");
-for (const flaw of PLANTED_FLAWS) {
-  console.log(`  ${flaw.metric}: ${flaw.label}`);
+// One readable line, same as the CLI: with no key this used to dump a 12-line ZodError and a
+// stack from the top-level await, which is the opposite of what a diagnostic script is for.
+try {
+  const diff = await readFile(FIXTURE, "utf8");
+
+  // Title and body deliberately never say "React 19": the sweep's provider sends the bare
+  // diff, so naming the version here would hand the model the one fact flaw 3 exists to test
+  // whether it takes from the ground-truth versions block instead.
+  const review = await reviewDiff(diff, {
+    cwd: REPO_ROOT,
+    title: "refactor(decks): migrate DeckSettingsPanel to a function component",
+    body: "Converts the last class component to hooks and moves the root render to createRoot. No behaviour change intended.",
+  });
+
+  console.log(JSON.stringify(review, null, 2));
+  console.log(`\nverdict: ${deriveVerdict(review)} (expected: ${EXPECTED_VERDICT})`);
+  for (const reason of explainVerdict(review)) {
+    console.log(`  - ${reason}`);
+  }
+
+  console.log("\nplanted flaws (judge decides these; this list is a reading aid):");
+  for (const flaw of PLANTED_FLAWS) {
+    console.log(`  ${flaw.metric}: ${flaw.label}`);
+  }
+} catch (error) {
+  console.error(toMessage(error));
+  process.exit(1);
 }

@@ -25,3 +25,11 @@ export {
   type ReviewOptions,
   type Verdict,
 } from "./agents/reviewer/index.ts";
+
+// Not an agent: how a model is built, shared with `evals/provider.ts` so the sweep exercises
+// the same construction the shipped path does.
+export { createModel } from "./providers/model.ts";
+// The readable-error path. Every entry point that reports a failure to a human goes through
+// it, `evals/` included — a swallowed `NoObjectGeneratedError.finishReason` is the whole
+// diagnostic budget for a failed review.
+export { toMessage } from "./cli.ts";
