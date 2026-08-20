@@ -1,0 +1,273 @@
+diff --git a/src/components/DeckSettingsPanel.jsx b/src/components/DeckSettingsPanel.jsx
+index 6ddc83e..2cae9c9 100644
+--- a/src/components/DeckSettingsPanel.jsx
++++ b/src/components/DeckSettingsPanel.jsx
+@@ -1,117 +1,90 @@
+-import React from "react";
++import { useEffect, useRef, useState } from "react";
+ 
+ import { updateDeckSettings } from "../api/decks";
+ import { deckStore } from "../stores/deckStore";
+ import { OverrideRow } from "./OverrideRow";
+ import { Pager } from "./Pager";
+ 
+-export class DeckSettingsPanel extends React.Component {
+-  static defaultProps = {
+-    pageSize: 25,
+-  };
+-
+-  constructor(props) {
+-    super(props);
+-    this.state = {
+-      settings: deckStore.getSettings(props.deck.id),
+-      page: 0,
+-      status: "idle",
+-      error: null,
+-    };
+-    this.nameInputRef = React.createRef();
+-    this.handleSave = this.handleSave.bind(this);
+-    this.handleFieldChange = this.handleFieldChange.bind(this);
+-    this.handlePageChange = this.handlePageChange.bind(this);
+-    this.handleWindowFocus = this.handleWindowFocus.bind(this);
+-  }
+-
+-  componentDidMount() {
+-    this.unsubscribe = deckStore.subscribe(this.props.deck.id, (settings) => {
+-      this.setState({ settings, page: 0 });
++export function DeckSettingsPanel({ deck, currentUser, pageSize }) {
++  const [settings, setSettings] = useState(() => deckStore.getSettings(deck.id));
++  const [page, setPage] = useState(0);
++  const [status, setStatus] = useState("idle");
++  const [error, setError] = useState(null);
++  const nameInputRef = useRef(null);
++
++  useEffect(() => {
++    deckStore.subscribe(deck.id, (next) => {
++      setSettings(next);
++      setPage(0);
+     });
+-    window.addEventListener("focus", this.handleWindowFocus);
+-    this.nameInputRef.current.focus();
+-  }
+ 
+-  componentWillUnmount() {
+-    this.unsubscribe();
+-    window.removeEventListener("focus", this.handleWindowFocus);
+-  }
++    window.addEventListener("focus", handleWindowFocus);
++    nameInputRef.current.focus();
+ 
+-  handleWindowFocus() {
+-    deckStore.refresh(this.props.deck.id);
+-  }
+-
+-  handleFieldChange(field, value) {
+-    this.setState((prev) => ({
+-      settings: { ...prev.settings, [field]: value },
+-      status: "idle",
+-    }));
+-  }
++    function handleWindowFocus() {
++      deckStore.refresh(deck.id);
++    }
++  }, [deck.id]);
+ 
+-  handlePageChange(page) {
+-    this.setState({ page });
++  function handleFieldChange(field, value) {
++    setSettings((prev) => ({ ...prev, [field]: value }));
++    setStatus("idle");
+   }
+ 
+-  async handleSave() {
+-    const { deck, currentUser } = this.props;
+-
+-    if (deck.ownerId !== currentUser.id) {
+-      this.setState({ status: "error", error: "Only the deck owner can change these settings." });
+-      return;
+-    }
+-
+-    this.setState({ status: "saving", error: null });
++  async function handleSave() {
++    setStatus("saving");
++    setError(null);
+     try {
+-      await updateDeckSettings(deck.id, this.state.settings);
+-      this.setState({ status: "saved", error: null });
++      await updateDeckSettings(deck.id, settings);
++      setStatus("saved");
+     } catch (cause) {
+-      this.setState({ status: "error", error: cause.message });
++      setStatus("error");
++      setError(cause.message);
+     }
+   }
+ 
+-  render() {
+-    const { deck, currentUser, pageSize } = this.props;
+-    const { settings, page, status, error } = this.state;
+-    const visible = settings.overrides.slice(page * pageSize, page * pageSize + pageSize);
+-
+-    return (
+-      <section className="deck-settings">
+-        <header>
+-          <h2>{deck.name}</h2>
+-          <span className="role-badge">{deck.ownerId === currentUser.id ? "Owner" : "Collaborator"}</span>
+-        </header>
+-
+-        <label htmlFor="deck-name">Display name</label>
+-        <input
+-          id="deck-name"
+-          ref={this.nameInputRef}
+-          value={settings.name}
+-          onChange={(event) => this.handleFieldChange("name", event.target.value)}
+-        />
+-
+-        <label htmlFor="daily-cap">New cards per day</label>
+-        <input
+-          id="daily-cap"
+-          type="number"
+-          value={settings.dailyCap}
+-          onChange={(event) => this.handleFieldChange("dailyCap", Number(event.target.value))}
+-        />
+-
+-        <ul className="overrides">
+-          {visible.map((override) => (
+-            <OverrideRow key={override.id} override={override} />
+-          ))}
+-        </ul>
+-
+-        <Pager page={page} pageSize={pageSize} total={settings.overrides.length} onChange={this.handlePageChange} />
+-
+-        {error ? <p className="error">{error}</p> : null}
+-
+-        <button type="button" onClick={this.handleSave} disabled={status === "saving"}>
+-          {status === "saving" ? "Saving…" : "Save settings"}
+-        </button>
+-      </section>
+-    );
+-  }
++  const visible = settings.overrides.slice(page * pageSize, page * pageSize + pageSize);
++
++  return (
++    <section className="deck-settings">
++      <header>
++        <h2>{deck.name}</h2>
++        <span className="role-badge">{deck.ownerId === currentUser.id ? "Owner" : "Collaborator"}</span>
++      </header>
++
++      <label htmlFor="deck-name">Display name</label>
++      <input
++        id="deck-name"
++        ref={nameInputRef}
++        value={settings.name}
++        onChange={(event) => handleFieldChange("name", event.target.value)}
++      />
++
++      <label htmlFor="daily-cap">New cards per day</label>
++      <input
++        id="daily-cap"
++        type="number"
++        value={settings.dailyCap}
++        onChange={(event) => handleFieldChange("dailyCap", Number(event.target.value))}
++      />
++
++      <ul className="overrides">
++        {visible.map((override) => (
++          <OverrideRow key={override.id} override={override} />
++        ))}
++      </ul>
++
++      <Pager page={page} pageSize={pageSize} total={settings.overrides.length} onChange={setPage} />
++
++      {error ? <p className="error">{error}</p> : null}
++
++      <button type="button" onClick={handleSave} disabled={status === "saving"}>
++        {status === "saving" ? "Saving…" : "Save settings"}
++      </button>
++    </section>
++  );
+ }
++
++DeckSettingsPanel.defaultProps = {
++  pageSize: 25,
++};
+diff --git a/src/components/DeckSettingsPanel.test.jsx b/src/components/DeckSettingsPanel.test.jsx
+index fbd1397..f7cf38e 100644
+--- a/src/components/DeckSettingsPanel.test.jsx
++++ b/src/components/DeckSettingsPanel.test.jsx
+@@ -1,5 +1,4 @@
+ import { fireEvent, render, screen } from "@testing-library/react";
+-import React from "react";
+ import { describe, expect, it, vi } from "vitest";
+ 
+ import { deckStore } from "../stores/deckStore";
+@@ -23,7 +22,7 @@ describe("DeckSettingsPanel", () => {
+   it("renders the deck name from the store", () => {
+     deckStore.getSettings.mockReturnValue(settingsWith(3));
+ 
+-    render(<DeckSettingsPanel deck={deck} currentUser={owner} />);
++    render(<DeckSettingsPanel deck={deck} currentUser={owner} pageSize={25} />);
+ 
+     expect(screen.getByLabelText("Display name")).toHaveValue("Kanji N3");
+   });
+@@ -31,7 +30,7 @@ describe("DeckSettingsPanel", () => {
+   it("subscribes to the store on mount", () => {
+     deckStore.getSettings.mockReturnValue(settingsWith(3));
+ 
+-    render(<DeckSettingsPanel deck={deck} currentUser={owner} />);
++    render(<DeckSettingsPanel deck={deck} currentUser={owner} pageSize={25} />);
+ 
+     expect(deckStore.subscribe).toHaveBeenCalledWith("deck-1", expect.any(Function));
+   });
+@@ -39,7 +38,7 @@ describe("DeckSettingsPanel", () => {
+   it("shows a collaborator badge for a non-owner", () => {
+     deckStore.getSettings.mockReturnValue(settingsWith(3));
+ 
+-    render(<DeckSettingsPanel deck={deck} currentUser={collaborator} />);
++    render(<DeckSettingsPanel deck={deck} currentUser={collaborator} pageSize={25} />);
+ 
+     expect(screen.getByText("Collaborator")).toBeInTheDocument();
+   });
+@@ -47,7 +46,7 @@ describe("DeckSettingsPanel", () => {
+   it("edits a field without saving", () => {
+     deckStore.getSettings.mockReturnValue(settingsWith(3));
+ 
+-    render(<DeckSettingsPanel deck={deck} currentUser={owner} />);
++    render(<DeckSettingsPanel deck={deck} currentUser={owner} pageSize={25} />);
+     fireEvent.change(screen.getByLabelText("Display name"), { target: { value: "Kanji N2" } });
+ 
+     expect(screen.getByLabelText("Display name")).toHaveValue("Kanji N2");
+@@ -56,7 +55,7 @@ describe("DeckSettingsPanel", () => {
+   it("pages the override list", () => {
+     deckStore.getSettings.mockReturnValue(settingsWith(60));
+ 
+-    render(<DeckSettingsPanel deck={deck} currentUser={owner} />);
++    render(<DeckSettingsPanel deck={deck} currentUser={owner} pageSize={25} />);
+ 
+     expect(screen.getAllByRole("listitem")).toHaveLength(25);
+   });
+diff --git a/src/main.jsx b/src/main.jsx
+index 02a580d..11b0042 100644
+--- a/src/main.jsx
++++ b/src/main.jsx
+@@ -1,5 +1,5 @@
+ import React from "react";
+-import ReactDOM from "react-dom";
++import { createRoot } from "react-dom/client";
+ 
+ import { App } from "./App";
+ import { AuthProvider } from "./auth/AuthProvider";
+@@ -7,11 +7,10 @@ import "./styles/index.css";
+ 
+ const container = document.getElementById("root");
+ 
+-ReactDOM.render(
++createRoot(container).render(
+   <React.StrictMode>
+     <AuthProvider>
+       <App />
+     </AuthProvider>
+   </React.StrictMode>,
+-  container,
+ );

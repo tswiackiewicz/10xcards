@@ -10,6 +10,7 @@
     "start": "node --env-file-if-exists=.env --import tsx src/cli.ts",
     "dev": "node --env-file-if-exists=.env --import tsx --watch src/cli.ts",
     "test": "vitest run",
+    "eval": "PROMPTFOO_DISABLE_TELEMETRY=1 PROMPTFOO_DISABLE_UPDATE=1 npx -y promptfoo@0.122.0 eval -c evals/promptfooconfig.yaml -o evals/out/results.csv -o evals/out/results.json",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
