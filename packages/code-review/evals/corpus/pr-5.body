@@ -1,0 +1,23 @@
+## Why
+Users need a way to delete their account with a recoverable grace period. Roadmap slice **S-05**: request deletion → 30-day soft-delete window (self-service reactivate) → permanent erasure. Also closes a GDPR right-to-erasure gap (data must not be retained past the promised window).
+
+## What
+- **Soft-delete data model** — new `account_deletions` table (owner RLS), a `SECURITY DEFINER` `is_pending_deletion()` helper, and the four `flashcards` policies extended so a pending user's cards are immediately invisible and immutable (zero query-site changes — the block lives in RLS).
+- **User-facing flow** — `/account` page with a type-to-confirm danger zone + reactivate panel; `POST /api/account/delete` (idempotent, signs out) and `/api/account/reactivate`; sign-in diverts a flagged account to `/account`; route protected + nav links added.
+- **Scheduled purge** — service-role admin client (isolated), a bearer-guarded `POST /api/cron/purge` (bounded batch, cascade erasure, idempotent, structured Workers-Logs line, non-2xx on failure), and a daily GitHub Actions workflow.
+- **Impl-review applied** — full-plan review run; all findings triaged (7 fixed, 2 accepted). Notably: RLS helper wrapped in a scalar subselect for per-statement eval, typed `AccountErrorCode` + `fail()` across endpoints, `security.checkOrigin` pinned, purge failures now fail the cron job.
+
+## How to verify
+- `npx astro sync && npm run lint && npm run build` — all pass.
+- `node scripts/verify-rls.mjs` — **27/27** assertions (cross-user isolation, soft-delete blocking, reactivation restore, purge cascade + idempotency).
+- Manual/HTTP e2e (local): sign-in → `/`, flagged sign-in → `/account`, delete hides cards + signs out, reactivate restores, `/account` guarded when logged out; purge route 401 on bad bearer, backdated account erased, second call idempotent.
+
+## Risk & rollback
+- **Migrations**: `20260702145938_create_account_deletions.sql` (+ service_role grant) and `20260702154817_optimize_pending_deletion_rls.sql`. No backfill; existing rows/policies otherwise untouched. Rollback = drop the pending-deletion clause / the table.
+- **New secrets (human-gated)**: `SUPABASE_SERVICE_ROLE_KEY`, `CRON_PURGE_SECRET` via `wrangler secret put`; `PURGE_URL` + `CRON_PURGE_SECRET` as GitHub repo secrets. Purge is idempotent, so a missed/double run is safe.
+- **Not production-verified yet (3.7)**: the GitHub Actions `workflow_dispatch` run against production is pending deploy + secret provisioning — the workflow and route are verified locally only.
+
+## Refs
+Roadmap S-05
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

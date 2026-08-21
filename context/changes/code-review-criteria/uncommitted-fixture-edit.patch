@@ -1,0 +1,28 @@
+diff --git a/packages/code-review/evals/fixtures/react19-migration.diff b/packages/code-review/evals/fixtures/react19-migration.diff
+index 4cf4441..64d5b50 100644
+--- a/packages/code-review/evals/fixtures/react19-migration.diff
++++ b/packages/code-review/evals/fixtures/react19-migration.diff
+@@ -238,7 +238,7 @@ index fbd1397..f7cf38e 100644
+      fireEvent.change(screen.getByLabelText("Display name"), { target: { value: "Kanji N2" } });
+  
+      expect(screen.getByLabelText("Display name")).toHaveValue("Kanji N2");
+-@@ -56,7 +55,7 @@ describe("DeckSettingsPanel", () => {
++@@ -56,7 +55,15 @@ describe("DeckSettingsPanel", () => {
+    it("pages the override list", () => {
+      deckStore.getSettings.mockReturnValue(settingsWith(60));
+  
+@@ -247,6 +247,14 @@ index fbd1397..f7cf38e 100644
+  
+      expect(screen.getAllByRole("listitem")).toHaveLength(25);
+    });
+++
+++  it("pages the override list with the component's default page size", () => {
+++    deckStore.getSettings.mockReturnValue(settingsWith(60));
+++
+++    render(<DeckSettingsPanel deck={deck} currentUser={owner} />);
+++
+++    expect(screen.getAllByRole("listitem")).toHaveLength(25);
+++  });
+ diff --git a/src/main.jsx b/src/main.jsx
+ index 02a580d..11b0042 100644
+ --- a/src/main.jsx

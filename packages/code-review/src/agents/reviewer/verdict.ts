@@ -1,4 +1,4 @@
-import type { Criterion, Review } from "./schema.ts";
+import { CRITERION_LABELS, type Criterion, type Review } from "./schema.ts";
 
 /**
  * A review outcome. The action-level `error` state — "no review outcome exists" — is
@@ -15,13 +15,36 @@ export type Verdict = "passed" | "failed";
 export const BLOCKING_MAX = 5;
 export const SINGLE_FAIL_MAX = 3;
 export const ACCUMULATION_MAX = 5;
+/**
+ * Three or more criteria at or below ACCUMULATION_MAX. Held at 3 across the six-to-five
+ * criteria swap, which left condition 3 unable to fire on its own: only two criteria are
+ * non-blocking now (`verification`, `clarity`), so any three at or below the threshold must
+ * include a blocking one — and that already fires condition 1. Verified exhaustively over
+ * all 7,776 score combinations: 3,888 firings, none of them without condition 1.
+ *
+ * So this is not a tightening from 3-of-6, and not an oversight either — the condition
+ * survives as a no-op that only adds a reason line to an already-failed verdict. Kept at 3
+ * because the plan forbade changing gate mechanics, and because it becomes live again the
+ * moment a rubric adds a third non-blocking criterion. Dropping it to 2 would make
+ * `verification` + `clarity` together fail a PR, which research.md deliberately rejects.
+ * See docs/criteria.md, "The gate".
+ */
 export const ACCUMULATION_COUNT = 3;
 
 /**
- * The two dimensions that fail on "unproven", not just on "bad". Conditions 1 and 2
- * partition the six criteria off this one list, so the two cannot drift apart.
+ * The three dimensions that fail on "unproven", not just on "bad" — a merged defect,
+ * exposure or silent production failure costs far more than a re-review. Condition 1
+ * reads this list and condition 2 reads its complement minus SINGLE_FAIL_EXEMPT, so the
+ * three lists cannot drift apart.
  */
-export const BLOCKING_CRITERIA = ["correctness", "security"] as const satisfies readonly Criterion[];
+export const BLOCKING_CRITERIA = ["defect", "safety", "blastRadius"] as const satisfies readonly Criterion[];
+
+/**
+ * Criteria that cannot fail a PR on their own. Unclear code is real review feedback, but
+ * it is not the kind of harm that should hold a merge — so `clarity` sits out of
+ * condition 2 while still counting toward the accumulation in condition 3.
+ */
+export const SINGLE_FAIL_EXEMPT = ["clarity"] as const satisfies readonly Criterion[];
 
 /** The only place the string score encoding is decoded. `n/a` becomes null, never 0. */
 function parseScore(score: Review["criteria"][Criterion]["score"]): number | null {
@@ -29,7 +52,7 @@ function parseScore(score: Review["criteria"][Criterion]["score"]): number | nul
 }
 
 interface Scored {
-  name: string;
+  name: Criterion;
   score: number;
 }
 
@@ -37,12 +60,13 @@ interface Scored {
 function scored(review: Review): Scored[] {
   return Object.entries(review.criteria).flatMap(([name, { score }]) => {
     const parsed = parseScore(score);
-    return parsed === null ? [] : [{ name, score: parsed }];
+    return parsed === null ? [] : [{ name: name as Criterion, score: parsed }];
   });
 }
 
+/** Reason strings are read by a human on a PR, so they carry the display name, not the key. */
 function label({ name, score }: Scored): string {
-  return `${name} (${String(score)})`;
+  return `${CRITERION_LABELS[name]} (${String(score)})`;
 }
 
 /**
@@ -53,6 +77,7 @@ function label({ name, score }: Scored): string {
 function evaluateGate(review: Review): { verdict: Verdict; reasons: string[] } {
   const numeric = scored(review);
   const blocking = new Set<string>(BLOCKING_CRITERIA);
+  const exempt = new Set<string>(SINGLE_FAIL_EXEMPT);
   const reasons: string[] = [];
 
   // 1 — a blocking dimension at or below the blocking threshold (requirements.md:124).
@@ -61,15 +86,22 @@ function evaluateGate(review: Review): { verdict: Verdict; reasons: string[] } {
     reasons.push(`Blocking criterion at or below ${String(BLOCKING_MAX)}: ${failedBlocking.map(label).join(", ")}`);
   }
 
-  // 2 — any other criterion at or below the single-fail threshold (requirements.md:127).
-  // "Other" because condition 1 already fails the two blocking dimensions at <= 5,
-  // which makes a <= 3 rule for them dead.
-  const failedSingle = numeric.filter((entry) => !blocking.has(entry.name) && entry.score <= SINGLE_FAIL_MAX);
+  // 2 — any other non-exempt criterion at or below the single-fail threshold
+  // (requirements.md:127). "Other" because condition 1 already fails the three blocking
+  // dimensions at <= 5, which makes a <= 3 rule for them dead; "non-exempt" because
+  // `clarity` must not fail a PR by itself. With three blocking criteria and `clarity`
+  // exempt, this condition applies to `verification` alone — a consequence of those two
+  // decisions, not an oversight (docs/criteria.md, "Which criteria block").
+  const failedSingle = numeric.filter(
+    (entry) => !blocking.has(entry.name) && !exempt.has(entry.name) && entry.score <= SINGLE_FAIL_MAX,
+  );
   if (failedSingle.length > 0) {
     reasons.push(`Criterion at or below ${String(SINGLE_FAIL_MAX)}: ${failedSingle.map(label).join(", ")}`);
   }
 
-  // 3 — accumulation across all six criteria (requirements.md:128).
+  // 3 — accumulation across all five criteria, `clarity` included (requirements.md:128).
+  // Cannot fire without condition 1 at this criteria arity — see ACCUMULATION_COUNT. It runs
+  // anyway so the reason list names every criterion that scored low, not just the blocking ones.
   const accumulated = numeric.filter((entry) => entry.score <= ACCUMULATION_MAX);
   if (accumulated.length >= ACCUMULATION_COUNT) {
     reasons.push(

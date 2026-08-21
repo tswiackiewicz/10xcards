@@ -4,12 +4,11 @@ import { reviewSchema } from "../../src/agents/reviewer/schema.ts";
 
 /** Every criterion scored, so a case can override exactly the one it is about. */
 const criteria = {
-  correctness: { score: "7", note: "Delivers what the title claims." },
-  idiomaticity: { score: "8", note: "Matches surrounding code." },
-  complexity: { score: "9", note: "Minimal and direct." },
-  testCoverage: { score: "n/a", note: "Config-only change; the pipeline run is the test." },
-  documentation: { score: "6", note: "One non-obvious decision left unexplained." },
-  security: { score: "8", note: "No trust boundary crossed." },
+  defect: { score: "7", note: "The changed lines hold no defect on the paths the diff exposes." },
+  safety: { score: "8", note: "Input is validated at the boundary this diff touches." },
+  blastRadius: { score: "9", note: "Nothing destructive here; the change reverts by the ordinary path." },
+  verification: { score: "n/a", note: "Config-only change; the pipeline run is the test." },
+  clarity: { score: "6", note: "One non-obvious decision left unexplained." },
 };
 
 const validReview = {
@@ -59,40 +58,40 @@ describe("reviewSchema", () => {
   });
 
   it("rejects a review missing a criterion", () => {
-    const { security: _security, ...incomplete } = criteria;
+    const { blastRadius: _blastRadius, ...incomplete } = criteria;
 
     const result = reviewSchema.safeParse({ ...validReview, criteria: incomplete });
 
     expect(result.success).toBe(false);
-    expect(result.error?.issues[0]?.path).toEqual(["criteria", "security"]);
+    expect(result.error?.issues[0]?.path).toEqual(["criteria", "blastRadius"]);
   });
 
   it.each([["0"], ["11"], ["7.5"], ["N/A"], ["good"]])("rejects %s as a score", (score) => {
     const result = reviewSchema.safeParse({
       ...validReview,
-      criteria: { ...criteria, correctness: { score, note: "…" } },
+      criteria: { ...criteria, defect: { score, note: "…" } },
     });
 
     expect(result.success).toBe(false);
-    expect(result.error?.issues[0]?.path).toEqual(["criteria", "correctness", "score"]);
+    expect(result.error?.issues[0]?.path).toEqual(["criteria", "defect", "score"]);
   });
 
   it("accepts n/a as a score", () => {
     const parsed = reviewSchema.parse({
       ...validReview,
-      criteria: { ...criteria, security: { score: "n/a", note: "No trust boundary in the diff." } },
+      criteria: { ...criteria, safety: { score: "n/a", note: "No trust boundary in the diff." } },
     });
 
-    expect(parsed.criteria.security.score).toBe("n/a");
+    expect(parsed.criteria.safety.score).toBe("n/a");
   });
 
   it("accepts an empty note — non-emptiness is a prompt and renderer concern, not a schema one", () => {
     const parsed = reviewSchema.parse({
       ...validReview,
-      criteria: { ...criteria, complexity: { score: "4", note: "" } },
+      criteria: { ...criteria, clarity: { score: "4", note: "" } },
     });
 
-    expect(parsed.criteria.complexity.note).toBe("");
+    expect(parsed.criteria.clarity.note).toBe("");
   });
 
   it("accepts a finding tagged with a blocking category", () => {

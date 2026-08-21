@@ -11,12 +11,11 @@ const criterion = (score: string, note: string) => ({ score, note });
 const review = {
   summary: "One real defect in the changed lines.",
   criteria: {
-    correctness: criterion("4", "Off-by-one ships in the changed loop."),
-    idiomaticity: criterion("8", "Matches surrounding code."),
-    complexity: criterion("9", "Minimal and direct."),
-    testCoverage: criterion("n/a", "No testable logic in the diff."),
-    documentation: criterion("6", "The bound change is unexplained."),
-    security: criterion("8", "No trust boundary crossed."),
+    defect: criterion("4", "Off-by-one ships in the changed loop."),
+    safety: criterion("8", "No trust boundary crossed."),
+    blastRadius: criterion("9", "Nothing destructive; reverts by the ordinary path."),
+    verification: criterion("n/a", "No testable logic in the diff."),
+    clarity: criterion("6", "The bound change is unexplained."),
   },
   findings: [
     {
@@ -149,7 +148,7 @@ describe("the JSON Schema the provider actually receives", () => {
     const properties = schema?.properties as Record<string, { properties?: Record<string, unknown> }> | undefined;
     const criteria = properties?.criteria?.properties as Record<string, { properties?: Record<string, unknown> }>;
 
-    expect(criteria.correctness?.properties?.score).toEqual({ type: "string", enum: [...SCORE_VALUES] });
+    expect(criteria.defect?.properties?.score).toEqual({ type: "string", enum: [...SCORE_VALUES] });
   });
 
   it("carries no keyword outside the provider's strict-mode subset", async () => {

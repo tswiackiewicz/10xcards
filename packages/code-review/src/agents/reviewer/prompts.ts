@@ -15,53 +15,60 @@ const scale = [
   "Every criterion also needs a one-line justification in its note — never leave a note empty.",
 ].join(" ");
 
-/** Transcribed from requirements.md:36-91. The anchors are the calibration; do not drop them. */
+/** Transcribed from docs/criteria.md. The anchors are the calibration; do not drop them. */
 const criteria = `Criteria:
 
-1. implementation correctness — does the code actually do what the PR title and description claim, without breaking existing behavior?
-   - 1: the change does not deliver what it claims, or introduces an obvious defect (wrong logic, broken contract, unhandled failure path on a realistic input).
-   - 5: the happy path works as claimed, but an edge case, error path or concurrent/retry scenario is left unhandled.
-   - 10: the stated intent is fully delivered, edge cases and error paths are handled, and no existing behavior is silently changed.
+1. defect — does the diff contain a defect observable in the changed lines? A mismatch with what the PR title or description claims is an ordinary finding, not this score.
+   - 1: the changed lines carry a defect that fires on a realistic input — wrong logic, a broken contract, a failure path that cannot work as written.
+   - 5: the happy path in the changed lines is sound, but an edge case, an error path or a retry/concurrent scenario visible in the diff is left unhandled.
+   - 10: the changed lines are sound on every path the diff exposes, boundaries and error cases included, and no behavior visible in the diff is silently changed.
 
-2. idiomaticity — does the code look like the rest of this repository and the conventions of its language/framework?
-   - 1: fights the codebase — foreign patterns, ad-hoc style, reinvented helpers that already exist, conventions from a different stack.
-   - 5: broadly conventional, with local deviations a maintainer would flag in review (naming, error handling, a helper duplicated instead of reused).
-   - 10: indistinguishable from surrounding code — same naming, structure, error handling and idioms a maintainer would have used.
+2. safety — does the change introduce a security or personal-data exposure at a trust boundary present in the diff?
+   - 1: introduces a concrete exposure — unvalidated input reaching a sink, a leaked secret or personal datum, a missing authz check, an unsafe default.
+   - 5: no exploitable path found, but the change rests on an implicit assumption — validation happening upstream, a trusted caller, a log line that could grow to carry personal data.
+   - 10: inputs are validated at the boundary the diff touches, secrets and personal data are handled correctly, and permissions and failure modes fail closed.
 
-3. complexity — is the solution the simplest one that solves the stated problem?
-   - 1: overengineered or unnecessarily convoluted — speculative abstraction, dead configurability, deep nesting, logic that needs a diagram to follow.
-   - 5: solves the problem, but carries avoidable weight — an abstraction with one caller, a parameter nobody passes, a function that wants splitting.
-   - 10: minimal and direct — every construct earns its place, and a reviewer understands the change on the first read.
+3. blast radius — if this change is wrong in production, is the failure visible and the change reversible?
+   - 1: a destructive, irreversible or production-shaping operation whose failure is silent — success returned on a failed sub-operation, or a migration or purge whose error reaches no operator.
+   - 5: the failure is surfaced, but recovery depends on an unstated assumption — a manual step, an out-of-band alert, a retry nobody triggers.
+   - 10: failure is surfaced where an operator will see it and the change reverts by the ordinary path — or the diff carries nothing whose failure would matter.
 
-4. test / risk coverage — are the risks introduced by this change covered by tests proportional to their impact?
-   - 1: risky behavior ships untested, or tests are present but vacuous (assert nothing, mock the thing under test, weakened to pass).
-   - 5: the happy path is tested, but the failure modes that actually motivated the change are not.
-   - 10: the change's real failure modes are covered by tests that would fail if the behavior regressed, and low-risk code is not over-tested.
+4. verification — is behavior this diff introduces or changes exercised by something that would fail if it regressed? Only a test counts; manual steps and a green-by-hand claim do not.
+   - 1: the diff introduces risky behavior with no test touching it, or with tests that would pass while that behavior is broken.
+   - 5: the happy path of the changed behavior is tested, but the failure mode that motivated the change is not.
+   - 10: the behavior this diff changes is covered by a test that would fail on regression, and low-risk code is not over-tested.
 
-5. documentation — is the non-obvious part of the change explained where a future reader will look for it?
-   - 1: unexplained magic — no rationale for a non-obvious decision, stale or misleading comments/docs, public API or config left undocumented.
-   - 5: the code is self-explanatory as far as it goes, but one non-obvious decision is left unexplained, or a doc is technically correct yet stale in tone/detail.
-   - 10: the why is captured at the right altitude (comment, docstring, README/ADR), and existing docs are updated to match the change.
+5. clarity — will a reader six months from now understand why this diff looks the way it does? Never report style, formatting, import order, quoting or line length; ESLint and Prettier decide those and are enforced on commit.
+   - 1: a non-obvious decision ships with no rationale anywhere, or the change leaves a comment or document actively untrue.
+   - 5: the change is followable, but one non-obvious decision is unexplained, or a name misleads, or it carries avoidable weight.
+   - 10: the why is captured where a reader will look, names say what things do, and the docs this change touches are updated to match.
 
-6. security and safety — does the change avoid introducing security or data handling regressions?
-   - 1: introduces a concrete exposure — unvalidated input reaching a sink, leaked secret or PII, missing authz check, unsafe default.
-   - 5: no exploitable path found, but the change relies on an implicit assumption — validation happening upstream, a trusted caller, a log line that could grow to carry personal data.
-   - 10: inputs validated at the boundary, secrets and personal data handled correctly, permissions and failure modes fail closed.
+The schema keys map to the criteria in this order: defect, safety, blastRadius, verification, clarity.`;
 
-The schema keys map to the criteria in this order: correctness, idiomaticity, complexity, testCoverage, documentation, security.`;
-
-/** Transcribed from requirements.md:93-117. The default cases are load-bearing for the gate. */
+/**
+ * Transcribed from docs/criteria.md. The default cases are load-bearing for the gate.
+ *
+ * Size, because this block is paid on every review and grew where nothing was watching:
+ * 1,017 -> 1,493 characters (+47%) across the six-to-five criteria swap, which is most of the
+ * +309 on `reviewInstructions` as a whole (6,290 -> 6,599, +5%). The plan budgeted only the
+ * `criteria` block, so this went unmetered — accepted deliberately (impl-review F4), because
+ * the added `verification` limits measurably tightened that score on two of the five
+ * calibration PRs (#3 8->5, #5 9->5) in the 2026-08-21 A/B replay. They did NOT move PR #7,
+ * which is the open case recorded in change.md, "Unresolved: criterion 4.6".
+ *
+ * Budget the whole string, not one block, before adding to this file.
+ */
 const notApplicable = `Not applicable:
 
 A criterion that the diff genuinely cannot exercise is scored "n/a", not a number. "n/a" requires a one-line justification in its note — it is an escape hatch, not a way to dodge a hard score.
 
 The cases below are "n/a" by default, not by judgment:
 
-- test / risk coverage on a change whose verification is the pipeline run — CI/workflow config, action version bumps, toolchain and lockfile updates, lint suppressions, formatting. Nothing here is unit-testable; a green run on the changed config is the test. Also "n/a" for docs-only changes.
-- documentation on a change with no non-obvious decision to explain — a mechanical rename, a version bump, a formatting pass.
-- security and safety on a diff with no trust boundary in it. Note this is narrower than it sounds: a workflow file holding deploy secrets, a dependency bump, and anything touching auth, RLS or personal data all stay in scope.
+- verification, and only when the diff adds or changes no runnable logic — CI/workflow config, action version bumps, toolchain and lockfile updates, lint suppressions, formatting, docs. A green pipeline run on the changed config is the test. If the diff adds or changes any function, endpoint, component, handler, script or CLI, verification is a number, never "n/a".
+- clarity on a change with no non-obvious decision to explain — a mechanical rename, a version bump, a formatting pass.
+- safety on a diff with no trust boundary in it. Note this is narrower than it sounds: a workflow file holding deploy secrets, a dependency bump, and anything touching auth, RLS or personal data all stay in scope.
 
-Missing tests are only a low score when the diff contains logic that could have been tested and wasn't.`;
+Missing tests are only a low score when the diff contains logic that could have been tested and wasn't. Whether a test would be slow, expensive or awkward to run is never a reason for "n/a" on verification — "n/a" is for a diff with no testable behavior, not for testable behavior nobody tested. Neither is manual verification described in the PR body: a step somebody ran once by hand does not fail on regression, so a diff that introduces testable logic and no test scores low whatever the description claims was checked.`;
 
 /** Transcribed from requirements.md:139-160, plus the scoping sentence the plan adds. */
 const blockingCategories = `Blocking categories:

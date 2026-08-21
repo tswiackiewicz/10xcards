@@ -5,12 +5,11 @@ import type { Review } from "../../src/agents/reviewer/schema.ts";
 import { deriveVerdict, explainVerdict } from "../../src/agents/reviewer/verdict.ts";
 
 const criteria: Review["criteria"] = {
-  correctness: { score: "4", note: "Off-by-one ships in the changed loop." },
-  idiomaticity: { score: "8", note: "Matches surrounding code." },
-  complexity: { score: "9", note: "Minimal and direct." },
-  testCoverage: { score: "n/a", note: "Config-only change; the pipeline run is the test." },
-  documentation: { score: "6", note: "The bound change is unexplained." },
-  security: { score: "8", note: "No trust boundary crossed." },
+  defect: { score: "4", note: "Off-by-one ships in the changed loop." },
+  safety: { score: "8", note: "Input is validated at the boundary this diff touches." },
+  blastRadius: { score: "9", note: "Nothing destructive here; the change reverts by the ordinary path." },
+  verification: { score: "n/a", note: "Config-only change; the pipeline run is the test." },
+  clarity: { score: "6", note: "The bound change is unexplained." },
 };
 
 const review: Review = {
@@ -45,7 +44,7 @@ describe("renderMarkdown", () => {
   it("names the verdict", () => {
     expect(render(review)).toContain("failed");
     expect(
-      render({ ...review, criteria: { ...criteria, correctness: { score: "9", note: "Fine." } }, findings: [] }),
+      render({ ...review, criteria: { ...criteria, defect: { score: "9", note: "Fine." } }, findings: [] }),
     ).toContain("passed");
   });
 
@@ -53,12 +52,11 @@ describe("renderMarkdown", () => {
     const markdown = render(review);
 
     for (const [label, note] of [
-      ["implementation correctness", criteria.correctness.note],
-      ["idiomaticity", criteria.idiomaticity.note],
-      ["complexity", criteria.complexity.note],
-      ["test / risk coverage", criteria.testCoverage.note],
-      ["documentation", criteria.documentation.note],
-      ["security and safety", criteria.security.note],
+      ["local defect", criteria.defect.note],
+      ["security and data handling", criteria.safety.note],
+      ["blast radius and reversibility", criteria.blastRadius.note],
+      ["risk-proportional verification", criteria.verification.note],
+      ["clarity of the change", criteria.clarity.note],
     ]) {
       expect(markdown).toContain(label);
       expect(markdown).toContain(note);
@@ -68,12 +66,12 @@ describe("renderMarkdown", () => {
   it("renders n/a as n/a, never as a number or a blank cell", () => {
     const markdown = render(review);
 
-    expect(markdown).toMatch(/test \/ risk coverage \| n\/a/);
+    expect(markdown).toMatch(/risk-proportional verification \| n\/a/);
     expect(markdown).not.toContain("| 0 |");
   });
 
   it("substitutes a placeholder for an empty note", () => {
-    const markdown = render({ ...review, criteria: { ...criteria, complexity: { score: "7", note: "" } } });
+    const markdown = render({ ...review, criteria: { ...criteria, clarity: { score: "7", note: "" } } });
 
     expect(markdown).toContain("— no justification given");
   });
@@ -89,7 +87,7 @@ describe("renderMarkdown", () => {
   it("carries no reasons section when the verdict passes", () => {
     const passing: Review = {
       ...review,
-      criteria: { ...criteria, correctness: { score: "9", note: "Fine." } },
+      criteria: { ...criteria, defect: { score: "9", note: "Fine." } },
       findings: [],
     };
 

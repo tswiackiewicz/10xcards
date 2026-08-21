@@ -1,18 +1,8 @@
-import type { Criterion, Review } from "./schema.ts";
+import { CRITERION_LABELS, type Criterion, type Review } from "./schema.ts";
 import { explainVerdict, type Verdict } from "./verdict.ts";
 
 /** The sticky-comment anchor. The workflow finds its own comment by this string. */
 export const COMMENT_MARKER = "<!-- ai-code-review -->";
-
-/** Criterion keys are terse for the model; the comment uses the names requirements.md uses. */
-const CRITERION_LABELS: Record<Criterion, string> = {
-  correctness: "implementation correctness",
-  idiomaticity: "idiomaticity",
-  complexity: "complexity",
-  testCoverage: "test / risk coverage",
-  documentation: "documentation",
-  security: "security and safety",
-};
 
 const SEVERITY_ORDER = ["error", "warning", "info"] as const;
 
