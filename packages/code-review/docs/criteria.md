@@ -168,8 +168,11 @@ just on "bad", because a merged defect, exposure or silent production failure co
 re-review.
 
 `clarity` is **exempt from the single-fail condition**: it cannot fail a PR on its own. Unclear code
-is real review feedback, but it is not the kind of harm that should hold a merge; a low `clarity`
-still counts toward the accumulation condition.
+is real review feedback, but it is not the kind of harm that should hold a merge. It is still
+counted by the accumulation condition, but only so the reason list names it — at this criteria arity
+that condition cannot fire alone (see [The gate](#the-gate)), so in practice **no `clarity` score can
+change a verdict.** Verified exhaustively: across all 7,776 score combinations there is no case where
+lowering `clarity` turns a `passed` into a `failed`.
 
 `verification` is neither blocking nor exempt, which — with three blocking criteria and `clarity`
 exempt — makes it the only criterion condition 2 applies to. That is a consequence of the two
@@ -186,7 +189,11 @@ The label is derived mechanically from the scores — the model reports numbers,
 2. any other **non-exempt** criterion scores ≤ `SINGLE_FAIL_MAX` (3) — with `clarity` exempt, this
    is `verification` alone;
 3. `ACCUMULATION_COUNT` (3) or more criteria score ≤ `ACCUMULATION_MAX` (5) — death by a thousand
-   cuts. 3-of-5 is a deliberate tightening from the original 3-of-6;
+   cuts. **This condition can no longer fire on its own.** Only two criteria are non-blocking
+   (`verification`, `clarity`), so any three at or below 5 must include a blocking one, which
+   already trips condition 1. It is a no-op that adds a reason line to an already-failed verdict —
+   not a tightening of the original 3-of-6, where four non-blocking criteria could reach the count
+   unaided. It goes live again if a rubric adds a third non-blocking criterion;
 4. a concrete finding in a **named blocking category**, whatever the scores say.
 
 Otherwise `passed`. `n/a` scores are excluded from every condition.

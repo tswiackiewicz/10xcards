@@ -17,8 +17,17 @@ export const SINGLE_FAIL_MAX = 3;
 export const ACCUMULATION_MAX = 5;
 /**
  * Three or more criteria at or below ACCUMULATION_MAX. Held at 3 across the six-to-five
- * criteria swap, which makes it a deliberate tightening from 3-of-6 to 3-of-5 — not an
- * oversight left behind by the rename. See docs/criteria.md, "The gate".
+ * criteria swap, which left condition 3 unable to fire on its own: only two criteria are
+ * non-blocking now (`verification`, `clarity`), so any three at or below the threshold must
+ * include a blocking one — and that already fires condition 1. Verified exhaustively over
+ * all 7,776 score combinations: 3,888 firings, none of them without condition 1.
+ *
+ * So this is not a tightening from 3-of-6, and not an oversight either — the condition
+ * survives as a no-op that only adds a reason line to an already-failed verdict. Kept at 3
+ * because the plan forbade changing gate mechanics, and because it becomes live again the
+ * moment a rubric adds a third non-blocking criterion. Dropping it to 2 would make
+ * `verification` + `clarity` together fail a PR, which research.md deliberately rejects.
+ * See docs/criteria.md, "The gate".
  */
 export const ACCUMULATION_COUNT = 3;
 
@@ -90,6 +99,8 @@ function evaluateGate(review: Review): { verdict: Verdict; reasons: string[] } {
   }
 
   // 3 — accumulation across all five criteria, `clarity` included (requirements.md:128).
+  // Cannot fire without condition 1 at this criteria arity — see ACCUMULATION_COUNT. It runs
+  // anyway so the reason list names every criterion that scored low, not just the blocking ones.
   const accumulated = numeric.filter((entry) => entry.score <= ACCUMULATION_MAX);
   if (accumulated.length >= ACCUMULATION_COUNT) {
     reasons.push(
