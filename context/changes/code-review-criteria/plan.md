@@ -724,7 +724,9 @@ the criteria set. `docs/criteria.md` and `evals/corpus/` are additive and can be
 
 #### Manual
 
-- [x] 2.4 The four rewritten `verdict.ts` comments each state something now true — 657c158
+- [x] 2.4 The four rewritten `verdict.ts` comments each state something now true — 5bb7a17
+      (first flipped at 657c158, but the `ACCUMULATION_COUNT` comment added by that commit was
+      itself untrue; impl-review F1 caught it and 5bb7a17 is the commit that made 2.4 hold)
 
 ### Phase 3: Tests
 

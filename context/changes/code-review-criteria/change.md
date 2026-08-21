@@ -1,7 +1,7 @@
 ---
 change_id: code-review-criteria
 title: Code review criteria
-status: implemented
+status: impl_reviewed
 created: 2026-08-20
 updated: 2026-08-21
 archived_at: null
@@ -37,7 +37,7 @@ so `temperature: 0` is in effect and no cell rests on a single reading. PR #7 wa
 **Old rubric 4 of 5. New rubric 4 of 5. Tied, and the single disagreement is the same PR for
 substantially the same reason.**
 
-The plan set "3 of 5" as the number to beat, computed from the *recorded* 2026-08-18 replay
+The plan set "3 of 5" as the number to beat, computed from the _recorded_ 2026-08-18 replay
 where PR #5 failed on an over-tagged `data-retention` category. Replayed fresh today, the old
 rubric does **not** reproduce that tag — PR #5 passes with four findings and no blocking
 category in either rubric. So the honest comparison is fresh-vs-fresh, 4 of 5 either way, and
@@ -50,23 +50,23 @@ rubric comparison must re-run both arms rather than cite an old table.
 
 Old rubric (correctness / idiomaticity / complexity / testCoverage / documentation / security):
 
-| PR  | Scores                     | Findings       |
-| --- | -------------------------- | -------------- |
-| #1  | 10 / 10 / 10 / n/a / 10 / 10 | 0            |
-| #3  | 10 / 10 / 10 / 5 / 10 / 10   | 2            |
+| PR  | Scores                       | Findings       |
+| --- | ---------------------------- | -------------- |
+| #1  | 10 / 10 / 10 / n/a / 10 / 10 | 0              |
+| #3  | 10 / 10 / 10 / 5 / 10 / 10   | 2              |
 | #5  | 8 / 9 / 9 / 8 / 9 / 8        | 4 (0 blocking) |
-| #6  | 10 / 10 / 10 / n/a / 10 / 10 | 0            |
-| #7  | 10 / 9 / 10 / 5 / 10 / 9     | 2            |
+| #6  | 10 / 10 / 10 / n/a / 10 / 10 | 0              |
+| #7  | 10 / 9 / 10 / 5 / 10 / 9     | 2              |
 
 New rubric (defect / safety / blastRadius / verification / clarity):
 
-| PR  | Scores                | Findings       |
-| --- | --------------------- | -------------- |
-| #1  | 10 / 10 / 10 / n/a / 10 | 0            |
-| #3  | 10 / 10 / 10 / 5 / 9    | 2            |
+| PR  | Scores                  | Findings       |
+| --- | ----------------------- | -------------- |
+| #1  | 10 / 10 / 10 / n/a / 10 | 0              |
+| #3  | 10 / 10 / 10 / 5 / 9    | 2              |
 | #5  | 7 / 7 / 8 / 5 / 9       | 4 (0 blocking) |
-| #6  | 10 / 10 / 10 / n/a / 10 | 0            |
-| #7  | 10 / 10 / 10 / n/a / 10 | 1            |
+| #6  | 10 / 10 / 10 / n/a / 10 | 0              |
+| #7  | 10 / 10 / 10 / n/a / 10 | 1              |
 
 ### Per-PR judgment
 
@@ -76,7 +76,7 @@ New rubric (defect / safety / blastRadius / verification / clarity):
 - **#6 (CI bump, 1.2 KB) — no criterion moved.** Same shape as #1, same correct `n/a`.
 - **#3 (manual flashcard creation, 10.1 KB) — `verification` improved the note, not the verdict.**
   Old `testCoverage: 5` and new `verification: 5` both pass the gate (5 > `SINGLE_FAIL_MAX`), so the
-  verdict is unchanged. The new note is materially better: it names the *specific* claim it is
+  verdict is unchanged. The new note is materially better: it names the _specific_ claim it is
   refusing to credit — "PR claims manual verification … but no automated test covers the endpoint
   logic or form behavior". That is the anti-abuse text working as designed on this PR. The new
   rubric also found a real `defect`-class issue the old one missed (`createClient()` can return
@@ -117,7 +117,7 @@ this run allowed):
 
 1. **Attempt 1** — added "manual verification described in the PR body is not verification" to
    both the spec and the prompt's `n/a` block. Result: still `n/a`, and the note grew to cite
-   *both* forbidden justifications at once ("requires an API key … so automated testing is not
+   _both_ forbidden justifications at once ("requires an API key … so automated testing is not
    feasible" **and** "manual verification steps are documented").
 2. **Attempt 2** — replaced the prohibition with a positive closed-list precondition: `n/a` only
    when the diff adds or changes no runnable logic; if it adds any function, endpoint, component,
@@ -126,7 +126,7 @@ this run allowed):
 
 The verbose variant of attempt 2 was reverted (it cost +712 prompt characters on every review
 for zero measured effect); the concise form of both fixes is kept, because the text is correct
-regardless of whether Haiku obeys it, and it demonstrably *did* work on #3 and #5.
+regardless of whether Haiku obeys it, and it demonstrably _did_ work on #3 and #5.
 
 **Assessment.** This is not an anti-abuse-sentence problem any more — three explicit
 prohibitions and a mechanical precondition are all in the prompt and all read. The model has
@@ -185,7 +185,7 @@ why `impl-review.md:190-193` describes the fixture as "now 281 lines" while the 
 fixture is not. The plan required that edit to be resolved before this sweep, so that the
 baseline measures a recorded fixture rather than an unrecorded one.
 
-**Resolution: reverted, not committed.** The sweep above therefore measures the *committed*
+**Resolution: reverted, not committed.** The sweep above therefore measures the _committed_
 fixture. The edit itself was not discarded — it is preserved verbatim at
 `context/changes/code-review-criteria/uncommitted-fixture-edit.patch` and restored to the
 working tree after this phase's commit, exactly as it was found.
@@ -194,3 +194,29 @@ That leaves the F3 item where its own change left it: `code-review-evals` still 
 sweep against the fixed fixture, and the `flaw_defaultprops` row above is not evidence about
 Fix A either way. Committing another change's unreviewed fixture mutation into this change would
 have made the new baseline measure something nobody signed off on — the opposite of a baseline.
+
+## Impl-review triage — 2026-08-21
+
+`reviews/impl-review.md`, verdict NEEDS ATTENTION: 0 critical, 4 warnings, 3 observations.
+Decisions recorded there; the two that changed shipped behavior or accepted a cost:
+
+- **F1 — gate condition 3 is structurally dead** (fixed, `5bb7a17`). Making `blastRadius`
+  blocking left only two non-blocking criteria, so condition 3 cannot reach a count of three
+  without including a blocking criterion — which fires condition 1 first. Exhaustive over all
+  7,776 score combinations: 3,888 firings, none without condition 1. The same sweep shows no
+  `clarity` score can flip a verdict. Three comments claimed the opposite (including one calling
+  it "a deliberate tightening from 3-of-6") and were corrected; `ACCUMULATION_COUNT` stays at 3,
+  since the plan forbade gate changes and the condition goes live again the moment a rubric adds
+  a third non-blocking criterion.
+- **F4 — the `n/a` prompt block grew 47%** (accepted). 1,017 → 1,493 characters, most of the
+  +309 on `reviewInstructions` (6,290 → 6,599, +5%), paid on every review. The plan budgeted only
+  the `criteria` block, so this went unmetered. Kept, because the added `verification` limits
+  measurably tightened that score on PR #3 (8 → 5) and PR #5 (9 → 5) — the change's only measured
+  win — even though they did not move PR #7. Recorded in a doc comment on the block itself so the
+  next edit budgets the whole string.
+
+The other five: F2 re-stamped criterion 2.4 to `5bb7a17`, the commit that actually made it true
+(it was first flipped at `657c158`, which introduced the untrue comment). F3 added a dated
+correction to `research.md` §C4 — the "PR #7 added 15 tests" premise is false, and that sentence
+was the headline argument for the `testCoverage` → `verification` reframe, which is why criterion
+4.6 failed across eight runs. O1–O3 are observations; see the report for their disposition.
