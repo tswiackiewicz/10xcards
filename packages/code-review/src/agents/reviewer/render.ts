@@ -4,7 +4,7 @@ import { explainVerdict, type Verdict } from "./verdict.ts";
 /** The sticky-comment anchor. The workflow finds its own comment by this string. */
 export const COMMENT_MARKER = "<!-- ai-code-review -->";
 
-/** Criterion keys are terse for the model; the comment uses the names requirements.md uses. */
+/** Criterion keys are terse for the model; the comment uses the names docs/criteria.md uses. */
 const CRITERION_LABELS: Record<Criterion, string> = {
   correctness: "implementation correctness",
   idiomaticity: "idiomaticity",
