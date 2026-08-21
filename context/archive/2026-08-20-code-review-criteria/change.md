@@ -1,10 +1,10 @@
 ---
 change_id: code-review-criteria
 title: Code review criteria
-status: impl_reviewed
+status: archived
 created: 2026-08-20
 updated: 2026-08-21
-archived_at: null
+archived_at: 2026-08-21T12:24:54Z
 ---
 
 ## Notes
