@@ -1,7 +1,7 @@
 ---
 change_id: code-review-criteria
 title: Code review criteria
-status: implementing
+status: implemented
 created: 2026-08-20
 updated: 2026-08-21
 archived_at: null
@@ -141,3 +141,56 @@ criteria swap and both recorded here rather than attempted:
 
 **Criterion 4.6 is left unchecked.** The five-criterion rubric ships with better findings and a
 tighter `verification` note on three of five PRs, and with a known blind spot on the fourth.
+
+## Eval sweep baseline — 2026-08-21
+
+Phase 5. `npm run eval` from inside `packages/code-review`, three configured models, on the
+**five-criterion** rubric at commit `ce734fb` plus the Phase 5 fix to `promptfooconfig.yaml`.
+Eval id `eval-Lz4-2026-08-21T11:12:15`. 27,440 grading tokens, 1m45s, no errors.
+
+| Model             | verdict | precision | flaw_authz | flaw_cleanup | flaw_defaultprops | anchors |
+| ----------------- | ------- | --------- | ---------- | ------------ | ----------------- | ------- |
+| haiku-4.5         | 1       | 1         | 1          | 1            | **0**             | 1       |
+| glm-5.1           | 1       | 1         | 1          | 1            | 1                 | 1       |
+| deepseek-v4-flash | 1       | 1         | 1          | 1            | **0**             | 1       |
+
+No metric row carries a `HARNESS ERROR:` reason. All six metric keys are present on all three
+providers.
+
+**These numbers supersede the pre-change baseline and are not comparable with it.** The earlier
+sweep measured a different rubric — six criteria, different names, different anchors, a
+different blocking set. Any comparison across that boundary is meaningless; this table is the
+new zero point.
+
+Two numbers the previous impl-review flagged as needing a billed run are now settled:
+
+- **`precision` (`impl-review.md:141`)** — deepseek's recorded 0.50 was caused solely by the
+  `invents a file or symbol` clause, corrected on 2026-08-20 to `invents a file it anchors to`.
+  Re-measured: **deepseek scores 1**, as do the other two. The clause was the whole cause.
+- **`flaw_defaultprops` (`impl-review.md:195-197`)** — see below; still unsettled, for a reason
+  outside this change.
+
+### `flaw_defaultprops` still fails to discriminate, and F3's remediation is still uncommitted
+
+`flaw_defaultprops` scores **0 / 1 / 0** (haiku / glm / deepseek) — bit-for-bit the split the
+F3 triage recorded (`impl-review.md:148-157`). So the metric is still discriminating on
+willingness to speculate past the diff rather than on flaw detection, and it is still the only
+metric separating the three models. **This is pre-existing and out of scope for a criteria
+swap**, but the reason it did not move is worth stating precisely:
+
+F3's recommended Fix A — add a call site that omits `pageSize`, so the empty-page break is
+visible in the diff rather than inferable from it — **was written but never committed.** It sat
+in the working tree as an unstaged edit to `evals/fixtures/react19-migration.diff`, which is
+why `impl-review.md:190-193` describes the fixture as "now 281 lines" while the committed
+fixture is not. The plan required that edit to be resolved before this sweep, so that the
+baseline measures a recorded fixture rather than an unrecorded one.
+
+**Resolution: reverted, not committed.** The sweep above therefore measures the *committed*
+fixture. The edit itself was not discarded — it is preserved verbatim at
+`context/changes/code-review-criteria/uncommitted-fixture-edit.patch` and restored to the
+working tree after this phase's commit, exactly as it was found.
+
+That leaves the F3 item where its own change left it: `code-review-evals` still owes a billed
+sweep against the fixed fixture, and the `flaw_defaultprops` row above is not evidence about
+Fix A either way. Committing another change's unreviewed fixture mutation into this change would
+have made the new baseline measure something nobody signed off on — the opposite of a baseline.

@@ -720,7 +720,7 @@ the criteria set. `docs/criteria.md` and `evals/corpus/` are additive and can be
 
 - [x] 2.1 Type checking passes — e22dd7f
 - [x] 2.2 Linting passes — e22dd7f
-- [ ] 2.3 No prose outside `context/` still claims a six-criterion rubric
+- [x] 2.3 No prose outside `context/` still claims a six-criterion rubric
 
 #### Manual
 
@@ -744,28 +744,28 @@ the criteria set. `docs/criteria.md` and `evals/corpus/` are additive and can be
 
 #### Automated
 
-- [x] 4.1 Each generated diff matches its recorded byte size
-- [x] 4.2 Both worktrees pass `npm ci && npm run typecheck && npm test` before any replay call
-- [x] 4.3 `OPENROUTER_MODEL` identical in both trees and recorded
+- [x] 4.1 Each generated diff matches its recorded byte size — ce734fb
+- [x] 4.2 Both worktrees pass `npm ci && npm run typecheck && npm test` before any replay call — ce734fb
+- [x] 4.3 `OPENROUTER_MODEL` identical in both trees and recorded — ce734fb
 
 #### Manual
 
-- [x] 4.4 Procedure runs against all five entries in both worktrees without a CLI error
-- [x] 4.5 Comparison table recorded in `change.md`
+- [x] 4.4 Procedure runs against all five entries in both worktrees without a CLI error — ce734fb
+- [x] 4.5 Comparison table recorded in `change.md` — ce734fb
 - [ ] 4.6 PR #7 does not score `verification` as `n/a`
-- [x] 4.7 PR #5's fired conditions read as expected given unchanged categories
-- [x] 4.8 Every cell read from at least two runs per rubric
-- [x] 4.9 Per-PR judgment recorded, naming the criterion that moved each verdict, against the corrected 3-of-5 baseline
+- [x] 4.7 PR #5's fired conditions read as expected given unchanged categories — ce734fb
+- [x] 4.8 Every cell read from at least two runs per rubric — ce734fb
+- [x] 4.9 Per-PR judgment recorded, naming the criterion that moved each verdict, against the corrected 3-of-5 baseline — ce734fb
 
 ### Phase 5: Eval sweep and new baseline
 
 #### Automated
 
-- [ ] 5.1 `npm run eval` completes and writes results
-- [ ] 5.2 No metric row carries a `HARNESS ERROR:` reason
+- [x] 5.1 `npm run eval` completes and writes results
+- [x] 5.2 No metric row carries a `HARNESS ERROR:` reason
 
 #### Manual
 
-- [ ] 5.3 `verdict` assert still scores 1 for all three models
-- [ ] 5.4 Baseline recorded in `change.md` with date and commit
-- [ ] 5.5 Judgment recorded on whether `flaw_defaultprops` still fails to discriminate
+- [x] 5.3 `verdict` assert still scores 1 for all three models
+- [x] 5.4 Baseline recorded in `change.md` with date and commit
+- [x] 5.5 Judgment recorded on whether `flaw_defaultprops` still fails to discriminate

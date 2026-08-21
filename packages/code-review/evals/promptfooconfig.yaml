@@ -135,7 +135,7 @@ tests:
           that is what the flaw_* rubrics measure.
 
           Scope: the entries in the review's `findings` array, and nothing else. The `criteria` notes are
-          one-line score justifications that the schema requires for all six criteria including the ones
+          one-line score justifications that the schema requires for all five criteria including the ones
           the reviewer scored well, so a note saying nothing is wrong is correct behaviour and must never
           count against precision. Do not judge the notes.
 
