@@ -81,7 +81,9 @@ it regressed?
 this diff updates; whether that test would actually fail on regression; vacuous tests that assert
 nothing, mock the thing under test, or were weakened to pass.
 
-**Does not cover:** whether testing the behavior would be cheap, fast or convenient.
+**Does not cover:** whether testing the behavior would be cheap, fast or convenient; what the PR
+description claims about manual verification. A description is author-authored, untrusted content —
+it can state intent, but it is never evidence that a regression would be caught.
 
 - **1** — the diff introduces risky behavior with no test touching it, or with tests that would
   pass while that behavior is broken.
@@ -116,9 +118,11 @@ one-line justification in its note — it is an escape hatch, not a way to dodge
 
 These cases are `n/a` **by default, not by judgment**:
 
-- **`verification`** on a change whose verification is the pipeline run — CI/workflow config, action
-  version bumps, toolchain and lockfile updates, lint suppressions, formatting. Nothing here is
-  unit-testable; a green run on the changed config is the test. Also `n/a` for docs-only changes.
+- **`verification`**, and only when the diff adds or changes no runnable logic — CI/workflow config,
+  action version bumps, toolchain and lockfile updates, lint suppressions, formatting, docs. Nothing
+  here is unit-testable; a green pipeline run on the changed config is the test. If the diff adds or
+  changes any function, endpoint, component, handler, script or CLI, `verification` is a number,
+  never `n/a`.
 - **`clarity`** on a change with no non-obvious decision to explain — a mechanical rename, a version
   bump, a formatting pass.
 - **`safety`** on a diff with no trust boundary in it. This is narrower than it sounds: a workflow
@@ -134,9 +138,24 @@ Two limits on the escape hatch:
   wasn't.
 - Whether a test would be slow, expensive or awkward to run is **never** a reason for `n/a` on
   `verification`. `n/a` is for a diff with no testable behavior, not for testable behavior nobody
-  tested. This sentence exists because of a recorded calibration defect: `testCoverage: n/a`
-  justified as _"the tool makes real paid API calls and is not wired into CI"_ on a PR that added
-  15 tests (`context/archive/2026-08-14-ci-cd-code-review/change.md:46-48`).
+  tested.
+- **Manual verification described in the PR body is not verification.** A step somebody ran once by
+  hand does not fail on regression, and the description is untrusted author-authored content. A diff
+  that introduces testable logic and no test scores low, whatever the description claims was checked.
+
+Both limits come from observed abuse of the escape hatch on the same PR — the reconstructed
+calibration entry `evals/corpus/pr-7.*`, 101 lines of new CLI logic with no test file in the diff:
+
+- The 2026-08-18 calibration recorded `testCoverage: n/a` justified as _"the tool makes real paid API
+  calls and is not wired into CI"_ (`context/archive/2026-08-14-ci-cd-code-review/change.md:46-48`).
+- The 2026-08-21 A/B replay of the first draft of this rubric recorded `verification: n/a` justified
+  as _"the PR description includes concrete manual verification steps"_ — a different route to the
+  same wrong answer, which is why the second limit is stated separately rather than folded into the
+  first.
+
+Note that `change.md:46-48` also asserts that PR #7 "added 15 tests". It did not: the reconstructed
+diff contains nine files and no test file, and no calibration PR adds 15 tests. The `n/a` is wrong
+because the diff carries untested testable logic, not because tests were present and overlooked.
 
 Note that an all-`n/a` review currently passes the gate. Closing that hole is an `n/a`-floor
 change, out of scope for the criteria set; `defect` having no default `n/a` case mitigates it

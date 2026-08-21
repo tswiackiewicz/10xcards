@@ -1,0 +1,74 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index e147e83..62d3906 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -10,10 +10,10 @@ jobs:
+   ci:
+     runs-on: ubuntu-latest
+     steps:
+-      - uses: actions/checkout@v4
+-      - uses: actions/setup-node@v4
++      - uses: actions/checkout@v7
++      - uses: actions/setup-node@v6
+         with:
+-          node-version: 22
++          node-version: 24
+           cache: npm
+       - run: npm ci
+       - run: npx astro sync
+@@ -28,17 +28,17 @@ jobs:
+     if: github.ref == 'refs/heads/master'
+     runs-on: ubuntu-latest
+     steps:
+-      - uses: actions/checkout@v4
+-      - uses: actions/setup-node@v4
++      - uses: actions/checkout@v7
++      - uses: actions/setup-node@v6
+         with:
+-          node-version: 22
++          node-version: 24
+           cache: npm
+       - run: npm ci
+       - run: npm run build
+         env:
+           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+-      - uses: cloudflare/wrangler-action@v3
++      - uses: cloudflare/wrangler-action@v4
+         with:
+           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+diff --git a/.nvmrc b/.nvmrc
+index adb5558..1dd37d5 100644
+--- a/.nvmrc
++++ b/.nvmrc
+@@ -1 +1 @@
+-22.14.0
+\ No newline at end of file
++24.17.0
+diff --git a/AGENTS.md b/AGENTS.md
+index 03a2a4e..83d4104 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -4,7 +4,7 @@ Project onboarding for AI coding agents. This is the source of truth; `CLAUDE.md
+ 
+ ## Stack
+ 
+-Astro 6 (server-first, `output: server` on Cloudflare) · React 19 islands · TypeScript 5.9 (strict) · Tailwind 4 · shadcn/ui (new-york) · Supabase (auth + Postgres) · deploys to Cloudflare Workers via Wrangler. Package manager: **npm**. Node: **22.14.0** (`.nvmrc`) — `type: module` (ESM).
++Astro 6 (server-first, `output: server` on Cloudflare) · React 19 islands · TypeScript 5.9 (strict) · Tailwind 4 · shadcn/ui (new-york) · Supabase (auth + Postgres) · deploys to Cloudflare Workers via Wrangler. Package manager: **npm**. Node: **24.17.0** (`.nvmrc`) — `type: module` (ESM).
+ 
+ ## Commands
+ 
+diff --git a/README.md b/README.md
+index 1754151..5cd8589 100644
+--- a/README.md
++++ b/README.md
+@@ -15,7 +15,7 @@ A modern, opinionated starter template for building fast, accessible web applica
+ 
+ ## Prerequisites
+ 
+-- Node.js v22.14.0 (as specified in `.nvmrc`)
++- Node.js v24.17.0 (as specified in `.nvmrc`)
+ - npm (comes with Node.js)
+ 
+ ## Getting Started

@@ -1,0 +1,8 @@
+{
+  "number": 6,
+  "title": "chore(ci): bump supabase/setup-cli to v2, suppress intentional console warning",
+  "body": "## Why\nLatest CI run had two warning annotations: a GitHub Actions Node 20 deprecation notice on `supabase/setup-cli@v1`, and an ESLint `no-console` warning on an intentional diagnostic log in a test helper.\n\n## What\n- Bump `supabase/setup-cli@v1` → `@v2` at both call sites in `.github/workflows/ci.yml` (`ci` and `deploy` jobs). v2 is a Bun-based composite action with no Node runtime declaration, so it can't trigger the deprecation warning. Confirmed the `version: latest` input is unchanged in meaning between v1 and v2.\n- Add `// eslint-disable-next-line no-console -- ...` above the intentional `console.warn` in `tests/helpers/auth.ts`'s `cleanupUser()`, matching the existing suppression convention already used in `src/pages/api/cron/purge.ts`.\n\n## How to verify\n- CI on this PR should pass with no Node 20 deprecation annotation and no `no-console` annotation on `tests/helpers/auth.ts:57`.\n- `npm run lint`, `npm test`, `npm run build`, and the migration dry-run step should all still pass unchanged.\n\n## Risk & rollback\nNo application behavior change — CI tooling version bump and a lint suppression comment only. Revert by reverting this commit if `supabase/setup-cli@v2` misbehaves in the runner.\n\nCo-authored-by: Claude <noreply@anthropic.com>",
+  "handScored": "passed",
+  "citation": "context/archive/2026-08-14-ci-cd-code-review/change.md:19-25",
+  "note": "CI bump; the replay scored testCoverage n/a."
+}

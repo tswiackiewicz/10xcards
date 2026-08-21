@@ -1,0 +1,34 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 2074b6c..4344f7c 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -19,7 +19,7 @@ jobs:
+       - run: npx astro sync
+       - run: npm run lint
+ 
+-      - uses: supabase/setup-cli@v1
++      - uses: supabase/setup-cli@v2
+         with:
+           version: latest
+       - run: supabase start
+@@ -49,7 +49,7 @@ jobs:
+       - run: npm ci
+       - run: npm run build
+ 
+-      - uses: supabase/setup-cli@v1
++      - uses: supabase/setup-cli@v2
+         with:
+           version: latest
+       - name: Push Supabase migrations
+diff --git a/tests/helpers/auth.ts b/tests/helpers/auth.ts
+index c2ac56b..553c339 100644
+--- a/tests/helpers/auth.ts
++++ b/tests/helpers/auth.ts
+@@ -54,6 +54,7 @@ export async function cleanupUser(id: string): Promise<void> {
+   await adminClient()
+     .auth.admin.deleteUser(id)
+     .catch((err: unknown) => {
++      // eslint-disable-next-line no-console -- surfaces cleanupUser failures instead of swallowing them (test hygiene)
+       console.warn(`cleanupUser(${id}) failed: ${err instanceof Error ? err.message : String(err)}`);
+     });
+ }

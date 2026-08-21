@@ -718,8 +718,8 @@ the criteria set. `docs/criteria.md` and `evals/corpus/` are additive and can be
 
 #### Automated
 
-- [x] 2.1 Type checking passes
-- [x] 2.2 Linting passes
+- [x] 2.1 Type checking passes — e22dd7f
+- [x] 2.2 Linting passes — e22dd7f
 - [ ] 2.3 No prose outside `context/` still claims a six-criterion rubric
 
 #### Manual
@@ -730,32 +730,32 @@ the criteria set. `docs/criteria.md` and `evals/corpus/` are additive and can be
 
 #### Automated
 
-- [x] 3.1 Unit and integration tests pass
-- [x] 3.2 Type checking passes
-- [x] 3.3 Linting passes
-- [x] 3.4 Strict-subset guard passes unedited
+- [x] 3.1 Unit and integration tests pass — e22dd7f
+- [x] 3.2 Type checking passes — e22dd7f
+- [x] 3.3 Linting passes — e22dd7f
+- [x] 3.4 Strict-subset guard passes unedited — e22dd7f
 
 #### Manual
 
-- [x] 3.5 Every removed assertion was removed because its subject no longer exists
-- [x] 3.6 Criteria notes in each fixture are plausible for their criterion
+- [x] 3.5 Every removed assertion was removed because its subject no longer exists — e22dd7f
+- [x] 3.6 Criteria notes in each fixture are plausible for their criterion — e22dd7f
 
 ### Phase 4: A/B replay on the reconstructed calibration corpus
 
 #### Automated
 
-- [ ] 4.1 Each generated diff matches its recorded byte size
-- [ ] 4.2 Both worktrees pass `npm ci && npm run typecheck && npm test` before any replay call
-- [ ] 4.3 `OPENROUTER_MODEL` identical in both trees and recorded
+- [x] 4.1 Each generated diff matches its recorded byte size
+- [x] 4.2 Both worktrees pass `npm ci && npm run typecheck && npm test` before any replay call
+- [x] 4.3 `OPENROUTER_MODEL` identical in both trees and recorded
 
 #### Manual
 
-- [ ] 4.4 Procedure runs against all five entries in both worktrees without a CLI error
-- [ ] 4.5 Comparison table recorded in `change.md`
+- [x] 4.4 Procedure runs against all five entries in both worktrees without a CLI error
+- [x] 4.5 Comparison table recorded in `change.md`
 - [ ] 4.6 PR #7 does not score `verification` as `n/a`
-- [ ] 4.7 PR #5's fired conditions read as expected given unchanged categories
-- [ ] 4.8 Every cell read from at least two runs per rubric
-- [ ] 4.9 Per-PR judgment recorded, naming the criterion that moved each verdict, against the corrected 3-of-5 baseline
+- [x] 4.7 PR #5's fired conditions read as expected given unchanged categories
+- [x] 4.8 Every cell read from at least two runs per rubric
+- [x] 4.9 Per-PR judgment recorded, naming the criterion that moved each verdict, against the corrected 3-of-5 baseline
 
 ### Phase 5: Eval sweep and new baseline
 

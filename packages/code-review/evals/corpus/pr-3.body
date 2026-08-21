@@ -1,0 +1,31 @@
+## Why
+
+Roadmap **S-02** / PRD **FR-005**: give users a way to create a flashcard by hand (question + answer) and save it to their deck. This is the fallback path for when AI generation (S-01) doesn't fit the source material. It builds on F-01 (per-user store + RLS) and reuses S-01's Zod schemas and page/island patterns.
+
+## What
+
+- New `POST /api/flashcards/manual` — auth via session `getUser()`, validates one card with the reused `candidateSchema`, inserts `source:'manual'` with a session-derived `user_id` under RLS, returns `{saved:1}`. Deliberately separate from the AI batch-save endpoint so the north-star wedge code stays untouched.
+- `ManualCardForm` React island + protected `/create` page (mirrors `/generate`); `/create` added to middleware `PROTECTED_ROUTES`; dashboard links to it.
+- Inline confirmation + form reset on save; empty/over-length fields disable save; typed error codes → friendly copy.
+- No DB migration — the `flashcards.source` column (default `'manual'`, CHECK `in ('ai','manual')`) already exists from F-01.
+
+## How to verify
+
+- **Automated (CI mirror):** `npx astro sync` → `npm run lint` → `npm run build` — all pass.
+- **Manual (verified locally):**
+  - `/create` signed out → redirects to `/auth/signin`.
+  - Signed-in save → `200 {"saved":1}`; row persists with `source='manual'` + caller's `user_id` (confirmed via RLS-scoped read).
+  - Unauth → 401; empty/over-length input → 400 `invalid_input` (rejected rows write nothing).
+  - Browser (Playwright): save shows confirmation + clears form; empty fields disable the button; dashboard link navigates; `/generate` unregressed.
+
+## Risk & rollback
+
+- **Low.** Additive only — one new endpoint, one new page, one island; no change to the AI path, no schema/migration. Guardrails held: `user_id` is session-derived (never body), RLS `with check` pins ownership, `source='manual'` keeps the "75%-via-AI" metric honest.
+- Rollback: revert the branch; nothing to migrate.
+- Full-plan impl-review: **APPROVED** (0 critical, 0 warnings, 2 accepted observations).
+
+## Refs
+
+Roadmap S-02 · PRD FR-005
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

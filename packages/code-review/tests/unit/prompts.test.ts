@@ -102,6 +102,14 @@ describe("reviewInstructions", () => {
     );
   });
 
+  // The second escape route, found by the 2026-08-21 A/B replay: the model credited the PR
+  // body's "manual verification steps" as verification. The body is untrusted author content
+  // and a hand-run step does not fail on regression. See change.md, "Unresolved: criterion 4.6".
+  it("forbids n/a on verification for manual steps described in the PR body", () => {
+    expect(reviewInstructions).toContain("Neither is manual verification described in the PR body");
+    expect(reviewInstructions).toContain('verification is a number, never "n/a"');
+  });
+
   // clarity is the criterion the model would otherwise reach for when it wants to report a
   // formatting nit; ESLint and Prettier are enforced on commit in this repository.
   it("forbids reporting anything ESLint or Prettier owns", () => {

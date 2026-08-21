@@ -1,0 +1,85 @@
+## Why
+
+We have no programmatic way to get a second opinion on a diff. This adds the
+smallest thing that can grow into one: a package that takes a unified diff and
+returns structured findings, so review logic can be scripted instead of
+copy-pasted into a chat window.
+
+Scope is deliberately a foundation, not a product — one entry point, one
+exported function, no CLI flags or config surface beyond two env vars.
+
+Note on size: 1065 of the 1211 added lines are `package-lock.json`. The actual
+implementation is 101 lines in `src/index.ts`.
+
+## What
+
+- New standalone package `packages/code-review` (the repo root has no npm
+  workspaces, so it carries its own lockfile and `node_modules`).
+- `reviewDiff(diff, cwd)` — sends a unified diff to a model, returns findings
+  validated against a zod schema (`file`, `line`, `severity`, `message`).
+- Structured output via `generateText` + `Output.object()`. AI SDK deprecated
+  `generateObject` in v6, so the older pattern is intentionally not used.
+- Provider is OpenRouter (`@openrouter/ai-sdk-provider`); model comes from
+  `OPENROUTER_MODEL`, defaulting to `anthropic/claude-haiku-4.5`.
+- Two guards against the reviewer hallucinating about the ecosystem: the system
+  prompt forbids claims about whether a dependency version exists or is
+  current, and installed versions read from `node_modules` are injected into
+  the prompt as ground truth.
+- Runtime is `tsx` under Node (`node --import tsx`) — no bundler, no `dotenv`;
+  env is loaded with `--env-file-if-exists` so a missing `.env` is not fatal.
+
+### Why the hallucination guards are in the first commit
+
+Without them the model rejected the entire dependency set as fictional — it
+flagged `typescript@7.0.2` as "does not correspond to any released version" at
+`error` severity, plus `ai@7.0.64`, `@types/node@26.2.0`, the zod custom-message
+API and the model id. Five findings, zero real. The reviewer's training data is
+older than the packages it reviews, and its confidence was highest exactly
+where its knowledge was most stale. After the guards, the same diff produced
+zero version findings.
+
+## How to verify
+
+Requires your own OpenRouter API key — the tool makes a real paid API call,
+which is also why it is not wired into CI.
+
+```bash
+cd packages/code-review
+npm ci
+npm run typecheck                     # no output = clean
+
+cp .env.example .env                  # then put your key in it
+printf 'diff --git a/src/cart.ts b/src/cart.ts\n--- a/src/cart.ts\n+++ b/src/cart.ts\n@@ -1,5 +1,9 @@\n export function total(items: Item[]): number {\n-  return items.reduce((sum, i) => sum + i.price * i.qty, 0);\n+  let sum = 0;\n+  for (let i = 0; i <= items.length; i++) {\n+    sum += items[i].price * items[i].qty;\n+  }\n+  return sum;\n }\n' | npm start
+```
+
+Expected: one finding, `severity: "error"`, `line: 3`, naming the `<=` bound.
+Both `anthropic/claude-haiku-4.5` and `anthropic/claude-sonnet-5` catch it.
+
+Negative controls worth running, since they cover the failure modes:
+
+```bash
+npm start                             # no stdin  -> usage message, exit 1
+OPENROUTER_API_KEY= npm start < d     # empty key -> zod too_small on that var
+git diff HEAD~1 -- packages/code-review/src | npm start   # review its own code
+```
+
+Checked locally: `tsc --noEmit` clean, `prettier --check` clean, root
+`eslint` 0 errors (2 `no-console` warnings, both in the CLI path).
+
+## Risk & rollback
+
+- **No effect on the deployed app.** Nothing in `src/` or `astro.config.mjs`
+  imports this package; it is not part of the Astro build or the Worker bundle.
+- **Not covered by CI.** The workflow targets the root Astro app, so a green
+  pipeline says nothing about this package. Quality currently rests on local
+  `npm run typecheck`. If we want it enforced, that needs a separate CI step.
+- **Costs money per invocation** and sends the diff to a third party
+  (OpenRouter). Do not point it at diffs containing secrets or customer data.
+  Keys stay in `.env`, which is gitignored.
+- **Known limitation, not fixed here:** the guards cover dependency versions
+  but not language-level claims. On its own source the model reported, at
+  `error` severity, that `filter((row) => row !== null)` fails to narrow —
+  false since TypeScript 5.5 inferred type predicates, and contradicted by a
+  passing `tsc`. Treat `error` severity as a hint, not a verdict. The fix is to
+  inject real compiler/linter output; that is follow-up work.
+- **Rollback:** delete the directory. `git revert 99f64ec` touches nothing else.

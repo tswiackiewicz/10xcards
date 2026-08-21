@@ -33,7 +33,7 @@ const criteria = `Criteria:
    - 5: the failure is surfaced, but recovery depends on an unstated assumption — a manual step, an out-of-band alert, a retry nobody triggers.
    - 10: failure is surfaced where an operator will see it and the change reverts by the ordinary path — or the diff carries nothing whose failure would matter.
 
-4. verification — is behavior this diff introduces or changes exercised by something that would fail if it regressed?
+4. verification — is behavior this diff introduces or changes exercised by something that would fail if it regressed? Only a test counts; manual steps and a green-by-hand claim do not.
    - 1: the diff introduces risky behavior with no test touching it, or with tests that would pass while that behavior is broken.
    - 5: the happy path of the changed behavior is tested, but the failure mode that motivated the change is not.
    - 10: the behavior this diff changes is covered by a test that would fail on regression, and low-risk code is not over-tested.
@@ -52,11 +52,11 @@ A criterion that the diff genuinely cannot exercise is scored "n/a", not a numbe
 
 The cases below are "n/a" by default, not by judgment:
 
-- verification on a change whose verification is the pipeline run — CI/workflow config, action version bumps, toolchain and lockfile updates, lint suppressions, formatting. Nothing here is unit-testable; a green run on the changed config is the test. Also "n/a" for docs-only changes.
+- verification, and only when the diff adds or changes no runnable logic — CI/workflow config, action version bumps, toolchain and lockfile updates, lint suppressions, formatting, docs. A green pipeline run on the changed config is the test. If the diff adds or changes any function, endpoint, component, handler, script or CLI, verification is a number, never "n/a".
 - clarity on a change with no non-obvious decision to explain — a mechanical rename, a version bump, a formatting pass.
 - safety on a diff with no trust boundary in it. Note this is narrower than it sounds: a workflow file holding deploy secrets, a dependency bump, and anything touching auth, RLS or personal data all stay in scope.
 
-Missing tests are only a low score when the diff contains logic that could have been tested and wasn't. Whether a test would be slow, expensive or awkward to run is never a reason for "n/a" on verification — "n/a" is for a diff with no testable behavior, not for testable behavior nobody tested.`;
+Missing tests are only a low score when the diff contains logic that could have been tested and wasn't. Whether a test would be slow, expensive or awkward to run is never a reason for "n/a" on verification — "n/a" is for a diff with no testable behavior, not for testable behavior nobody tested. Neither is manual verification described in the PR body: a step somebody ran once by hand does not fail on regression, so a diff that introduces testable logic and no test scores low whatever the description claims was checked.`;
 
 /** Transcribed from requirements.md:139-160, plus the scoping sentence the plan adds. */
 const blockingCategories = `Blocking categories:
