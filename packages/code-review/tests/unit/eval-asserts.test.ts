@@ -25,16 +25,15 @@ const DIFF = ["diff --git a/src/app.ts b/src/app.ts", "--- a/src/app.ts", "+++ b
 );
 
 function reviewWith(findings: Review["findings"]): Review {
-  const criterion = { score: "9", note: "…" } as Review["criteria"]["correctness"];
+  const criterion = { score: "9", note: "…" } as Review["criteria"]["defect"];
   return {
     summary: "…",
     criteria: {
-      correctness: criterion,
-      idiomaticity: criterion,
-      complexity: criterion,
-      testCoverage: criterion,
-      documentation: criterion,
-      security: criterion,
+      defect: criterion,
+      safety: criterion,
+      blastRadius: criterion,
+      verification: criterion,
+      clarity: criterion,
     },
     findings,
   };

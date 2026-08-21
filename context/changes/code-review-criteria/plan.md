@@ -718,27 +718,27 @@ the criteria set. `docs/criteria.md` and `evals/corpus/` are additive and can be
 
 #### Automated
 
-- [ ] 2.1 Type checking passes
-- [ ] 2.2 Linting passes
+- [x] 2.1 Type checking passes
+- [x] 2.2 Linting passes
 - [ ] 2.3 No prose outside `context/` still claims a six-criterion rubric
 
 #### Manual
 
-- [x] 2.4 The four rewritten `verdict.ts` comments each state something now true
+- [x] 2.4 The four rewritten `verdict.ts` comments each state something now true — 657c158
 
 ### Phase 3: Tests
 
 #### Automated
 
-- [ ] 3.1 Unit and integration tests pass
-- [ ] 3.2 Type checking passes
-- [ ] 3.3 Linting passes
-- [ ] 3.4 Strict-subset guard passes unedited
+- [x] 3.1 Unit and integration tests pass
+- [x] 3.2 Type checking passes
+- [x] 3.3 Linting passes
+- [x] 3.4 Strict-subset guard passes unedited
 
 #### Manual
 
-- [ ] 3.5 Every removed assertion was removed because its subject no longer exists
-- [ ] 3.6 Criteria notes in each fixture are plausible for their criterion
+- [x] 3.5 Every removed assertion was removed because its subject no longer exists
+- [x] 3.6 Criteria notes in each fixture are plausible for their criterion
 
 ### Phase 4: A/B replay on the reconstructed calibration corpus
 

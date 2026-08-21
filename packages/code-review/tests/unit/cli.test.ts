@@ -11,12 +11,11 @@ import { COMMENT_MARKER } from "../../src/agents/reviewer/render.ts";
 const review = {
   summary: "One real defect in the changed lines.",
   criteria: {
-    correctness: { score: "4", note: "Off-by-one ships." },
-    idiomaticity: { score: "8", note: "Matches surrounding code." },
-    complexity: { score: "9", note: "Minimal." },
-    testCoverage: { score: "n/a", note: "Nothing testable." },
-    documentation: { score: "7", note: "Explained." },
-    security: { score: "8", note: "No trust boundary." },
+    defect: { score: "4", note: "Off-by-one ships in the changed loop." },
+    safety: { score: "8", note: "No trust boundary in the diff." },
+    blastRadius: { score: "9", note: "Nothing destructive; reverts by the ordinary path." },
+    verification: { score: "n/a", note: "Nothing testable in the diff." },
+    clarity: { score: "7", note: "The why is recorded where a reader will look." },
   },
   findings: [{ file: "src/cart.ts", line: 5, severity: "error", message: "Off-by-one.", blockingCategory: null }],
 };
@@ -123,7 +122,7 @@ describe("toMessage", () => {
   it("names the finish reason and what the model emitted on a schema miss", () => {
     const error = new NoObjectGeneratedError({
       message: "No object generated: response did not match schema.",
-      text: '{"summary": "…", "criteria": {"correctness": {"score": 4',
+      text: '{"summary": "…", "criteria": {"defect": {"score": 4',
       finishReason: "length",
       response: { id: "gen-1", timestamp: new Date(0), modelId: "anthropic/claude-haiku-4.5" },
       usage: {

@@ -75,26 +75,37 @@ describe("buildReviewPrompt", () => {
 });
 
 describe("reviewInstructions", () => {
-  it("carries the six criteria the schema scores", () => {
-    for (const criterion of [
-      "implementation correctness",
-      "idiomaticity",
-      "complexity",
-      "test / risk coverage",
-      "documentation",
-      "security and safety",
-    ]) {
+  it("carries the five criteria the schema scores", () => {
+    for (const criterion of ["defect", "safety", "blast radius", "verification", "clarity"]) {
       expect(reviewInstructions).toContain(criterion);
     }
+    expect(reviewInstructions).toContain(
+      "The schema keys map to the criteria in this order: defect, safety, blastRadius, verification, clarity.",
+    );
   });
 
   it("carries a 1/5/10 anchor rather than a bare scale", () => {
-    expect(reviewInstructions).toContain("indistinguishable from surrounding code");
-    expect(reviewInstructions).toContain("the stated intent is fully delivered");
+    expect(reviewInstructions).toContain("a defect that fires on a realistic input");
+    expect(reviewInstructions).toContain("failure is surfaced where an operator will see it");
   });
 
   it("carries the n/a rule and its default cases", () => {
     expect(reviewInstructions).toContain("Missing tests are only a low score");
+  });
+
+  // The recorded calibration defect this sentence exists to close: `testCoverage: n/a`
+  // justified as "the tool makes real paid API calls and is not wired into CI" on a PR that
+  // added 15 tests. See docs/criteria.md, "The n/a rule".
+  it("forbids n/a on verification for cost or inconvenience", () => {
+    expect(reviewInstructions).toContain(
+      'Whether a test would be slow, expensive or awkward to run is never a reason for "n/a" on verification',
+    );
+  });
+
+  // clarity is the criterion the model would otherwise reach for when it wants to report a
+  // formatting nit; ESLint and Prettier are enforced on commit in this repository.
+  it("forbids reporting anything ESLint or Prettier owns", () => {
+    expect(reviewInstructions).toContain("Never report style, formatting, import order, quoting or line length");
   });
 
   it("carries the eleven legal score values", () => {
