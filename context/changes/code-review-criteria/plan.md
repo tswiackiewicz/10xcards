@@ -702,17 +702,17 @@ the criteria set. `docs/criteria.md` and `evals/corpus/` are additive and can be
 
 #### Automated
 
-- [x] 1.1 `docs/criteria.md` exists and contains all five criterion names and fifteen anchors
-- [x] 1.2 Prompt `criteria` block at or below 3,323 chars with no `Covers:` text
-- [x] 1.3 Three criteria citations now point at `docs/criteria.md`
-- [x] 1.4 Seven gate / blocking-category citations untouched
-- [x] 1.5 `npx prettier --check docs/criteria.md` clean
+- [x] 1.1 `docs/criteria.md` exists and contains all five criterion names and fifteen anchors — 9c3ac74
+- [x] 1.2 Prompt `criteria` block at or below 3,323 chars with no `Covers:` text — 9c3ac74
+- [x] 1.3 Three criteria citations now point at `docs/criteria.md` — 9c3ac74
+- [x] 1.4 Seven gate / blocking-category citations untouched — 9c3ac74
+- [x] 1.5 `npx prettier --check docs/criteria.md` clean — 9c3ac74
 
 #### Manual
 
-- [x] 1.6 Each criterion's "does not cover" section rules out its intended failure mode
-- [x] 1.7 `clarity` forbids reporting anything ESLint or Prettier owns
-- [x] 1.8 `verification` forbids `n/a` for "testing would be expensive"
+- [x] 1.6 Each criterion's "does not cover" section rules out its intended failure mode — 9c3ac74
+- [x] 1.7 `clarity` forbids reporting anything ESLint or Prettier owns — 9c3ac74
+- [x] 1.8 `verification` forbids `n/a` for "testing would be expensive" — 9c3ac74
 
 ### Phase 2: Gate wiring and rendering
 
@@ -724,7 +724,7 @@ the criteria set. `docs/criteria.md` and `evals/corpus/` are additive and can be
 
 #### Manual
 
-- [ ] 2.4 The four rewritten `verdict.ts` comments each state something now true
+- [x] 2.4 The four rewritten `verdict.ts` comments each state something now true
 
 ### Phase 3: Tests
 

@@ -44,7 +44,9 @@ export const reviewSchema = z.object({
     defect: criterion("defect — does the diff contain a defect observable in the changed lines"),
     safety: criterion("safety — does the change expose data or open a trust boundary present in the diff"),
     blastRadius: criterion("blast radius — if this is wrong in production, is the failure visible and reversible"),
-    verification: criterion("verification — is the changed behavior exercised by something that would fail on regression"),
+    verification: criterion(
+      "verification — is the changed behavior exercised by something that would fail on regression",
+    ),
     clarity: criterion("clarity — will a later reader understand why this diff looks the way it does"),
   }),
   findings: z.array(

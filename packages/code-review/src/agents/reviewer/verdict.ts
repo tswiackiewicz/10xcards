@@ -15,13 +15,27 @@ export type Verdict = "passed" | "failed";
 export const BLOCKING_MAX = 5;
 export const SINGLE_FAIL_MAX = 3;
 export const ACCUMULATION_MAX = 5;
+/**
+ * Three or more criteria at or below ACCUMULATION_MAX. Held at 3 across the six-to-five
+ * criteria swap, which makes it a deliberate tightening from 3-of-6 to 3-of-5 — not an
+ * oversight left behind by the rename. See docs/criteria.md, "The gate".
+ */
 export const ACCUMULATION_COUNT = 3;
 
 /**
- * The two dimensions that fail on "unproven", not just on "bad". Conditions 1 and 2
- * partition the six criteria off this one list, so the two cannot drift apart.
+ * The three dimensions that fail on "unproven", not just on "bad" — a merged defect,
+ * exposure or silent production failure costs far more than a re-review. Condition 1
+ * reads this list and condition 2 reads its complement minus SINGLE_FAIL_EXEMPT, so the
+ * three lists cannot drift apart.
  */
-export const BLOCKING_CRITERIA = ["correctness", "security"] as const satisfies readonly Criterion[];
+export const BLOCKING_CRITERIA = ["defect", "safety", "blastRadius"] as const satisfies readonly Criterion[];
+
+/**
+ * Criteria that cannot fail a PR on their own. Unclear code is real review feedback, but
+ * it is not the kind of harm that should hold a merge — so `clarity` sits out of
+ * condition 2 while still counting toward the accumulation in condition 3.
+ */
+export const SINGLE_FAIL_EXEMPT = ["clarity"] as const satisfies readonly Criterion[];
 
 /** The only place the string score encoding is decoded. `n/a` becomes null, never 0. */
 function parseScore(score: Review["criteria"][Criterion]["score"]): number | null {
@@ -53,6 +67,7 @@ function label({ name, score }: Scored): string {
 function evaluateGate(review: Review): { verdict: Verdict; reasons: string[] } {
   const numeric = scored(review);
   const blocking = new Set<string>(BLOCKING_CRITERIA);
+  const exempt = new Set<string>(SINGLE_FAIL_EXEMPT);
   const reasons: string[] = [];
 
   // 1 — a blocking dimension at or below the blocking threshold (requirements.md:124).
@@ -61,15 +76,20 @@ function evaluateGate(review: Review): { verdict: Verdict; reasons: string[] } {
     reasons.push(`Blocking criterion at or below ${String(BLOCKING_MAX)}: ${failedBlocking.map(label).join(", ")}`);
   }
 
-  // 2 — any other criterion at or below the single-fail threshold (requirements.md:127).
-  // "Other" because condition 1 already fails the two blocking dimensions at <= 5,
-  // which makes a <= 3 rule for them dead.
-  const failedSingle = numeric.filter((entry) => !blocking.has(entry.name) && entry.score <= SINGLE_FAIL_MAX);
+  // 2 — any other non-exempt criterion at or below the single-fail threshold
+  // (requirements.md:127). "Other" because condition 1 already fails the three blocking
+  // dimensions at <= 5, which makes a <= 3 rule for them dead; "non-exempt" because
+  // `clarity` must not fail a PR by itself. With three blocking criteria and `clarity`
+  // exempt, this condition applies to `verification` alone — a consequence of those two
+  // decisions, not an oversight (docs/criteria.md, "Which criteria block").
+  const failedSingle = numeric.filter(
+    (entry) => !blocking.has(entry.name) && !exempt.has(entry.name) && entry.score <= SINGLE_FAIL_MAX,
+  );
   if (failedSingle.length > 0) {
     reasons.push(`Criterion at or below ${String(SINGLE_FAIL_MAX)}: ${failedSingle.map(label).join(", ")}`);
   }
 
-  // 3 — accumulation across all six criteria (requirements.md:128).
+  // 3 — accumulation across all five criteria, `clarity` included (requirements.md:128).
   const accumulated = numeric.filter((entry) => entry.score <= ACCUMULATION_MAX);
   if (accumulated.length >= ACCUMULATION_COUNT) {
     reasons.push(

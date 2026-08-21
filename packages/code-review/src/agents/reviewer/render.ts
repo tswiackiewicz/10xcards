@@ -6,12 +6,11 @@ export const COMMENT_MARKER = "<!-- ai-code-review -->";
 
 /** Criterion keys are terse for the model; the comment uses the names docs/criteria.md uses. */
 const CRITERION_LABELS: Record<Criterion, string> = {
-  correctness: "implementation correctness",
-  idiomaticity: "idiomaticity",
-  complexity: "complexity",
-  testCoverage: "test / risk coverage",
-  documentation: "documentation",
-  security: "security and safety",
+  defect: "local defect",
+  safety: "security and data handling",
+  blastRadius: "blast radius and reversibility",
+  verification: "risk-proportional verification",
+  clarity: "clarity of the change",
 };
 
 const SEVERITY_ORDER = ["error", "warning", "info"] as const;
