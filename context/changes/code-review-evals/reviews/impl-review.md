@@ -175,7 +175,26 @@ resolved the var to file contents at assert time.
   - Blind spot: Not verified whether haiku/deepseek noticed `defaultProps` and declined to call
     it a break, or missed it entirely — that distinction decides between A and B.
 
-- **Decision**: SKIPPED (2026-08-20) — the finding's premise was tested against `out/results.json` during triage and does not hold: neither haiku nor deepseek mentions `defaultProps` or React 19 anywhere in its findings, so both missed the flaw outright rather than noticing it and declining to speculate. The metric discriminates on detection, and Fix B would not have changed a single score. Fixture and rubric left as they are.
+- **Decision**: REOPENED, then FIXED via Fix A (2026-08-20). First triaged as SKIPPED: the
+  premise was tested against the 2026-08-19 `out/results.json` and did not hold there —
+  neither haiku nor deepseek mentioned `defaultProps` or React 19 anywhere, so both missed the
+  flaw outright rather than noticing it and declining to speculate.
+
+  A re-run the same day overturned that. With the fixture and this rubric untouched, `glm-5.1`
+  dropped from `flaw_defaultprops` = 1 to 0 — it **found** the dangling `defaultProps` at the
+  right line and gave the right fix (`pageSize = 25`), but framed it as "deprecated (React
+  18.3+)" and a style preference, never asserting the break. That is exactly the failure mode
+  F3 described, and it left all three models tied at 0, so the sweep had no discriminator left.
+
+  Fix A applied: the diff now **adds** a test, `pages the override list with the component's
+  default page size`, that renders `<DeckSettingsPanel deck={deck} currentUser={owner} />`
+  with 60 overrides and asserts `toHaveLength(25)`. Under React 19 that assertion fails, so the
+  break is visible in the diff rather than inferable from it. Fixture is still 3 files, now 281
+  lines, `+87/−108`; `git apply --stat` parses it from the repo root.
+
+  **Outstanding:** the recorded `flaw_defaultprops` scores predate this fixture, and the
+  deliberate-break check for this flaw has not been repeated against the new call site. Both
+  need a billed sweep.
 
 ### F4 — `flaw_defaultprops`'s ground truth depends on the host repo, unasserted
 
