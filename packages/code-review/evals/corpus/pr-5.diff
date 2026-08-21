@@ -1,0 +1,850 @@
+diff --git a/.env.example b/.env.example
+index c901a7e..52c445b 100644
+--- a/.env.example
++++ b/.env.example
+@@ -1,3 +1,5 @@
+ SUPABASE_URL=###
+ SUPABASE_KEY=###
+-OPENROUTER_API_KEY=###
+\ No newline at end of file
++OPENROUTER_API_KEY=###
++SUPABASE_SERVICE_ROLE_KEY=###
++CRON_PURGE_SECRET=###
+diff --git a/.github/workflows/purge.yml b/.github/workflows/purge.yml
+new file mode 100644
+index 0000000..bf80b8e
+--- /dev/null
++++ b/.github/workflows/purge.yml
+@@ -0,0 +1,27 @@
++name: Purge deleted accounts
++
++# S-05 Phase 3: daily hard-delete of accounts past the 30-day retention window.
++# Posts to the bearer-guarded /api/cron/purge route. Requires two repo secrets:
++#   PURGE_URL          — full production URL, e.g. https://<app>/api/cron/purge
++#   CRON_PURGE_SECRET  — must match the Worker's CRON_PURGE_SECRET secret
++# The route is idempotent, so a missed or double run is safe.
++
++on:
++  schedule:
++    - cron: "0 3 * * *"
++  workflow_dispatch: {}
++
++jobs:
++  purge:
++    runs-on: ubuntu-latest
++    steps:
++      # -f fails the job on any non-2xx so failures surface in the Actions UI;
++      # -sS keeps it quiet on success but still prints errors.
++      - name: POST purge endpoint
++        run: |
++          # Content-Type: application/json is required — Astro's CSRF origin guard
++          # rejects form content types from a request with no matching Origin (which
++          # a cross-site cron POST is); JSON bypasses that guard.
++          curl -fsS -X POST "${{ secrets.PURGE_URL }}" \
++            -H "Content-Type: application/json" \
++            -H "Authorization: Bearer ${{ secrets.CRON_PURGE_SECRET }}"
+diff --git a/astro.config.mjs b/astro.config.mjs
+index a242219..f01ba9f 100644
+--- a/astro.config.mjs
++++ b/astro.config.mjs
+@@ -9,6 +9,9 @@ import cloudflare from "@astrojs/cloudflare";
+ // https://astro.build/config
+ export default defineConfig({
+   output: "server",
++  // Destructive cookie-authed endpoints (POST /api/account/delete) depend on this —
++  // pin it explicitly rather than relying on Astro's implicit default (see impl-review F5).
++  security: { checkOrigin: true },
+   integrations: [react(), sitemap()],
+   vite: {
+     plugins: [tailwindcss()],
+@@ -19,6 +22,8 @@ export default defineConfig({
+       SUPABASE_URL: envField.string({ context: "server", access: "secret", optional: true }),
+       SUPABASE_KEY: envField.string({ context: "server", access: "secret", optional: true }),
+       OPENROUTER_API_KEY: envField.string({ context: "server", access: "secret", optional: true }),
++      SUPABASE_SERVICE_ROLE_KEY: envField.string({ context: "server", access: "secret", optional: true }),
++      CRON_PURGE_SECRET: envField.string({ context: "server", access: "secret", optional: true }),
+     },
+   },
+ });
+diff --git a/scripts/verify-rls.mjs b/scripts/verify-rls.mjs
+index 1787249..04fb0b2 100644
+--- a/scripts/verify-rls.mjs
++++ b/scripts/verify-rls.mjs
+@@ -47,6 +47,7 @@ function anonClient() {
+ const suffix = `${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+ const userA = { email: `rls-a-${suffix}@example.com`, password: "Password123!", id: null };
+ const userB = { email: `rls-b-${suffix}@example.com`, password: "Password123!", id: null };
++const userC = { email: `rls-c-${suffix}@example.com`, password: "Password123!", id: null };
+ 
+ async function seedUser(u) {
+   const { data, error } = await admin.auth.admin.createUser({
+@@ -168,11 +169,99 @@ async function main() {
+     "A's SRS state is unchanged after B's attempt",
+   );
+ 
++  // --- S-05: Soft-delete blocking (account_deletions) ----------------------------
++  // A pending-deletion user must neither read nor mutate their own flashcards; the
++  // block lives in RLS via is_pending_deletion(). Seeding/cleanup uses service-role;
++  // the assertions run on A's real anon-key + JWT client.
++
++  // 14. Seed a pending-deletion row for A (service-role — bypasses RLS to seed).
++  const seedDel = await admin.from("account_deletions").insert({ user_id: userA.id });
++  assert(!seedDel.error, "pending-deletion row seeded for A");
++
++  // 15. A now sees zero flashcards (RLS hides own rows while pending).
++  const selPending = await asA.from("flashcards").select("*");
++  assert(!selPending.error && selPending.data.length === 0, "pending A sees zero flashcards");
++
++  // 16. A cannot update its own card while pending (RLS → 0 rows affected).
++  const updPending = await asA.from("flashcards").update({ answer: "while pending" }).eq("id", cardId).select();
++  assert(
++    !updPending.error && Array.isArray(updPending.data) && updPending.data.length === 0,
++    "pending A's update affects 0 rows",
++  );
++
++  // 17. A cannot delete its own card while pending (RLS → 0 rows affected).
++  const delPending = await asA.from("flashcards").delete().eq("id", cardId).select();
++  assert(
++    !delPending.error && Array.isArray(delPending.data) && delPending.data.length === 0,
++    "pending A's delete affects 0 rows",
++  );
++
++  // 18. A cannot insert a new card while pending (INSERT WITH CHECK rejects it).
++  const insPending = await asA
++    .from("flashcards")
++    .insert({ user_id: userA.id, question: "while pending", answer: "while pending" })
++    .select();
++  assert(!!insPending.error, "pending A cannot insert a card (WITH CHECK rejects it)");
++
++  // 19. Reactivate: delete the pending row (service-role) → A regains visibility.
++  const cancelDel = await admin.from("account_deletions").delete().eq("user_id", userA.id);
++  assert(!cancelDel.error, "pending-deletion row removed for A");
++
++  const selRestored = await asA.from("flashcards").select("*").eq("id", cardId);
++  assert(
++    !selRestored.error && selRestored.data.length === 1 && selRestored.data[0].id === cardId,
++    "after reactivation, A sees its card again",
++  );
++
++  // --- S-05 Phase 3: hard-delete purge + idempotency ------------------------------
++  // Prove permanent erasure: a >30-day-old pending account, when purged the way the
++  // route does (admin.deleteUser), leaves zero flashcards and zero account_deletions
++  // rows behind (on-delete-cascade), and a second purge with nothing eligible is a
++  // no-op. Uses a dedicated user C so it doesn't disturb A/B assertions above.
++
++  await seedUser(userC);
++  const asC = await signIn(userC);
++  const insC = await asC
++    .from("flashcards")
++    .insert({ user_id: userC.id, question: "C question", answer: "C answer", source: "manual" })
++    .select()
++    .single();
++  assert(!insC.error && insC.data?.id, "C can insert a card it owns");
++
++  // Backdate a pending-deletion row for C to >30 days ago (service-role seed).
++  const backdated = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString();
++  const seedC = await admin.from("account_deletions").insert({ user_id: userC.id, requested_at: backdated });
++  assert(!seedC.error, "C backdated (>30d) pending-deletion row seeded");
++
++  // Select eligible the way the purge route does, then delete each user.
++  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
++  const eligible = await admin.from("account_deletions").select("user_id").lt("requested_at", cutoff);
++  assert(!eligible.error && eligible.data.some((r) => r.user_id === userC.id), "C is eligible for purge (>30d)");
++  for (const row of eligible.data) {
++    await admin.auth.admin.deleteUser(row.user_id);
++  }
++
++  // Post-purge: the auth user is gone. Because flashcards.user_id and
++  // account_deletions.user_id both FK auth.users(id) ON DELETE CASCADE, a missing
++  // auth user guarantees zero flashcards survive — a strictly stronger proof than a
++  // row count (service_role has no SELECT grant on flashcards, and shouldn't need one).
++  const cUser = await admin.auth.admin.getUserById(userC.id);
++  assert(!cUser.data?.user, "post-purge: C's auth user is gone (cascade erases flashcards)");
++  const cDel = await admin.from("account_deletions").select("user_id").eq("user_id", userC.id);
++  assert(!cDel.error && cDel.data.length === 0, "post-purge: zero account_deletions rows survive for C (cascade)");
++
++  // Idempotency: a second purge finds nothing eligible → no-op.
++  const eligible2 = await admin.from("account_deletions").select("user_id").lt("requested_at", cutoff);
++  assert(
++    !eligible2.error && !eligible2.data.some((r) => r.user_id === userC.id),
++    "second purge finds nothing eligible for C (idempotent no-op)",
++  );
++
+   console.log(`\nAll ${passed} assertions passed. RLS isolation holds. ✅`);
+ }
+ 
+ async function cleanup() {
+-  for (const u of [userA, userB]) {
++  for (const u of [userA, userB, userC]) {
+     if (u.id) await admin.auth.admin.deleteUser(u.id).catch(() => {});
+   }
+ }
+diff --git a/src/components/Topbar.astro b/src/components/Topbar.astro
+index 380fbd4..9fe9379 100644
+--- a/src/components/Topbar.astro
++++ b/src/components/Topbar.astro
+@@ -13,6 +13,9 @@ const { user } = Astro.locals;
+           <a href="/dashboard" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
+             Dashboard
+           </a>
++          <a href="/account" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
++            Account
++          </a>
+           <form method="POST" action="/api/auth/signout">
+             <button type="submit" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
+               Sign out
+diff --git a/src/components/account/AccountView.tsx b/src/components/account/AccountView.tsx
+new file mode 100644
+index 0000000..0983dd1
+--- /dev/null
++++ b/src/components/account/AccountView.tsx
+@@ -0,0 +1,137 @@
++import { useState } from "react";
++import { Loader2, ShieldAlert } from "lucide-react";
++import { Button } from "@/components/ui/button";
++import {
++  AlertDialog,
++  AlertDialogAction,
++  AlertDialogCancel,
++  AlertDialogContent,
++  AlertDialogDescription,
++  AlertDialogFooter,
++  AlertDialogHeader,
++  AlertDialogTitle,
++  AlertDialogTrigger,
++} from "@/components/ui/alert-dialog";
++
++interface Props {
++  pending: boolean;
++  requestedAt: string | null;
++  email: string | null;
++}
++
++const RETENTION_DAYS = 30;
++
++async function postJson(url: string): Promise<boolean> {
++  const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" } });
++  return res.ok;
++}
++
++function purgeDate(requestedAt: string): string {
++  const d = new Date(new Date(requestedAt).getTime() + RETENTION_DAYS * 24 * 60 * 60 * 1000);
++  return d.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
++}
++
++export default function AccountView({ pending, requestedAt, email }: Props) {
++  const confirmPhrase = email ?? "DELETE";
++  const [confirmText, setConfirmText] = useState("");
++  const [busy, setBusy] = useState(false);
++  const [error, setError] = useState(false);
++
++  const canConfirm = confirmText.trim() === confirmPhrase && !busy;
++
++  async function handleDelete() {
++    setBusy(true);
++    setError(false);
++    const ok = await postJson("/api/account/delete");
++    if (ok) {
++      window.location.href = "/auth/signin";
++    } else {
++      setError(true);
++      setBusy(false);
++    }
++  }
++
++  async function handleReactivate() {
++    setBusy(true);
++    setError(false);
++    const ok = await postJson("/api/account/reactivate");
++    if (ok) {
++      window.location.href = "/dashboard";
++    } else {
++      setError(true);
++      setBusy(false);
++    }
++  }
++
++  if (pending) {
++    return (
++      <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 p-6 text-white">
++        <h2 className="mb-2 flex items-center gap-2 text-lg font-semibold text-amber-200">
++          <ShieldAlert className="h-5 w-5" /> Account scheduled for deletion
++        </h2>
++        <p className="text-sm text-blue-100/80">
++          Your account and all your flashcards are scheduled to be permanently deleted on{" "}
++          <span className="font-semibold text-white">{requestedAt ? purgeDate(requestedAt) : "soon"}</span>. Until then
++          your data is hidden but recoverable. Reactivate to restore full access.
++        </p>
++        {error && <p className="mt-3 text-sm text-red-300">Something went wrong. Please try again.</p>}
++        <Button type="button" className="mt-4" onClick={handleReactivate} disabled={busy}>
++          {busy && <Loader2 className="h-4 w-4 animate-spin" />}
++          Reactivate account
++        </Button>
++      </div>
++    );
++  }
++
++  return (
++    <div className="rounded-2xl border border-red-400/30 bg-red-500/10 p-6 text-white">
++      <h2 className="mb-2 flex items-center gap-2 text-lg font-semibold text-red-200">
++        <ShieldAlert className="h-5 w-5" /> Danger zone
++      </h2>
++      <p className="text-sm text-blue-100/80">
++        Delete your account. Your flashcards are hidden immediately and permanently erased after {RETENTION_DAYS} days.
++        You can restore everything by signing in and reactivating before then.
++      </p>
++      {error && <p className="mt-3 text-sm text-red-300">Something went wrong. Please try again.</p>}
++      <AlertDialog>
++        <AlertDialogTrigger asChild>
++          <Button type="button" variant="destructive" className="mt-4">
++            Delete my account
++          </Button>
++        </AlertDialogTrigger>
++        <AlertDialogContent>
++          <AlertDialogHeader>
++            <AlertDialogTitle>Delete your account?</AlertDialogTitle>
++            <AlertDialogDescription>
++              This hides your flashcards immediately and signs you out. After {RETENTION_DAYS} days everything is
++              permanently erased. Type <span className="font-semibold">{confirmPhrase}</span> to confirm.
++            </AlertDialogDescription>
++          </AlertDialogHeader>
++          <input
++            type="text"
++            autoComplete="off"
++            value={confirmText}
++            onChange={(e) => {
++              setConfirmText(e.target.value);
++            }}
++            placeholder={confirmPhrase}
++            className="border-input bg-background text-foreground focus-visible:ring-ring w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2"
++          />
++          <AlertDialogFooter>
++            <AlertDialogCancel
++              onClick={() => {
++                setConfirmText("");
++              }}
++            >
++              Cancel
++            </AlertDialogCancel>
++            <AlertDialogAction disabled={!canConfirm} onClick={handleDelete}>
++              {busy && <Loader2 className="h-4 w-4 animate-spin" />}
++              Delete account
++            </AlertDialogAction>
++          </AlertDialogFooter>
++        </AlertDialogContent>
++      </AlertDialog>
++    </div>
++  );
++}
+diff --git a/src/db/database.types.ts b/src/db/database.types.ts
+index c19986c..bd15491 100644
+--- a/src/db/database.types.ts
++++ b/src/db/database.types.ts
+@@ -34,6 +34,21 @@ export type Database = {
+   }
+   public: {
+     Tables: {
++      account_deletions: {
++        Row: {
++          requested_at: string
++          user_id: string
++        }
++        Insert: {
++          requested_at?: string
++          user_id: string
++        }
++        Update: {
++          requested_at?: string
++          user_id?: string
++        }
++        Relationships: []
++      }
+       flashcards: {
+         Row: {
+           answer: string
+@@ -96,7 +111,7 @@ export type Database = {
+       [_ in never]: never
+     }
+     Functions: {
+-      [_ in never]: never
++      is_pending_deletion: { Args: { uid: string }; Returns: boolean }
+     }
+     Enums: {
+       [_ in never]: never
+diff --git a/src/lib/account/schemas.ts b/src/lib/account/schemas.ts
+new file mode 100644
+index 0000000..46aa614
+--- /dev/null
++++ b/src/lib/account/schemas.ts
+@@ -0,0 +1,3 @@
++/** Typed error codes returned by the account + cron endpoints, mirroring the
++ *  `ApiErrorCode` pattern used by the flashcards endpoints (src/lib/flashcards/schemas.ts). */
++export type AccountErrorCode = "unauthorized" | "server_error" | "service_unavailable" | "purge_failed";
+diff --git a/src/lib/supabase-admin.ts b/src/lib/supabase-admin.ts
+new file mode 100644
+index 0000000..23da045
+--- /dev/null
++++ b/src/lib/supabase-admin.ts
+@@ -0,0 +1,18 @@
++import { createClient } from "@supabase/supabase-js";
++import { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } from "astro:env/server";
++import type { Database } from "@/db/database.types";
++
++// S-05: the privileged, RLS-bypassing plane. This is the ONLY module that touches
++// the service-role key. Used exclusively by the scheduled purge to permanently
++// delete auth users (which cascades to their flashcards and account_deletions row).
++// No cookie wiring and no session persistence — it acts as the service role, not a
++// user. Returns null when the key is unset (mirrors the src/lib/supabase.ts guard),
++// so the purge route can respond 503 rather than crash.
++export function createAdminClient() {
++  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
++    return null;
++  }
++  return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
++    auth: { autoRefreshToken: false, persistSession: false },
++  });
++}
+diff --git a/src/middleware.ts b/src/middleware.ts
+index 7395876..40c3f9c 100644
+--- a/src/middleware.ts
++++ b/src/middleware.ts
+@@ -1,7 +1,7 @@
+ import { defineMiddleware } from "astro:middleware";
+ import { createClient } from "@/lib/supabase";
+ 
+-const PROTECTED_ROUTES = ["/dashboard", "/generate", "/create", "/cards", "/study"];
++const PROTECTED_ROUTES = ["/dashboard", "/generate", "/create", "/cards", "/study", "/account"];
+ 
+ export const onRequest = defineMiddleware(async (context, next) => {
+   const supabase = createClient(context.request.headers, context.cookies);
+diff --git a/src/pages/account.astro b/src/pages/account.astro
+new file mode 100644
+index 0000000..e7f6132
+--- /dev/null
++++ b/src/pages/account.astro
+@@ -0,0 +1,33 @@
++---
++import Layout from "@/layouts/Layout.astro";
++import AccountView from "@/components/account/AccountView";
++import { createClient } from "@/lib/supabase";
++
++const { user } = Astro.locals;
++const supabase = createClient(Astro.request.headers, Astro.cookies);
++
++let pending = false;
++let requestedAt: string | null = null;
++if (supabase) {
++  // RLS scopes this to the signed-in owner; middleware already gated the route.
++  const { data } = await supabase.from("account_deletions").select("requested_at").maybeSingle();
++  if (data) {
++    pending = true;
++    requestedAt = data.requested_at;
++  }
++}
++---
++
++<Layout title="Account">
++  <div class="bg-cosmic min-h-screen p-4">
++    <div class="mx-auto max-w-2xl">
++      <header class="flex items-center justify-between py-6 text-white">
++        <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-2xl font-bold text-transparent">
++          Account
++        </h1>
++        <a href="/dashboard" class="text-sm text-blue-100/70 transition-colors hover:text-white">← Dashboard</a>
++      </header>
++      <AccountView client:load pending={pending} requestedAt={requestedAt} email={user?.email ?? null} />
++    </div>
++  </div>
++</Layout>
+diff --git a/src/pages/api/account/delete.ts b/src/pages/api/account/delete.ts
+new file mode 100644
+index 0000000..77fbd09
+--- /dev/null
++++ b/src/pages/api/account/delete.ts
+@@ -0,0 +1,44 @@
++import type { APIRoute } from "astro";
++import { createClient } from "@/lib/supabase";
++import type { AccountErrorCode } from "@/lib/account/schemas";
++
++function json(status: number, body: unknown): Response {
++  return new Response(JSON.stringify(body), {
++    status,
++    headers: { "Content-Type": "application/json" },
++  });
++}
++
++function fail(status: number, error: AccountErrorCode): Response {
++  return json(status, { error });
++}
++
++// S-05: record a deletion request for the session user, then sign them out.
++// Idempotent — a duplicate/pending row is treated as success (upsert, ignore
++// conflict). The account_deletions row makes the user "pending deletion"; RLS
++// (is_pending_deletion) immediately hides their flashcards. Sign-out revokes the
++// session on the requesting device.
++export const POST: APIRoute = async (context) => {
++  const supabase = createClient(context.request.headers, context.cookies);
++  if (!supabase) {
++    return fail(401, "unauthorized");
++  }
++  const {
++    data: { user },
++  } = await supabase.auth.getUser();
++  if (!user) {
++    return fail(401, "unauthorized");
++  }
++
++  // user_id comes from the verified session, never the request body; RLS also
++  // pins the row to auth.uid(). ignoreDuplicates makes a repeat request a no-op.
++  const { error } = await supabase
++    .from("account_deletions")
++    .upsert({ user_id: user.id }, { onConflict: "user_id", ignoreDuplicates: true });
++  if (error) {
++    return fail(500, "server_error");
++  }
++
++  await supabase.auth.signOut();
++  return json(200, { ok: true });
++};
+diff --git a/src/pages/api/account/reactivate.ts b/src/pages/api/account/reactivate.ts
+new file mode 100644
+index 0000000..1e386d4
+--- /dev/null
++++ b/src/pages/api/account/reactivate.ts
+@@ -0,0 +1,38 @@
++import type { APIRoute } from "astro";
++import { createClient } from "@/lib/supabase";
++import type { AccountErrorCode } from "@/lib/account/schemas";
++
++function json(status: number, body: unknown): Response {
++  return new Response(JSON.stringify(body), {
++    status,
++    headers: { "Content-Type": "application/json" },
++  });
++}
++
++function fail(status: number, error: AccountErrorCode): Response {
++  return json(status, { error });
++}
++
++// S-05: cancel a pending deletion for the session user. Deleting the
++// account_deletions row clears the pending state; RLS immediately restores the
++// user's flashcards. RLS pins the delete to auth.uid(), so a 0-row delete (no
++// pending request) is still success.
++export const POST: APIRoute = async (context) => {
++  const supabase = createClient(context.request.headers, context.cookies);
++  if (!supabase) {
++    return fail(401, "unauthorized");
++  }
++  const {
++    data: { user },
++  } = await supabase.auth.getUser();
++  if (!user) {
++    return fail(401, "unauthorized");
++  }
++
++  const { error } = await supabase.from("account_deletions").delete().eq("user_id", user.id);
++  if (error) {
++    return fail(500, "server_error");
++  }
++
++  return json(200, { ok: true });
++};
+diff --git a/src/pages/api/auth/signin.ts b/src/pages/api/auth/signin.ts
+index 72e9744..9263dff 100644
+--- a/src/pages/api/auth/signin.ts
++++ b/src/pages/api/auth/signin.ts
+@@ -10,11 +10,26 @@ export const POST: APIRoute = async (context) => {
+   if (!supabase) {
+     return context.redirect(`/auth/signin?error=${encodeURIComponent("Supabase is not configured")}`);
+   }
+-  const { error } = await supabase.auth.signInWithPassword({ email, password });
++  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+ 
+   if (error) {
+     return context.redirect(`/auth/signin?error=${encodeURIComponent(error.message)}`);
+   }
+ 
++  // S-05: a flagged (pending-deletion) account still signs in — the live session is
++  // what powers self-service reactivation — but is diverted to /account instead of
++  // the app. RLS keeps their data hidden meanwhile, so the diverted session is safe.
++  const { data: pending, error: pendingError } = await supabase
++    .from("account_deletions")
++    .select("user_id")
++    .eq("user_id", data.user.id)
++    .maybeSingle();
++  // Fail safe: if we can't confirm the account is clean, divert to /account rather
++  // than into the app. RLS hides a pending user's data either way, so an over-divert
++  // is harmless; an under-divert would drop a pending user into an empty-looking app.
++  if (pendingError || pending) {
++    return context.redirect("/account");
++  }
++
+   return context.redirect("/");
+ };
+diff --git a/src/pages/api/cron/purge.ts b/src/pages/api/cron/purge.ts
+new file mode 100644
+index 0000000..0af359e
+--- /dev/null
++++ b/src/pages/api/cron/purge.ts
+@@ -0,0 +1,87 @@
++import type { APIRoute } from "astro";
++import { CRON_PURGE_SECRET } from "astro:env/server";
++import { createAdminClient } from "@/lib/supabase-admin";
++import type { AccountErrorCode } from "@/lib/account/schemas";
++
++function json(status: number, body: unknown): Response {
++  return new Response(JSON.stringify(body), {
++    status,
++    headers: { "Content-Type": "application/json" },
++  });
++}
++
++function fail(status: number, error: AccountErrorCode): Response {
++  return json(status, { error });
++}
++
++// Constant-time string compare — avoids leaking the secret via response timing.
++// Length is compared first (unavoidable early-out), then every byte is XOR-accumulated.
++function safeEqual(a: string, b: string): boolean {
++  if (a.length !== b.length) return false;
++  let diff = 0;
++  for (let i = 0; i < a.length; i++) {
++    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
++  }
++  return diff === 0;
++}
++
++// S-05 Phase 3: permanently erase accounts past the 30-day retention window.
++// Bearer-guarded (GitHub Actions cron posts the shared secret). Idempotent — a run
++// with nothing eligible deletes nothing. Bounded batch per invocation keeps us under
++// the Workers free-tier 50-subrequest cap; the daily cadence drains any backlog.
++// BATCH deletes + 1 select = 36 subrequests, leaving headroom under the 50 cap.
++const RETENTION_DAYS = 30;
++const BATCH = 35;
++
++export const POST: APIRoute = async (context) => {
++  const auth = context.request.headers.get("authorization") ?? "";
++  const expected = `Bearer ${CRON_PURGE_SECRET ?? ""}`;
++  // Reject when the secret is unconfigured (expected has an empty token → no valid
++  // bearer can match) or the header doesn't match.
++  if (!CRON_PURGE_SECRET || !safeEqual(auth, expected)) {
++    return fail(401, "unauthorized");
++  }
++
++  const admin = createAdminClient();
++  if (!admin) {
++    return fail(503, "service_unavailable");
++  }
++
++  const cutoff = new Date(Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000).toISOString();
++  const { data, count, error } = await admin
++    .from("account_deletions")
++    .select("user_id", { count: "exact" })
++    .lt("requested_at", cutoff)
++    .order("requested_at", { ascending: true })
++    .limit(BATCH);
++
++  if (error) {
++    // eslint-disable-next-line no-console -- Workers Logs: a silent failure retains data past the promised window (GDPR).
++    console.error(JSON.stringify({ event: "account_purge", ok: false, error: error.message }));
++    return fail(500, "purge_failed");
++  }
++
++  const eligible = count ?? data.length;
++  let deleted = 0;
++  let errors = 0;
++  for (const row of data) {
++    // The on-delete-cascade FKs erase the user's flashcards and their
++    // account_deletions row automatically.
++    const { error: delErr } = await admin.auth.admin.deleteUser(row.user_id);
++    if (delErr) errors++;
++    else deleted++;
++  }
++  const skipped = Math.max(0, eligible - data.length);
++
++  // eslint-disable-next-line no-console -- Workers Logs: explicit success/failure line is a GDPR safeguard.
++  console.log(JSON.stringify({ event: "account_purge", ok: errors === 0, eligible, deleted, skipped, errors }));
++
++  // Any failed deletion means a user is being retained past the 30-day window. Return
++  // non-2xx so the GitHub Action's `curl -fsS` fails and the miss surfaces in the UI
++  // rather than being masked by a 200 and only visible in the logs (GDPR liability).
++  if (errors > 0) {
++    return json(500, { deleted, skipped, errors });
++  }
++
++  return json(200, { deleted, skipped });
++};
+diff --git a/src/pages/dashboard.astro b/src/pages/dashboard.astro
+index 9cc9922..bfe48d9 100644
+--- a/src/pages/dashboard.astro
++++ b/src/pages/dashboard.astro
+@@ -39,6 +39,12 @@ const { user } = Astro.locals;
+         >
+           Study
+         </a>
++        <a
++          href="/account"
++          class="inline-block rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm transition-colors hover:bg-white/20"
++        >
++          Account
++        </a>
+       </div>
+       <form method="POST" action="/api/auth/signout" class="mt-6">
+         <button
+diff --git a/supabase/migrations/20260702145938_create_account_deletions.sql b/supabase/migrations/20260702145938_create_account_deletions.sql
+new file mode 100644
+index 0000000..23ff9b9
+--- /dev/null
++++ b/supabase/migrations/20260702145938_create_account_deletions.sql
+@@ -0,0 +1,106 @@
++-- S-05: Account deletion with 30-day retention — soft-delete state + RLS blocking
++--
++-- Introduces `account_deletions`: one row per account that has requested deletion.
++-- Presence of a row = the account is pending deletion; `requested_at` drives the
++-- 30-day purge boundary (Phase 3); deleting the row = cancel/reactivate. The FK
++-- cascades so the row self-cleans when the auth user is permanently purged.
++--
++-- The soft-delete "block" lives entirely in RLS, not in app queries: a pending user
++-- must neither read nor mutate their own flashcards. We fold that into the four
++-- owner-scoped flashcards policies via a SECURITY DEFINER helper that reads
++-- `account_deletions` bypassing its own RLS (a raw cross-table subquery would be
++-- subject to that table's RLS and is fragile). Cross-user isolation and the
++-- soft-delete blocking/reactivation are verified by scripts/verify-rls.mjs.
++
++-- Table -----------------------------------------------------------------------
++
++create table public.account_deletions (
++  user_id uuid primary key references auth.users (id) on delete cascade,
++  requested_at timestamptz not null default now()
++);
++
++-- Table privileges -------------------------------------------------------------
++-- Grant only what the self-service flow needs: an owner may see their own request
++-- (select), create one (insert), and cancel it (delete). No update — the row is
++-- immutable once created. No grant to `anon` — unauthenticated access is forbidden.
++-- `service_role` also needs table access: the Phase 3 purge reads eligible rows with
++-- the service-role client (RLS-bypassing), and verify-rls.mjs seeds/cleans rows with it.
++
++grant select, insert, delete on public.account_deletions to authenticated;
++grant select, insert, delete on public.account_deletions to service_role;
++
++-- Row-Level Security -----------------------------------------------------------
++
++alter table public.account_deletions enable row level security;
++
++create policy "account_deletions_select_own"
++on public.account_deletions
++for select
++to authenticated
++using (auth.uid() = user_id);
++
++create policy "account_deletions_insert_own"
++on public.account_deletions
++for insert
++to authenticated
++with check (auth.uid() = user_id);
++
++create policy "account_deletions_delete_own"
++on public.account_deletions
++for delete
++to authenticated
++using (auth.uid() = user_id);
++
++-- Pending-deletion helper ------------------------------------------------------
++-- SECURITY DEFINER so the flashcards policies can ask "is this user pending
++-- deletion?" without the lookup being subject to `account_deletions`' own RLS.
++-- `stable` (no writes, consistent within a statement), empty search_path (resolve
++-- everything schema-qualified — defence against search_path hijacking), execute
++-- granted to `authenticated` (the only role that evaluates flashcards policies).
++
++create function public.is_pending_deletion(uid uuid)
++returns boolean
++language sql
++stable
++security definer
++set search_path = ''
++as $$
++  select exists (select 1 from public.account_deletions d where d.user_id = uid);
++$$;
++
++grant execute on function public.is_pending_deletion(uuid) to authenticated;
++
++-- Extend flashcards RLS with the soft-delete block -----------------------------
++-- Recreate the four owner policies (F-01) so each predicate also requires the
++-- owner to NOT be pending deletion. A pending user's rows physically remain
++-- (soft-delete) but become invisible and immutable until they reactivate.
++
++drop policy "flashcards_select_own" on public.flashcards;
++drop policy "flashcards_insert_own" on public.flashcards;
++drop policy "flashcards_update_own" on public.flashcards;
++drop policy "flashcards_delete_own" on public.flashcards;
++
++create policy "flashcards_select_own"
++on public.flashcards
++for select
++to authenticated
++using (auth.uid() = user_id and not public.is_pending_deletion(auth.uid()));
++
++create policy "flashcards_insert_own"
++on public.flashcards
++for insert
++to authenticated
++with check (auth.uid() = user_id and not public.is_pending_deletion(auth.uid()));
++
++create policy "flashcards_update_own"
++on public.flashcards
++for update
++to authenticated
++using (auth.uid() = user_id and not public.is_pending_deletion(auth.uid()))
++with check (auth.uid() = user_id and not public.is_pending_deletion(auth.uid()));
++
++create policy "flashcards_delete_own"
++on public.flashcards
++for delete
++to authenticated
++using (auth.uid() = user_id and not public.is_pending_deletion(auth.uid()));
+diff --git a/supabase/migrations/20260702154817_optimize_pending_deletion_rls.sql b/supabase/migrations/20260702154817_optimize_pending_deletion_rls.sql
+new file mode 100644
+index 0000000..b474d27
+--- /dev/null
++++ b/supabase/migrations/20260702154817_optimize_pending_deletion_rls.sql
+@@ -0,0 +1,38 @@
++-- S-05 follow-up: fold the pending-deletion check into a single InitPlan.
++--
++-- The four flashcards policies from 20260702145938 called
++-- `not public.is_pending_deletion(auth.uid())` inline, so Postgres re-evaluated the
++-- SECURITY DEFINER function once per candidate row (the documented Supabase RLS perf
++-- pitfall). Wrapping it in a scalar subselect lets the planner evaluate it once per
++-- statement. Behaviour is identical; this is a performance-only recreation.
++-- Re-verified by scripts/verify-rls.mjs.
++
++drop policy "flashcards_select_own" on public.flashcards;
++drop policy "flashcards_insert_own" on public.flashcards;
++drop policy "flashcards_update_own" on public.flashcards;
++drop policy "flashcards_delete_own" on public.flashcards;
++
++create policy "flashcards_select_own"
++on public.flashcards
++for select
++to authenticated
++using (auth.uid() = user_id and not (select public.is_pending_deletion(auth.uid())));
++
++create policy "flashcards_insert_own"
++on public.flashcards
++for insert
++to authenticated
++with check (auth.uid() = user_id and not (select public.is_pending_deletion(auth.uid())));
++
++create policy "flashcards_update_own"
++on public.flashcards
++for update
++to authenticated
++using (auth.uid() = user_id and not (select public.is_pending_deletion(auth.uid())))
++with check (auth.uid() = user_id and not (select public.is_pending_deletion(auth.uid())));
++
++create policy "flashcards_delete_own"
++on public.flashcards
++for delete
++to authenticated
++using (auth.uid() = user_id and not (select public.is_pending_deletion(auth.uid())));

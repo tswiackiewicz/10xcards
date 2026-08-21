@@ -1,0 +1,16 @@
+## Why
+The repo pinned Node 22.14.0; Node 24 is the current LTS line. CI also emitted a deprecation warning for GitHub Actions still running on the Node 20 runtime (`checkout@v4`, `setup-node@v4`, `wrangler-action@v3`).
+
+## What
+- Toolchain pin 22.14.0 → **24.17.0** (latest Node 24 LTS): `.nvmrc`, `README.md`, `AGENTS.md`.
+- CI `node-version` 22 → 24 (both `ci` and `deploy` jobs).
+- Bump actions off the deprecated Node 20 runtime: `checkout@v4→v7`, `setup-node@v4→v6`, `wrangler-action@v3→v4`.
+- Production runtime is **unaffected** — Cloudflare runs `workerd` + `nodejs_compat`, not Node. This is a build/dev/CI-only change.
+
+## How to verify
+Locally on Node 24.17.0 (`npm ci` → `astro sync` → `lint` → `build`) all pass. CI on this PR re-runs the same chain on Node 24; the `deploy` job is gated to `master` so it won't run on the PR.
+
+## Risk & rollback
+Low: no `engines` field, no `@types/node` pin, no native addons; lockfile unchanged. Rollback = revert this commit (toolchain-only).
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

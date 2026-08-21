@@ -18,6 +18,7 @@ import { describe, expect, it } from "vitest";
 import assertAnchors from "../../evals/asserts/anchors.ts";
 import assertVerdict from "../../evals/asserts/verdict.ts";
 import { EXPECTED_VERDICT, PLANTED_FLAWS } from "../../evals/fixtures/react19-migration.flaws.ts";
+import { reviewSchema } from "../../src/agents/reviewer/schema.ts";
 import type { Review } from "../../src/agents/reviewer/schema.ts";
 
 const DIFF = ["diff --git a/src/app.ts b/src/app.ts", "--- a/src/app.ts", "+++ b/src/app.ts", "@@ -1 +1 @@", "+x"].join(
@@ -25,16 +26,15 @@ const DIFF = ["diff --git a/src/app.ts b/src/app.ts", "--- a/src/app.ts", "+++ b
 );
 
 function reviewWith(findings: Review["findings"]): Review {
-  const criterion = { score: "9", note: "…" } as Review["criteria"]["correctness"];
+  const criterion = { score: "9", note: "…" } as Review["criteria"]["defect"];
   return {
     summary: "…",
     criteria: {
-      correctness: criterion,
-      idiomaticity: criterion,
-      complexity: criterion,
-      testCoverage: criterion,
-      documentation: criterion,
-      security: criterion,
+      defect: criterion,
+      safety: criterion,
+      blastRadius: criterion,
+      verification: criterion,
+      clarity: criterion,
     },
     findings,
   };
@@ -148,5 +148,20 @@ describe("promptfooconfig.yaml transcription", () => {
   it("expected_verdict matches EXPECTED_VERDICT", () => {
     const match = /^\s*expected_verdict:\s*(\S+)\s*$/m.exec(config);
     expect(match?.[1]).toBe(EXPECTED_VERDICT);
+  });
+
+  /**
+   * The `flaw_*` guard above only covers rubrics sourced from flaws.ts. The `precision` rubric
+   * is authored inline in the YAML and states the criterion count to the judge — it said "all
+   * six criteria" for the whole of the five-criterion change until a human noticed. A stale
+   * count there is worse than a typo: the judge reads it as instruction, so it silently grades
+   * against a rubric that does not match the schema.
+   */
+  it("the precision rubric states the schema's real criterion count", () => {
+    const count = Object.keys(reviewSchema.shape.criteria.shape).length;
+    const spelled = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"][count];
+
+    expect(spelled, `no English numeral for ${String(count)} criteria`).toBeDefined();
+    expect(blockScalarAfter("precision")).toContain(`all ${String(spelled)} criteria`);
   });
 });
