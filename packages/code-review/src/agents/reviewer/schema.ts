@@ -73,3 +73,19 @@ export const reviewSchema = z.object({
 export type Review = z.infer<typeof reviewSchema>;
 export type Criterion = keyof Review["criteria"];
 export type BlockingCategory = (typeof BLOCKING_CATEGORIES)[number];
+
+/**
+ * The human names docs/criteria.md uses. Schema keys are terse for the model; anything a
+ * person reads goes through this map.
+ *
+ * It lives here rather than in render.ts because both renderers need it and render.ts
+ * imports verdict.ts — putting it there would make the gate's reason strings depend on the
+ * markdown layer. This module is the shared root: it already owns `Criterion`.
+ */
+export const CRITERION_LABELS: Record<Criterion, string> = {
+  defect: "local defect",
+  safety: "security and data handling",
+  blastRadius: "blast radius and reversibility",
+  verification: "risk-proportional verification",
+  clarity: "clarity of the change",
+};

@@ -45,7 +45,19 @@ const criteria = `Criteria:
 
 The schema keys map to the criteria in this order: defect, safety, blastRadius, verification, clarity.`;
 
-/** Transcribed from docs/criteria.md. The default cases are load-bearing for the gate. */
+/**
+ * Transcribed from docs/criteria.md. The default cases are load-bearing for the gate.
+ *
+ * Size, because this block is paid on every review and grew where nothing was watching:
+ * 1,017 -> 1,493 characters (+47%) across the six-to-five criteria swap, which is most of the
+ * +309 on `reviewInstructions` as a whole (6,290 -> 6,599, +5%). The plan budgeted only the
+ * `criteria` block, so this went unmetered — accepted deliberately (impl-review F4), because
+ * the added `verification` limits measurably tightened that score on two of the five
+ * calibration PRs (#3 8->5, #5 9->5) in the 2026-08-21 A/B replay. They did NOT move PR #7,
+ * which is the open case recorded in change.md, "Unresolved: criterion 4.6".
+ *
+ * Budget the whole string, not one block, before adding to this file.
+ */
 const notApplicable = `Not applicable:
 
 A criterion that the diff genuinely cannot exercise is scored "n/a", not a number. "n/a" requires a one-line justification in its note — it is an escape hatch, not a way to dodge a hard score.

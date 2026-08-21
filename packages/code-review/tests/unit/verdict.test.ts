@@ -142,16 +142,17 @@ describe("explainVerdict", () => {
     const reasons = explainVerdict(reviewWith({ defect: "5", safety: "4", verification: "2" }, blockingFinding));
 
     expect(reasons).toHaveLength(4);
-    expect(reasons[0]).toContain("defect");
-    expect(reasons[0]).toContain("safety");
-    expect(reasons[1]).toContain("verification");
+    // Display names, not schema keys — a human reads these on the PR (see CRITERION_LABELS).
+    expect(reasons[0]).toContain("local defect");
+    expect(reasons[0]).toContain("security and data handling");
+    expect(reasons[1]).toContain("risk-proportional verification");
     expect(reasons[2]).toContain("3");
     expect(reasons[3]).toContain("data-retention");
     expect(reasons[3]).toContain("src/purge.ts");
   });
 
   it("names only the condition that fired", () => {
-    expect(explainVerdict(reviewWith({ defect: "5" }))).toEqual([expect.stringContaining("defect")]);
+    expect(explainVerdict(reviewWith({ defect: "5" }))).toEqual([expect.stringContaining("local defect")]);
   });
 
   it("says nothing about a low clarity on its own", () => {
@@ -162,7 +163,7 @@ describe("explainVerdict", () => {
     const reasons = explainVerdict(reviewWith({ blastRadius: "5", verification: "5", clarity: "5" }));
 
     const accumulation = reasons.find((reason) => reason.startsWith("3 criteria"));
-    expect(accumulation).toContain("clarity (5)");
+    expect(accumulation).toContain("clarity of the change (5)");
   });
 });
 

@@ -1,4 +1,4 @@
-import type { Criterion, Review } from "./schema.ts";
+import { CRITERION_LABELS, type Criterion, type Review } from "./schema.ts";
 
 /**
  * A review outcome. The action-level `error` state — "no review outcome exists" — is
@@ -52,7 +52,7 @@ function parseScore(score: Review["criteria"][Criterion]["score"]): number | nul
 }
 
 interface Scored {
-  name: string;
+  name: Criterion;
   score: number;
 }
 
@@ -60,12 +60,13 @@ interface Scored {
 function scored(review: Review): Scored[] {
   return Object.entries(review.criteria).flatMap(([name, { score }]) => {
     const parsed = parseScore(score);
-    return parsed === null ? [] : [{ name, score: parsed }];
+    return parsed === null ? [] : [{ name: name as Criterion, score: parsed }];
   });
 }
 
+/** Reason strings are read by a human on a PR, so they carry the display name, not the key. */
 function label({ name, score }: Scored): string {
-  return `${name} (${String(score)})`;
+  return `${CRITERION_LABELS[name]} (${String(score)})`;
 }
 
 /**
