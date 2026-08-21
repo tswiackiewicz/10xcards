@@ -720,7 +720,7 @@ the criteria set. `docs/criteria.md` and `evals/corpus/` are additive and can be
 
 - [x] 2.1 Type checking passes — e22dd7f
 - [x] 2.2 Linting passes — e22dd7f
-- [x] 2.3 No prose outside `context/` still claims a six-criterion rubric
+- [x] 2.3 No prose outside `context/` still claims a six-criterion rubric — 31bc75b
 
 #### Manual
 
@@ -761,11 +761,11 @@ the criteria set. `docs/criteria.md` and `evals/corpus/` are additive and can be
 
 #### Automated
 
-- [x] 5.1 `npm run eval` completes and writes results
-- [x] 5.2 No metric row carries a `HARNESS ERROR:` reason
+- [x] 5.1 `npm run eval` completes and writes results — 31bc75b
+- [x] 5.2 No metric row carries a `HARNESS ERROR:` reason — 31bc75b
 
 #### Manual
 
-- [x] 5.3 `verdict` assert still scores 1 for all three models
-- [x] 5.4 Baseline recorded in `change.md` with date and commit
-- [x] 5.5 Judgment recorded on whether `flaw_defaultprops` still fails to discriminate
+- [x] 5.3 `verdict` assert still scores 1 for all three models — 31bc75b
+- [x] 5.4 Baseline recorded in `change.md` with date and commit — 31bc75b
+- [x] 5.5 Judgment recorded on whether `flaw_defaultprops` still fails to discriminate — 31bc75b
