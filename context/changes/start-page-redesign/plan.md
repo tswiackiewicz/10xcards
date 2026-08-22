@@ -471,35 +471,35 @@ No DB/API migrations. Each phase is one Conventional Commit, independently rever
 
 #### Automated
 
-- [x] 1.1 `npx astro sync && npm run lint` passes
-- [x] 1.2 `npm run build` passes
-- [x] 1.3 `npm test` passes
-- [x] 1.4 `npm run test:e2e` passes
-- [x] 1.5 No Polish in `src/`: diacritics + `Uwaga`/`Dokumentacja` grep clean
-- [x] 1.6 Starter debt gone: `template.png` + `LibBadge.astro` deleted, no `10x-astro-starter` in `src/`/`package.json`
+- [x] 1.1 `npx astro sync && npm run lint` passes — 1c51e90
+- [x] 1.2 `npm run build` passes — 1c51e90
+- [x] 1.3 `npm test` passes — 1c51e90
+- [x] 1.4 `npm run test:e2e` passes — 1c51e90
+- [x] 1.5 No Polish in `src/`: diacritics + `Uwaga`/`Dokumentacja` grep clean — 1c51e90
+- [x] 1.6 Starter debt gone: `template.png` + `LibBadge.astro` deleted, no `10x-astro-starter` in `src/`/`package.json` — 1c51e90
 
 #### Manual
 
-- [x] 1.7 Favicon (both themes) + `og.png` render correctly
-- [x] 1.8 `og:image`/`og:url` absolute in view-source with `SITE_URL` set; absent (not malformed) without it
-- [x] 1.9 Config banner renders in English, token-styled, both themes
-- [x] 1.10 shadcn Button/AlertDialog show emerald primary correctly
-- [x] 1.11 WCAG AA contrast (≥4.5:1) measured for the text-bearing token pairs in both themes
+- [x] 1.7 Favicon (both themes) + `og.png` render correctly — 1c51e90
+- [x] 1.8 `og:image`/`og:url` absolute in view-source with `SITE_URL` set; absent (not malformed) without it — 1c51e90
+- [x] 1.9 Config banner renders in English, token-styled, both themes — 1c51e90
+- [x] 1.10 shadcn Button/AlertDialog show emerald primary correctly — 1c51e90
+- [x] 1.11 WCAG AA contrast (≥4.5:1) measured for the text-bearing token pairs in both themes — 1c51e90
 
 ### Phase 2: Landing Page
 
 #### Automated
 
-- [ ] 2.1 `npx astro sync && npm run lint && npm run build` passes
-- [ ] 2.2 `npm test` passes
-- [ ] 2.3 `npm run test:e2e` passes incl. updated `risk8` + new `landing-smoke`
+- [x] 2.1 `npx astro sync && npm run lint && npm run build` passes
+- [x] 2.2 `npm test` passes
+- [x] 2.3 `npm run test:e2e` passes incl. updated `risk8` + new `landing-smoke`
 
 #### Manual
 
-- [ ] 2.4 Landing correct in both themes (hero, mock, steps, features, privacy, footer)
-- [ ] 2.5 Signed-in `/` shows "Open dashboard" variant
-- [ ] 2.6 Deliberate-break check on `landing-smoke` (break → red, revert → green)
-- [ ] 2.7 Copy proofread (English only, honest claims)
+- [x] 2.4 Landing correct in both themes (hero, mock, steps, features, privacy, footer)
+- [x] 2.5 Signed-in `/` shows "Open dashboard" variant
+- [x] 2.6 Deliberate-break check on `landing-smoke` (break → red, revert → green)
+- [x] 2.7 Copy proofread (English only, honest claims)
 
 ### Phase 3: Auth Flow & Auth Views
 

@@ -24,7 +24,7 @@ test("signed-out: a protected route redirects to /auth/signin, a public route an
   // --- Public route: / (EXPECTED_PUBLIC in the integration test) ---
   await gotoAndWaitForHydration(page, "/");
   await expect(page).toHaveURL("/");
-  await expect(page.getByRole("heading", { name: "10x Astro Starter" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Paste your notes. Remember them forever." })).toBeVisible();
 
   // --- Adversarial near-miss: /cardsxyz (ADVERSARIAL_NEAR_MISSES in the integration
   // test) — not a real page, but must NOT be swept into the /cards redirect by a

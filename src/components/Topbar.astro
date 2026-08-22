@@ -1,40 +1,48 @@
 ---
+import Logo from "@/components/Logo.astro";
+import { buttonVariants } from "@/components/ui/button";
+
+interface Props {
+  /** Auth pages already put the visitor on a form — the CTAs would just point back at it. */
+  hideAuthCta?: boolean;
+}
+
+const { hideAuthCta = false } = Astro.props;
 const { user } = Astro.locals;
 ---
 
-<div
-  class="mb-4 flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80"
->
+<header class="flex items-center justify-between gap-4 py-3">
+  <a href="/" class="focus-visible:ring-ring rounded-md focus-visible:ring-2 focus-visible:outline-none">
+    <Logo />
+  </a>
+
   {
     user ? (
-      <>
-        <span class="text-blue-100/70">{user.email}</span>
-        <div class="flex items-center gap-3">
-          <a href="/dashboard" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
-            Dashboard
-          </a>
-          <a href="/account" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
-            Account
-          </a>
-          <form method="POST" action="/api/auth/signout">
-            <button type="submit" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </>
+      <div class="flex items-center gap-3 text-sm">
+        <span class="text-muted-foreground hidden sm:inline">{user.email}</span>
+        <a href="/dashboard" class="text-muted-foreground hover:text-foreground transition-colors">
+          Dashboard
+        </a>
+        <a href="/account" class="text-muted-foreground hover:text-foreground transition-colors">
+          Account
+        </a>
+        <form method="POST" action="/api/auth/signout">
+          <button type="submit" class="text-muted-foreground hover:text-foreground transition-colors">
+            Sign out
+          </button>
+        </form>
+      </div>
     ) : (
-      <>
-        <span class="text-blue-100/70">Not signed in</span>
-        <div class="flex gap-3">
-          <a href="/auth/signin" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
-            Sign in
+      !hideAuthCta && (
+        <div class="flex items-center gap-2">
+          <a href="/auth/signin" class:list={buttonVariants({ variant: "ghost" })}>
+            Log in
           </a>
-          <a href="/auth/signup" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
-            Sign up
+          <a href="/auth/signup" class:list={buttonVariants()}>
+            Sign up free
           </a>
         </div>
-      </>
+      )
     )
   }
-</div>
+</header>
