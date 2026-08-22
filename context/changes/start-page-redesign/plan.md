@@ -520,15 +520,15 @@ No DB/API migrations. Each phase is one Conventional Commit, independently rever
 
 #### Automated
 
-- [x] 4.1 `npx astro sync && npm run lint && npm run build` passes
-- [x] 4.2 `npm test && npm run test:e2e` passes (full suite)
-- [x] 4.3 Grep gates zero: `bg-cosmic`, `text-blue-100`, `bg-white/`, `border-white/`, `purple-`, `bg-clip-text`, `10x Astro Starter`
-- [x] 4.4 `text-white` + `backdrop-blur` gates zero in `src/` (`--exclude-dir=ui`)
-- [x] 4.5 `min-h-screen` gone from `src/pages/`
+- [x] 4.1 `npx astro sync && npm run lint && npm run build` passes — 51347ff
+- [x] 4.2 `npm test && npm run test:e2e` passes (full suite) — 51347ff
+- [x] 4.3 Grep gates zero: `bg-cosmic`, `text-blue-100`, `bg-white/`, `border-white/`, `purple-`, `bg-clip-text`, `10x Astro Starter` — 51347ff
+- [x] 4.4 `text-white` + `backdrop-blur` gates zero in `src/` (`--exclude-dir=ui`) — 51347ff
+- [x] 4.5 `min-h-screen` gone from `src/pages/` — 51347ff
 
 #### Manual
 
-- [x] 4.6 All views reviewed in both system themes, no unreadable surfaces
-- [x] 4.7 Grade buttons / badges / pending card legible in both themes
-- [x] 4.8 AlertDialog + confirm input correct in both themes
-- [x] 4.9 Global Topbar: logo-only on auth, full nav elsewhere; header aligned, no header-induced scrollbar or low content
+- [x] 4.6 All views reviewed in both system themes, no unreadable surfaces — 51347ff
+- [x] 4.7 Grade buttons / badges / pending card legible in both themes — 51347ff
+- [x] 4.8 AlertDialog + confirm input correct in both themes — 51347ff
+- [x] 4.9 Global Topbar: logo-only on auth, full nav elsewhere; header aligned, no header-induced scrollbar or low content — 51347ff
