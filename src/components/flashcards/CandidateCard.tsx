@@ -20,15 +20,15 @@ interface Props {
 export function CandidateCard({ card, index, disabled, onEdit, onAccept, onReject }: Props) {
   const tone =
     card.status === "accepted"
-      ? "border-emerald-400/60 bg-emerald-400/10"
+      ? "border-primary/40 bg-primary/10"
       : card.status === "rejected"
-        ? "border-white/5 bg-white/5 opacity-50"
-        : "border-white/10 bg-white/5";
+        ? "border-border bg-muted opacity-50"
+        : "border-border bg-card";
 
   return (
     <li className={`rounded-xl border p-4 transition-colors ${tone}`}>
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs font-medium text-blue-100/60">Card {index + 1}</span>
+        <span className="text-muted-foreground text-xs font-medium">Card {index + 1}</span>
         <div className="flex gap-2">
           <Button
             type="button"
@@ -55,9 +55,9 @@ export function CandidateCard({ card, index, disabled, onEdit, onAccept, onRejec
         </div>
       </div>
 
-      <label className="mb-1 block text-xs text-blue-100/60">Question</label>
+      <label className="text-muted-foreground mb-1 block text-xs">Question</label>
       <textarea
-        className="mb-3 w-full resize-y rounded-md border border-white/10 bg-white/5 p-2 text-sm text-white outline-none focus:border-purple-300 disabled:opacity-50"
+        className="border-input text-foreground focus:border-ring mb-3 w-full resize-y rounded-md border bg-transparent p-2 text-sm outline-none disabled:opacity-50"
         rows={2}
         value={card.question}
         disabled={disabled}
@@ -66,9 +66,9 @@ export function CandidateCard({ card, index, disabled, onEdit, onAccept, onRejec
         }}
       />
 
-      <label className="mb-1 block text-xs text-blue-100/60">Answer</label>
+      <label className="text-muted-foreground mb-1 block text-xs">Answer</label>
       <textarea
-        className="w-full resize-y rounded-md border border-white/10 bg-white/5 p-2 text-sm text-white outline-none focus:border-purple-300 disabled:opacity-50"
+        className="border-input text-foreground focus:border-ring w-full resize-y rounded-md border bg-transparent p-2 text-sm outline-none disabled:opacity-50"
         rows={3}
         value={card.answer}
         disabled={disabled}

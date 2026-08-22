@@ -43,8 +43,8 @@ team/classroom tool — every user sees only their own deck.
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/przeprogramowani/10x-astro-starter.git
-cd 10x-astro-starter
+git clone https://github.com/tswiackiewicz/10xcards.git
+cd 10xcards
 ```
 
 2. Install dependencies:

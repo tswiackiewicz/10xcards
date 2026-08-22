@@ -132,7 +132,7 @@ export default function GenerateView() {
     <div className="space-y-4">
       <div>
         <textarea
-          className="h-40 w-full resize-y rounded-lg border border-white/10 bg-white/5 p-3 text-sm text-white outline-none focus:border-purple-300 disabled:opacity-50"
+          className="border-input text-foreground focus:border-ring h-40 w-full resize-y rounded-lg border bg-transparent p-3 text-sm outline-none disabled:opacity-50"
           placeholder="Paste your source text here…"
           value={text}
           onChange={(e) => {
@@ -141,7 +141,7 @@ export default function GenerateView() {
           disabled={generating || saving}
         />
         <div className="mt-1 flex items-center justify-between text-xs">
-          <span className={overLimit ? "text-red-300" : "text-blue-100/50"}>
+          <span className={overLimit ? "text-destructive" : "text-muted-foreground"}>
             {trimmedLength.toLocaleString()} / {MAX_INPUT_CHARS.toLocaleString()}
           </span>
           <Button
@@ -156,19 +156,19 @@ export default function GenerateView() {
       </div>
 
       {error && (
-        <p className="rounded-lg border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
+        <p className="border-destructive/40 bg-destructive/10 text-destructive rounded-lg border p-3 text-sm">
           {ERROR_COPY[error]}
         </p>
       )}
 
       {savedCount !== null && (
-        <p className="rounded-lg border border-emerald-400/40 bg-emerald-500/10 p-3 text-sm text-emerald-200">
+        <p className="border-primary/40 bg-primary/10 text-primary rounded-lg border p-3 text-sm">
           {savedCount} {savedCount === 1 ? "card" : "cards"} saved to your deck.
         </p>
       )}
 
       {generating && (
-        <div className="flex flex-col items-center gap-2 py-16 text-blue-100/70">
+        <div className="text-muted-foreground flex flex-col items-center gap-2 py-16">
           <Loader2 className="size-6 animate-spin" />
           <span className="text-sm">Generating cards…</span>
         </div>
@@ -191,7 +191,7 @@ export default function GenerateView() {
           </ul>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-blue-100/60">{acceptedCount} accepted</span>
+              <span className="text-muted-foreground text-sm">{acceptedCount} accepted</span>
               <Button
                 type="button"
                 size="sm"

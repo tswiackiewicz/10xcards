@@ -31,5 +31,5 @@ export const POST: APIRoute = async (context) => {
     return context.redirect("/account");
   }
 
-  return context.redirect("/");
+  return context.redirect("/dashboard");
 };
