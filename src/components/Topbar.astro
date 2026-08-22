@@ -17,23 +17,23 @@ const { user } = Astro.locals;
   </a>
 
   {
-    user ? (
-      <div class="flex items-center gap-3 text-sm">
-        <span class="text-muted-foreground hidden sm:inline">{user.email}</span>
-        <a href="/dashboard" class="text-muted-foreground hover:text-foreground transition-colors">
-          Dashboard
-        </a>
-        <a href="/account" class="text-muted-foreground hover:text-foreground transition-colors">
-          Account
-        </a>
-        <form method="POST" action="/api/auth/signout">
-          <button type="submit" class="text-muted-foreground hover:text-foreground transition-colors">
-            Sign out
-          </button>
-        </form>
-      </div>
-    ) : (
-      !hideAuthCta && (
+    !hideAuthCta &&
+      (user ? (
+        <div class="flex items-center gap-3 text-sm">
+          <span class="text-muted-foreground hidden sm:inline">{user.email}</span>
+          <a href="/dashboard" class="text-muted-foreground hover:text-foreground transition-colors">
+            Dashboard
+          </a>
+          <a href="/account" class="text-muted-foreground hover:text-foreground transition-colors">
+            Account
+          </a>
+          <form method="POST" action="/api/auth/signout">
+            <button type="submit" class="text-muted-foreground hover:text-foreground transition-colors">
+              Sign out
+            </button>
+          </form>
+        </div>
+      ) : (
         <div class="flex items-center gap-2">
           <a href="/auth/signin" class:list={buttonVariants({ variant: "ghost" })}>
             Log in
@@ -42,7 +42,6 @@ const { user } = Astro.locals;
             Sign up free
           </a>
         </div>
-      )
-    )
+      ))
   }
 </header>

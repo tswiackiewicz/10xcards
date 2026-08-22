@@ -18,15 +18,22 @@ test("signed-out landing: the pitch is visible and both entry points route into 
   await gotoAndWaitForHydration(page, "/");
 
   await expect(page.getByRole("heading", { name: "Paste your notes. Remember them forever." })).toBeVisible();
-  // The brand mark doubles as the home link; Logo.astro carries the accessible name.
-  await expect(page.getByLabel("10xCards").first()).toBeVisible();
+
+  // Both the header and the hero render a "Log in" link, and both the hero and the
+  // bottom CTA band render "Start learning free". Scope each click to its region so
+  // the spec asserts *which* control it exercised, instead of taking whatever came
+  // first in the DOM.
+  const hero = page.getByRole("region", { name: "Paste your notes. Remember them forever." });
+  // The brand mark doubles as the home link; its accessible name comes from the
+  // wordmark text inside it, which is what a screen-reader user actually hears.
+  await expect(page.getByRole("link", { name: "10xCards" })).toBeVisible();
 
   // --- Header "Log in" → /auth/signin ---
-  await page.getByRole("link", { name: "Log in" }).first().click();
+  await page.getByRole("banner").getByRole("link", { name: "Log in" }).click();
   await page.waitForURL("/auth/signin");
 
   // --- Hero primary CTA → /auth/signup ---
   await gotoAndWaitForHydration(page, "/");
-  await page.getByRole("link", { name: "Start learning free" }).first().click();
+  await hero.getByRole("link", { name: "Start learning free" }).click();
   await page.waitForURL("/auth/signup");
 });

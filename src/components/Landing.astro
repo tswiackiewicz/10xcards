@@ -36,11 +36,11 @@ const FEATURES = [
 ---
 
 <div class="mx-auto w-full max-w-4xl px-4">
-  <main>
+  <div>
     <!-- Hero -->
-    <section class="grid items-center gap-12 py-16 sm:py-24 lg:grid-cols-2">
+    <section class="grid items-center gap-12 py-16 sm:py-24 lg:grid-cols-2" aria-labelledby="hero">
       <div>
-        <h1 class="text-foreground text-4xl leading-tight font-semibold tracking-tight sm:text-5xl">
+        <h1 id="hero" class="text-foreground text-4xl leading-tight font-semibold tracking-tight sm:text-5xl">
           Paste your notes. Remember them forever.
         </h1>
         {
@@ -134,7 +134,7 @@ const FEATURES = [
         </div>
       </div>
     </section>
-  </main>
+  </div>
 
   <footer
     class="border-border text-muted-foreground flex flex-wrap items-center justify-between gap-2 border-t py-8 text-sm"

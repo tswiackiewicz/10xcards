@@ -71,7 +71,9 @@ const ogUrl = siteOrigin ? new URL(Astro.url.pathname, siteOrigin).href : null;
         <Topbar hideAuthCta={isAuthPage} />
       </div>
     </div>
-    <slot />
+    <main>
+      <slot />
+    </main>
   </body>
 </html>
 
