@@ -1,6 +1,5 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import Logo from "@/components/Logo.astro";
 import SignUpForm from "@/components/auth/SignUpForm";
 
 // A signed-in visitor has nothing to do on the sign-up form. Middleware leaves this
@@ -11,10 +10,7 @@ const error = Astro.url.searchParams.get("error");
 ---
 
 <Layout title="Sign up">
-  <div class="flex min-h-screen flex-col items-center justify-center gap-6 p-4">
-    <a href="/">
-      <Logo />
-    </a>
+  <div class="mx-auto flex max-w-sm flex-col items-center gap-6 px-4 py-16">
     <div class="bg-card border-border w-full max-w-sm rounded-xl border p-8 shadow-sm">
       <h1 class="text-foreground mb-6 text-center text-2xl font-semibold tracking-tight">Sign up</h1>
       <SignUpForm serverError={error} client:load />

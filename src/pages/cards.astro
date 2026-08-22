@@ -15,15 +15,11 @@ if (supabase) {
 ---
 
 <Layout title="My flashcards">
-  <div class="bg-cosmic min-h-screen p-4">
-    <div class="mx-auto max-w-3xl">
-      <header class="flex items-center justify-between py-6 text-white">
-        <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-2xl font-bold text-transparent">
-          My flashcards
-        </h1>
-        <a href="/dashboard" class="text-sm text-blue-100/70 transition-colors hover:text-white">← Dashboard</a>
-      </header>
-      <SavedCardsView client:load cards={cards} />
-    </div>
+  <div class="mx-auto max-w-3xl px-4 py-6">
+    <header class="flex items-center justify-between py-6">
+      <h1 class="text-foreground text-2xl font-semibold tracking-tight">My flashcards</h1>
+      <a href="/dashboard" class="text-muted-foreground hover:text-foreground text-sm transition-colors">← Dashboard</a>
+    </header>
+    <SavedCardsView client:load cards={cards} />
   </div>
 </Layout>

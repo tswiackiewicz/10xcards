@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import Banner from "@/components/Banner.astro";
+import Topbar from "@/components/Topbar.astro";
 import { missingConfigs } from "@/lib/config-status";
 
 interface Props {
@@ -8,6 +9,8 @@ interface Props {
 }
 
 const { title } = Astro.props;
+// On the auth forms the CTAs would only point back at the page the visitor is on.
+const isAuthPage = Astro.url.pathname.startsWith("/auth/");
 const pageTitle = title ? `${title} · 10xCards` : "10xCards — AI flashcards you'll actually remember";
 const description = "Paste your notes, review AI-drafted flashcards, and remember them with spaced repetition.";
 
@@ -61,6 +64,13 @@ const ogUrl = siteOrigin ? new URL(Astro.url.pathname, siteOrigin).href : null;
         </Banner>
       ))
     }
+    <!-- Page content widths differ (max-w-2xl .. max-w-5xl, max-w-sm auth cards), so
+         the header gets its own container rather than inheriting an ambiguous one. -->
+    <div class="border-border border-b">
+      <div class="mx-auto w-full max-w-5xl px-4">
+        <Topbar hideAuthCta={isAuthPage} />
+      </div>
+    </div>
     <slot />
   </body>
 </html>

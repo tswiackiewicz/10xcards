@@ -505,30 +505,30 @@ No DB/API migrations. Each phase is one Conventional Commit, independently rever
 
 #### Automated
 
-- [x] 3.1 `npx astro sync && npm run lint && npm run build` passes
-- [x] 3.2 `npm test` passes
-- [x] 3.3 `npm run test:e2e` passes incl. updated `auth.setup.ts`
-- [x] 3.4 No `purple-` classes left under `src/components/auth` + `src/pages/auth`
+- [x] 3.1 `npx astro sync && npm run lint && npm run build` passes — 398819d
+- [x] 3.2 `npm test` passes — 398819d
+- [x] 3.3 `npm run test:e2e` passes incl. updated `auth.setup.ts` — 398819d
+- [x] 3.4 No `purple-` classes left under `src/components/auth` + `src/pages/auth` — 398819d
 
 #### Manual
 
-- [x] 3.5 Full loop: sign-up → confirm → sign-in → `/dashboard`; sign-out → `/`
-- [x] 3.6 Signed-in bounce off `/auth/signin` + `/auth/signup`
-- [x] 3.7 Failed sign-in error styling correct, both themes
+- [x] 3.5 Full loop: sign-up → confirm → sign-in → `/dashboard`; sign-out → `/` — 398819d
+- [x] 3.6 Signed-in bounce off `/auth/signin` + `/auth/signup` — 398819d
+- [x] 3.7 Failed sign-in error styling correct, both themes — 398819d
 
 ### Phase 4: App-Wide Sweep & Global Shell
 
 #### Automated
 
-- [ ] 4.1 `npx astro sync && npm run lint && npm run build` passes
-- [ ] 4.2 `npm test && npm run test:e2e` passes (full suite)
-- [ ] 4.3 Grep gates zero: `bg-cosmic`, `text-blue-100`, `bg-white/`, `border-white/`, `purple-`, `bg-clip-text`, `10x Astro Starter`
-- [ ] 4.4 `text-white` + `backdrop-blur` gates zero in `src/` (`--exclude-dir=ui`)
-- [ ] 4.5 `min-h-screen` gone from `src/pages/`
+- [x] 4.1 `npx astro sync && npm run lint && npm run build` passes
+- [x] 4.2 `npm test && npm run test:e2e` passes (full suite)
+- [x] 4.3 Grep gates zero: `bg-cosmic`, `text-blue-100`, `bg-white/`, `border-white/`, `purple-`, `bg-clip-text`, `10x Astro Starter`
+- [x] 4.4 `text-white` + `backdrop-blur` gates zero in `src/` (`--exclude-dir=ui`)
+- [x] 4.5 `min-h-screen` gone from `src/pages/`
 
 #### Manual
 
-- [ ] 4.6 All views reviewed in both system themes, no unreadable surfaces
-- [ ] 4.7 Grade buttons / badges / pending card legible in both themes
-- [ ] 4.8 AlertDialog + confirm input correct in both themes
-- [ ] 4.9 Global Topbar: logo-only on auth, full nav elsewhere; header aligned, no header-induced scrollbar or low content
+- [x] 4.6 All views reviewed in both system themes, no unreadable surfaces
+- [x] 4.7 Grade buttons / badges / pending card legible in both themes
+- [x] 4.8 AlertDialog + confirm input correct in both themes
+- [x] 4.9 Global Topbar: logo-only on auth, full nav elsewhere; header aligned, no header-induced scrollbar or low content

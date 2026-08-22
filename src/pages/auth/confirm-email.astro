@@ -1,6 +1,5 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import Logo from "@/components/Logo.astro";
 
 const isAutoConfirmed = import.meta.env.DEV;
 
@@ -20,10 +19,7 @@ const content = isAutoConfirmed
 ---
 
 <Layout title={content.heading}>
-  <div class="flex min-h-screen flex-col items-center justify-center gap-6 p-4">
-    <a href="/">
-      <Logo />
-    </a>
+  <div class="mx-auto flex max-w-sm flex-col items-center gap-6 px-4 py-16">
     <div class="bg-card border-border w-full max-w-sm rounded-xl border p-8 text-center shadow-sm">
       <div class="mb-4 text-5xl">{content.emoji}</div>
       <h1 class="text-foreground mb-3 text-2xl font-semibold tracking-tight">{content.heading}</h1>
