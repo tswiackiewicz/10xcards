@@ -490,31 +490,31 @@ No DB/API migrations. Each phase is one Conventional Commit, independently rever
 
 #### Automated
 
-- [x] 2.1 `npx astro sync && npm run lint && npm run build` passes
-- [x] 2.2 `npm test` passes
-- [x] 2.3 `npm run test:e2e` passes incl. updated `risk8` + new `landing-smoke`
+- [x] 2.1 `npx astro sync && npm run lint && npm run build` passes — 9a1dc68
+- [x] 2.2 `npm test` passes — 9a1dc68
+- [x] 2.3 `npm run test:e2e` passes incl. updated `risk8` + new `landing-smoke` — 9a1dc68
 
 #### Manual
 
-- [x] 2.4 Landing correct in both themes (hero, mock, steps, features, privacy, footer)
-- [x] 2.5 Signed-in `/` shows "Open dashboard" variant
-- [x] 2.6 Deliberate-break check on `landing-smoke` (break → red, revert → green)
-- [x] 2.7 Copy proofread (English only, honest claims)
+- [x] 2.4 Landing correct in both themes (hero, mock, steps, features, privacy, footer) — 9a1dc68
+- [x] 2.5 Signed-in `/` shows "Open dashboard" variant — 9a1dc68
+- [x] 2.6 Deliberate-break check on `landing-smoke` (break → red, revert → green) — 9a1dc68
+- [x] 2.7 Copy proofread (English only, honest claims) — 9a1dc68
 
 ### Phase 3: Auth Flow & Auth Views
 
 #### Automated
 
-- [ ] 3.1 `npx astro sync && npm run lint && npm run build` passes
-- [ ] 3.2 `npm test` passes
-- [ ] 3.3 `npm run test:e2e` passes incl. updated `auth.setup.ts`
-- [ ] 3.4 No `purple-` classes left under `src/components/auth` + `src/pages/auth`
+- [x] 3.1 `npx astro sync && npm run lint && npm run build` passes
+- [x] 3.2 `npm test` passes
+- [x] 3.3 `npm run test:e2e` passes incl. updated `auth.setup.ts`
+- [x] 3.4 No `purple-` classes left under `src/components/auth` + `src/pages/auth`
 
 #### Manual
 
-- [ ] 3.5 Full loop: sign-up → confirm → sign-in → `/dashboard`; sign-out → `/`
-- [ ] 3.6 Signed-in bounce off `/auth/signin` + `/auth/signup`
-- [ ] 3.7 Failed sign-in error styling correct, both themes
+- [x] 3.5 Full loop: sign-up → confirm → sign-in → `/dashboard`; sign-out → `/`
+- [x] 3.6 Signed-in bounce off `/auth/signin` + `/auth/signup`
+- [x] 3.7 Failed sign-in error styling correct, both themes
 
 ### Phase 4: App-Wide Sweep & Global Shell
 
