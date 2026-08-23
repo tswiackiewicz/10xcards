@@ -1,0 +1,23 @@
+version: 2
+
+updates:
+  # The three `uses:` entries in ci.yml are pinned to commit SHAs, which nothing else un-freezes:
+  # a SHA carries no version for a human to compare against, so without this the pins silently rot.
+  # Dependabot rewrites both the SHA and its trailing version comment.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: chore
+    # `wrangler` is pinned exactly on purpose — see the Stack section of AGENTS.md. From 4.117.0 it
+    # drags in miniflare@5.x-alpha, reintroducing the prerelease this repo deliberately removed.
+    ignore:
+      - dependency-name: wrangler
