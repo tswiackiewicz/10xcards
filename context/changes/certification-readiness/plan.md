@@ -627,18 +627,18 @@ The one thing to watch is the Phase 1 `Cache-Control` work: applying no-store he
 
 #### Automated
 
-- [x] 5.1 `LICENSE` exists and `package.json` reports `license: "MIT"`
-- [x] 5.2 `package.json` has `license`, `repository`, `author`, `private`, `engines`
-- [x] 5.3 Every path in the README "Project Structure" block resolves
-- [x] 5.4 `git grep 'No database tables or migrations are required'` returns nothing
-- [x] 5.5 `git grep 'Example protected page'` returns nothing
-- [x] 5.6 Lint and format pass on the touched files
-- [x] 5.7 Full suite passes: `npm test && npm run test:e2e && npm run build`
+- [x] 5.1 `LICENSE` exists and `package.json` reports `license: "MIT"` — 873f171
+- [x] 5.2 `package.json` has `license`, `repository`, `author`, `private`, `engines` — 873f171
+- [x] 5.3 Every path in the README "Project Structure" block resolves — 873f171
+- [x] 5.4 `git grep 'No database tables or migrations are required'` returns nothing — 873f171
+- [x] 5.5 `git grep 'Example protected page'` returns nothing — 873f171
+- [x] 5.6 Lint and format pass on the touched files — 873f171
+- [x] 5.7 Full suite passes: `npm test && npm run test:e2e && npm run build` — 873f171
 
 #### Manual
 
-- [x] 5.8 GitHub repo page shows a product description and stack topics
-- [x] 5.9 `vars.SITE_URL` confirmed present in GitHub repo variables (or set)
-- [x] 5.10 A shared production URL unfurls with the `og.png` card
-- [x] 5.11 Production auth policy recorded in the repo with the local-only caveat stated
-- [x] 5.12 Cold read-through of `README.md` describes a working setup path with no starter residue
+- [x] 5.8 GitHub repo page shows a product description and stack topics — 873f171
+- [x] 5.9 `vars.SITE_URL` confirmed present in GitHub repo variables (or set) — 873f171
+- [x] 5.10 A shared production URL unfurls with the `og.png` card — 873f171
+- [ ] 5.11 Production auth policy recorded in the repo with the local-only caveat stated — PARTIAL (873f171): the local-only caveat is recorded in README.md; the actual dashboard values are NOT, because no production Supabase URL or management token exists in this environment. Needs a human with dashboard access.
+- [x] 5.12 Cold read-through of `README.md` describes a working setup path with no starter residue — 873f171
