@@ -2,12 +2,16 @@ import { describe, expect, it } from "vitest";
 import { AUTH_ERROR_MESSAGES, toGenericAuthError, type AuthErrorLike } from "@/lib/auth/errors";
 
 /**
- * The regression guard for the account-existence oracle. Before this mapping existed both
- * auth routes put Supabase's verbatim `error.message` into the `?error=` query string, so
- * signing up with an already-registered address answered `"User already registered"`.
+ * The regression guard for the auth error *copy*. Before this mapping existed both auth
+ * routes put Supabase's verbatim `error.message` into the `?error=` query string, so signing
+ * up with an already-registered address answered `"User already registered"`.
  *
- * No e2e spec asserts on auth error copy (the five files are landing-smoke, risk1, risk3,
- * risk8 and seed), so without this test the oracle could come back silently.
+ * Scope, stated precisely because an earlier version of this docblock claimed more: everything
+ * here feeds two *error* objects to a pure function, so it cannot see a status line, a redirect
+ * target, or the success branch. It is not the end-to-end guard for the account-existence
+ * oracle — the signup route once leaked existence through its `Location` while every test below
+ * was green. That property is asserted at the route in
+ * tests/unit/auth-signup-existence-oracle.test.ts; keep both.
  */
 
 /** The two that must never be tellable apart — the oracle, and an ordinary bad password. */
