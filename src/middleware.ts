@@ -23,5 +23,17 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
   }
 
-  return next();
+  const response = await next();
+
+  if (context.locals.user) {
+    // @supabase/ssr hands these to setAll's second argument (applyServerStorage in
+    // node_modules/@supabase/ssr/dist/main/cookies.js) precisely so an intermediary
+    // cannot serve one user's session token to another. src/lib/supabase.ts drops
+    // that argument, and this app sits behind Cloudflare — so set them here instead.
+    response.headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate, max-age=0");
+    response.headers.set("Expires", "0");
+    response.headers.set("Pragma", "no-cache");
+  }
+
+  return response;
 });

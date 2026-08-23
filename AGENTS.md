@@ -11,7 +11,7 @@ Astro 6 (server-first, `output: server` on Cloudflare) · React 19 islands · Ty
 Standard scripts (`dev`, `lint`, `lint:fix`, `format`, `build`): see `@package.json`. The non-obvious ones:
 
 - **`npx astro sync`** — regenerate `.astro/` types after touching `astro.config.mjs`, content collections, or env schema. CI runs this before lint; run it locally if types look stale. (Or `/verify` to mirror CI: sync → lint → build.)
-- `npx wrangler deploy` — ship `./dist` to Cloudflare Workers manually (ad-hoc/local); CI also runs this automatically on every push to `master` (see Git & CI).
+- `npx wrangler deploy` — ship `./dist/client` to Cloudflare Workers manually (ad-hoc/local); CI also runs this automatically on every push to `master` (see Git & CI).
 
 `npm test` runs the Vitest unit/integration suite; `npm run test:e2e` runs the Playwright e2e suite. Both are wired into CI (see Git & CI).
 
