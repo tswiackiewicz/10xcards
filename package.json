@@ -1,8 +1,18 @@
 {
   "name": "10xcards",
   "description": "AI-generated flashcards with spaced repetition study",
-  "type": "module",
   "version": "0.0.1",
+  "private": true,
+  "license": "MIT",
+  "author": "Tomasz Swiackiewicz",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tswiackiewicz/10xcards.git"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "type": "module",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",

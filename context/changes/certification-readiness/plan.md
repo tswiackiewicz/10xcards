@@ -609,36 +609,36 @@ The one thing to watch is the Phase 1 `Cache-Control` work: applying no-store he
 
 #### Automated
 
-- [x] 4.1 Lint and types pass: `npx astro sync && npm run lint`
-- [x] 4.2 `npm test` passes, including the new auth-error-mapping unit test
-- [x] 4.3 `npm run test:e2e` passes, in particular every auth spec (says nothing about the CSP — dev server)
-- [x] 4.4 `npm run build` passes
-- [x] 4.5 On `astro preview`, HTML carries a `<meta http-equiv="content-security-policy">` with `sha256-` hashes and no `'unsafe-inline'`
-- [x] 4.6 On `astro preview`, `curl -sI` shows `Strict-Transport-Security`, `X-Content-Type-Options`, `Referrer-Policy`, `frame-ancestors`
+- [x] 4.1 Lint and types pass: `npx astro sync && npm run lint` — d1c012c
+- [x] 4.2 `npm test` passes, including the new auth-error-mapping unit test — d1c012c
+- [x] 4.3 `npm run test:e2e` passes, in particular every auth spec (says nothing about the CSP — dev server) — d1c012c
+- [x] 4.4 `npm run build` passes — d1c012c
+- [x] 4.5 On `astro preview`, HTML carries a `<meta http-equiv="content-security-policy">` with `sha256-` hashes and no `'unsafe-inline'` — d1c012c
+- [x] 4.6 On `astro preview`, `curl -sI` shows `Strict-Transport-Security`, `X-Content-Type-Options`, `Referrer-Policy`, `frame-ancestors` — d1c012c
 
 #### Manual
 
-- [x] 4.7 Zero CSP violations in the console across all eight pages, on the `astro preview` build
-- [x] 4.8 All React islands still hydrate and respond to interaction on that preview build
-- [x] 4.9 Signup with an existing address is indistinguishable from a bad-credentials signin
-- [x] 4.10 No Supabase error text appears in any URL
+- [x] 4.7 Zero CSP violations in the console across all eight pages, on the `astro preview` build — d1c012c
+- [x] 4.8 All React islands still hydrate and respond to interaction on that preview build — d1c012c
+- [x] 4.9 Signup with an existing address is indistinguishable from a bad-credentials signin — d1c012c
+- [x] 4.10 No Supabase error text appears in any URL — d1c012c
 
 ### Phase 5: Repo Hygiene
 
 #### Automated
 
-- [ ] 5.1 `LICENSE` exists and `package.json` reports `license: "MIT"`
-- [ ] 5.2 `package.json` has `license`, `repository`, `author`, `private`, `engines`
-- [ ] 5.3 Every path in the README "Project Structure" block resolves
-- [ ] 5.4 `git grep 'No database tables or migrations are required'` returns nothing
-- [ ] 5.5 `git grep 'Example protected page'` returns nothing
-- [ ] 5.6 Lint and format pass on the touched files
-- [ ] 5.7 Full suite passes: `npm test && npm run test:e2e && npm run build`
+- [x] 5.1 `LICENSE` exists and `package.json` reports `license: "MIT"`
+- [x] 5.2 `package.json` has `license`, `repository`, `author`, `private`, `engines`
+- [x] 5.3 Every path in the README "Project Structure" block resolves
+- [x] 5.4 `git grep 'No database tables or migrations are required'` returns nothing
+- [x] 5.5 `git grep 'Example protected page'` returns nothing
+- [x] 5.6 Lint and format pass on the touched files
+- [x] 5.7 Full suite passes: `npm test && npm run test:e2e && npm run build`
 
 #### Manual
 
-- [ ] 5.8 GitHub repo page shows a product description and stack topics
-- [ ] 5.9 `vars.SITE_URL` confirmed present in GitHub repo variables (or set)
-- [ ] 5.10 A shared production URL unfurls with the `og.png` card
-- [ ] 5.11 Production auth policy recorded in the repo with the local-only caveat stated
-- [ ] 5.12 Cold read-through of `README.md` describes a working setup path with no starter residue
+- [x] 5.8 GitHub repo page shows a product description and stack topics
+- [x] 5.9 `vars.SITE_URL` confirmed present in GitHub repo variables (or set)
+- [x] 5.10 A shared production URL unfurls with the `og.png` card
+- [x] 5.11 Production auth policy recorded in the repo with the local-only caveat stated
+- [x] 5.12 Cold read-through of `README.md` describes a working setup path with no starter residue
