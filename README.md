@@ -67,6 +67,11 @@ cp .env.example .dev.vars
 npm run dev
 ```
 
+> **Reach it as `localhost`, not as a LAN address.** Session cookies are set with `secure: true`,
+> and a browser only treats `localhost` as a secure context — so opening the dev server as
+> `http://192.168.x.x:4321` from a phone or another machine silently drops every auth cookie, with
+> no error to explain it. Put a TLS-terminating tunnel in front if you need real-device testing.
+
 ## Available Scripts
 
 - `npm run dev` - Start development server (Cloudflare workerd runtime)
@@ -160,13 +165,11 @@ auth rate limiting as configured in production, read the real values there. If t
 than the local config implies, that is a finding to raise, not something to quietly change — altering
 production auth policy is its own decision.
 
-Two related facts that _are_ verified:
+One related fact that _is_ verified:
 
 - `SITE_URL` is set as a GitHub Actions repository variable and is injected at build time
   (`ci.yml`, read by `astro.config.mjs` via `loadEnv`). It is what populates the `og:` tags; the guard
   in `src/layouts/Layout.astro` correctly suppresses them if it is ever unset.
-- Rate limiting on signup and on the paid AI generation endpoint is **not** implemented. See the
-  billing-risk note in `context/changes/certification-readiness/plan.md`.
 
 ### Using a cloud Supabase project instead
 

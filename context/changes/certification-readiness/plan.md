@@ -468,7 +468,7 @@ The gaps that make the repo read as unfinished. All documentation and manifest w
 - Every path in the README "Project Structure" block resolves: check each with `ls`
 - `git grep -n 'No database tables or migrations are required'` returns nothing
 - `git grep -n 'Example protected page'` returns nothing
-- Lint and format pass: `npm run lint && npx prettier --check README.md LICENSE package.json`
+- Lint and format pass: `npm run lint && npx prettier --check README.md package.json` — CORRECTED (impl-review F9.5): `LICENSE` was in the original command but is now listed in `.prettierignore` (prettier cannot infer a parser for an extensionless file). The exclusion is right; keeping `LICENSE` in the command would make this criterion assert nothing about it while reading as though it did.
 - Full suite passes: `npm test && npm run test:e2e && npm run build`
 
 #### Manual Verification:
@@ -558,7 +558,7 @@ The one thing to watch is the Phase 1 `Cache-Control` work: applying no-store he
 - [x] 1.4 Unit/integration suite passes: `npm test` — 21fa208
 - [x] 1.5 E2E suite passes, including the auth-redirect specs: `npm run test:e2e` — 21fa208
 - [x] 1.6 Build passes: `npm run build` — 21fa208
-- [x] 1.7 `npx wrangler deploy --dry-run` reads from `dist/client` and excludes `.dev.vars` — 21fa208
+- [x] 1.7 `npx wrangler deploy --dry-run` reads from `dist/client` and excludes `.dev.vars` — 21fa208 — DEVIATION: the criterion at line 160 requires the `-c wrangler.jsonc` form precisely because the bare form reports `dist/client` whether or not the fix landed. That form cannot run in this repo at all (`main` is a bare package specifier), so it was never executed. The fix was instead proven by a separate probe that read the resolved asset directory directly. The row as originally worded was unfalsifiable.
 
 #### Manual
 
@@ -613,7 +613,7 @@ The one thing to watch is the Phase 1 `Cache-Control` work: applying no-store he
 - [x] 4.2 `npm test` passes, including the new auth-error-mapping unit test — d1c012c
 - [x] 4.3 `npm run test:e2e` passes, in particular every auth spec (says nothing about the CSP — dev server) — d1c012c
 - [x] 4.4 `npm run build` passes — d1c012c
-- [x] 4.5 On `astro preview`, HTML carries a `<meta http-equiv="content-security-policy">` with `sha256-` hashes and no `'unsafe-inline'` — d1c012c
+- [x] 4.5 On `astro preview`, the CSP carries `sha256-` script hashes — d1c012c — DEVIATION: both halves of the criterion as originally written are false, and correctly so. There is no `<meta http-equiv>` element: every route here is SSR, and Astro ships the policy as a real `content-security-policy` HEADER (the meta form is for prerendered pages). And `'unsafe-inline'` _is_ present — via `style-src-elem` / `style-src-attr`, the carve-out Radix's runtime-injected scroll-lock style requires. What was actually verified: `script-src` is fully hash-locked with no `'unsafe-inline'`. See the comment in `src/middleware.ts` and commit d1c012c.
 - [x] 4.6 On `astro preview`, `curl -sI` shows `Strict-Transport-Security`, `X-Content-Type-Options`, `Referrer-Policy`, `frame-ancestors` — d1c012c
 
 #### Manual
@@ -642,3 +642,20 @@ The one thing to watch is the Phase 1 `Cache-Control` work: applying no-store he
 - [x] 5.10 A shared production URL unfurls with the `og.png` card — 873f171
 - [ ] 5.11 Production auth policy recorded in the repo with the local-only caveat stated — PARTIAL (873f171): the local-only caveat is recorded in README.md; the actual dashboard values are NOT, because no production Supabase URL or management token exists in this environment. Needs a human with dashboard access.
 - [x] 5.12 Cold read-through of `README.md` describes a working setup path with no starter residue — 873f171
+
+## Addendum — changes made outside "Changes Required" (2026-08-23)
+
+Recorded during implementation review (`reviews/impl-review.md`, F8) so a later reviewer does not
+re-flag them as scope creep. Each is justified by its phase's own intent:
+
+- **`AGENTS.md`** — three E2E rules added (hydration-safe navigation helpers, accessibility-first
+  locators, no `page.waitForTimeout()`). Required by the Phase 3 change-3 contract, which this plan
+  wrongly assumed was already satisfied.
+- **`.gitignore`** — the header comment rewritten from Polish and de-referenced from 10x-cli; the
+  ignore rules themselves are byte-identical.
+- **`.prettierignore`** — `LICENSE` added; prettier cannot infer a parser for an extensionless file.
+- **`README.md`** — the bogus `npx supabase init` step removed from first-time setup.
+- **`README.md`** (reverted) — a note stating that signup and the paid AI endpoint have no rate
+  limiting, pointing here. Removed during triage: this repository is public, and the note handed a
+  reader a working shape for the G4 billing attack while that gap is still open. The gap stays
+  tracked in this file, which is where it belongs.
