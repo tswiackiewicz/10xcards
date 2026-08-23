@@ -54,3 +54,6 @@ reports/
 .github/**/10x-*
 .agents/**/10x-*
 skills-lock.json
+
+# local team context — not tracked
+context/team/
