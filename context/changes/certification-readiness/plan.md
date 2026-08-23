@@ -571,39 +571,39 @@ The one thing to watch is the Phase 1 `Cache-Control` work: applying no-store he
 
 #### Automated
 
-- [x] 2.1 `npm audit` residual is only build/dev/CLI advisories plus the three Astro-v7 XSS advisories
-- [x] 2.2 No new prerelease version string in `package-lock.json`
-- [x] 2.3 `actionlint` passes
-- [x] 2.4 Full CI passes on the branch: lint, `npm test`, `npm run test:e2e`, `npm run build`
-- [x] 2.5 No `pull_request`-triggered job references the production Supabase secrets
-- [x] 2.6 `supabase start` still applies all five migrations in the `ci` job
+- [x] 2.1 `npm audit` residual is only build/dev/CLI advisories plus the three Astro-v7 XSS advisories — 593f38c
+- [x] 2.2 No new prerelease version string in `package-lock.json` — 593f38c
+- [x] 2.3 `actionlint` passes — 593f38c
+- [x] 2.4 Full CI passes on the branch: lint, `npm test`, `npm run test:e2e`, `npm run build` — 593f38c
+- [x] 2.5 No `pull_request`-triggered job references the production Supabase secrets — 593f38c
+- [x] 2.6 `supabase start` still applies all five migrations in the `ci` job — 593f38c
 
 #### Manual
 
-- [x] 2.7 Every third-party `uses:` in `ci.yml` shows a 40-char SHA with a version comment
+- [x] 2.7 Every third-party `uses:` in `ci.yml` shows a 40-char SHA with a version comment — 593f38c
 - [ ] 2.8 A push to `master` still deploys: migrations pushed, then `wrangler deploy`
-- [x] 2.9 `README.md:193` and `AGENTS.md`'s CI section both state that prod-divergence detection is now post-merge
+- [x] 2.9 `README.md:193` and `AGENTS.md`'s CI section both state that prod-divergence detection is now post-merge — 593f38c
 
 ### Phase 3: Provenance Surgery
 
 #### Automated
 
-- [ ] 3.1 `git grep -iE 'przeprogramowani|10xdevs|10x-astro-starter'` (excluding `context/` and the eval corpus) returns nothing
-- [ ] 3.2 `node -e "console.log(require('./package-lock.json').name)"` prints `10xcards`
-- [ ] 3.3 `git grep -inE 'lesson|module [0-9]'` (same exclusions) returns nothing
-- [ ] 3.4 No tracked file references `context/foundation/.claude/` or `context/foundation/CLAUDE.md`
-- [ ] 3.5 Lint passes, confirming `includeIgnoreFile()` lint scope is unchanged
-- [ ] 3.6 `actionlint` passes after the workflow comment edits
-- [ ] 3.7 Local stack comes up under the new project id: `npx supabase stop && npx supabase start`
-- [ ] 3.8 `npm test` and `npm run test:e2e` pass against the renamed local stack
-- [ ] 3.9 `npm run build` passes
+- [x] 3.1 `git grep -iE 'przeprogramowani|10xdevs|10x-astro-starter'` (excluding `context/` and the eval corpus) returns nothing
+- [x] 3.2 `node -e "console.log(require('./package-lock.json').name)"` prints `10xcards`
+- [x] 3.3 `git grep -inE 'lesson|module [0-9]'` (same exclusions) returns nothing
+- [x] 3.4 No tracked file references `context/foundation/.claude/` or `context/foundation/CLAUDE.md`
+- [x] 3.5 Lint passes, confirming `includeIgnoreFile()` lint scope is unchanged
+- [x] 3.6 `actionlint` passes after the workflow comment edits
+- [x] 3.7 Local stack comes up under the new project id: `npx supabase stop && npx supabase start`
+- [x] 3.8 `npm test` and `npm run test:e2e` pass against the renamed local stack
+- [x] 3.9 `npm run build` passes
 
 #### Manual
 
-- [ ] 3.10 `CLAUDE.md` reads as an ordinary agent-instructions file with no course reference
-- [ ] 3.11 Every E2E rule from the deleted block is present in `AGENTS.md`
-- [ ] 3.12 GitHub's root file listing shows no course reference in rendered markdown
-- [ ] 3.13 `context/foundation/README.md` has no dangling reference to the deleted `CLAUDE.md`
+- [x] 3.10 `CLAUDE.md` reads as an ordinary agent-instructions file with no course reference
+- [x] 3.11 Every E2E rule from the deleted block is present in `AGENTS.md`
+- [x] 3.12 GitHub's root file listing shows no course reference in rendered markdown
+- [x] 3.13 `context/foundation/README.md` has no dangling reference to the deleted `CLAUDE.md`
 
 ### Phase 4: Security Headers and Error Hygiene
 

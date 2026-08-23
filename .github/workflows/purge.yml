@@ -1,6 +1,6 @@
 name: Purge deleted accounts
 
-# S-05 Phase 3: daily hard-delete of accounts past the 30-day retention window.
+# Daily hard-delete of accounts past the 30-day retention window.
 # Posts to the bearer-guarded /api/cron/purge route. Requires two repo secrets:
 #   PURGE_URL          — full production URL, e.g. https://<app>/api/cron/purge
 #   CRON_PURGE_SECRET  — must match the Worker's CRON_PURGE_SECRET secret

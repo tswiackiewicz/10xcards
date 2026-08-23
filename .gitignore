@@ -46,8 +46,11 @@ reports/
 .claude/config-templates/
 .agents/
 
-# 10x-cli managed (regenerowalne przez `10x-cli get`)
+# Locally generated agent tooling — never tracked. These patterns are load-bearing
+# beyond ignoring: eslint.config.js feeds .gitignore into includeIgnoreFile(), so the
+# `.github/**/10x-*` rule also shapes lint scope. Do not remove them.
 .claude/.10x-cli-manifest.json
 .claude/**/10x-*
 .github/**/10x-*
 .agents/**/10x-*
+skills-lock.json
