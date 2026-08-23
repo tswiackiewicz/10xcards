@@ -1,5 +1,6 @@
 {
-  "name": "10x-astro-starter",
+  "name": "10xcards",
+  "description": "AI-generated flashcards with spaced repetition study",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
@@ -23,6 +24,7 @@
     "@astrojs/react": "^5.0.4",
     "@astrojs/sitemap": "^3.7.2",
     "@eslint/config-helpers": "^0.6.0",
+    "@fontsource-variable/space-grotesk": "^5.3.0",
     "@radix-ui/react-slot": "^1.1.2",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.99.1",

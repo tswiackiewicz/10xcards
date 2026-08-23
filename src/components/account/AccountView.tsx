@@ -65,16 +65,16 @@ export default function AccountView({ pending, requestedAt, email }: Props) {
 
   if (pending) {
     return (
-      <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 p-6 text-white">
-        <h2 className="mb-2 flex items-center gap-2 text-lg font-semibold text-amber-200">
+      <div className="rounded-xl border border-amber-300 bg-amber-50 p-6 text-amber-900 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-200">
+        <h2 className="mb-2 flex items-center gap-2 text-lg font-semibold">
           <ShieldAlert className="h-5 w-5" /> Account scheduled for deletion
         </h2>
-        <p className="text-sm text-blue-100/80">
+        <p className="text-sm">
           Your account and all your flashcards are scheduled to be permanently deleted on{" "}
-          <span className="font-semibold text-white">{requestedAt ? purgeDate(requestedAt) : "soon"}</span>. Until then
-          your data is hidden but recoverable. Reactivate to restore full access.
+          <span className="font-semibold">{requestedAt ? purgeDate(requestedAt) : "soon"}</span>. Until then your data
+          is hidden but recoverable. Reactivate to restore full access.
         </p>
-        {error && <p className="mt-3 text-sm text-red-300">Something went wrong. Please try again.</p>}
+        {error && <p className="text-destructive mt-3 text-sm">Something went wrong. Please try again.</p>}
         <Button type="button" className="mt-4" onClick={handleReactivate} disabled={busy}>
           {busy && <Loader2 className="h-4 w-4 animate-spin" />}
           Reactivate account
@@ -84,15 +84,15 @@ export default function AccountView({ pending, requestedAt, email }: Props) {
   }
 
   return (
-    <div className="rounded-2xl border border-red-400/30 bg-red-500/10 p-6 text-white">
-      <h2 className="mb-2 flex items-center gap-2 text-lg font-semibold text-red-200">
+    <div className="border-destructive/40 bg-destructive/10 rounded-xl border p-6">
+      <h2 className="text-destructive mb-2 flex items-center gap-2 text-lg font-semibold">
         <ShieldAlert className="h-5 w-5" /> Danger zone
       </h2>
-      <p className="text-sm text-blue-100/80">
+      <p className="text-muted-foreground text-sm">
         Delete your account. Your flashcards are hidden immediately and permanently erased after {RETENTION_DAYS} days.
         You can restore everything by signing in and reactivating before then.
       </p>
-      {error && <p className="mt-3 text-sm text-red-300">Something went wrong. Please try again.</p>}
+      {error && <p className="text-destructive mt-3 text-sm">Something went wrong. Please try again.</p>}
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button type="button" variant="destructive" className="mt-4">

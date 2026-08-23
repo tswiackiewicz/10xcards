@@ -20,10 +20,11 @@ setup("authenticate", async ({ page }) => {
 
   // src/pages/api/auth/signin.ts (a real <form method="POST"> — no fetch
   // interception in SignInForm.tsx, so the browser follows the server's
-  // redirect natively) sends a normal, non-pending-deletion account to "/".
-  // A freshly seeded user is never in account_deletions, so "/" is the
-  // deterministic, verified target — wait for that navigation, not a timeout.
-  await page.waitForURL("/");
+  // redirect natively) sends a normal, non-pending-deletion account to
+  // "/dashboard". A freshly seeded user is never in account_deletions, so
+  // "/dashboard" is the deterministic, verified target — wait for that
+  // navigation, not a timeout.
+  await page.waitForURL("/dashboard");
 
   await page.context().storageState({ path: STORAGE_STATE_PATH });
 });

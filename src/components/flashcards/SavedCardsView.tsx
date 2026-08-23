@@ -23,7 +23,7 @@ const ERROR_COPY: Partial<Record<ApiErrorCode, string>> = {
 };
 
 const fieldClass =
-  "w-full resize-y rounded-lg border border-white/10 bg-white/5 p-3 text-sm text-white outline-none focus:border-purple-300 disabled:opacity-50";
+  "w-full resize-y rounded-lg border border-input bg-transparent p-3 text-sm text-foreground outline-none focus:border-ring disabled:opacity-50";
 
 async function requestJson(url: string, init: RequestInit): Promise<{ ok: boolean; error?: ApiErrorCode }> {
   const res = await fetch(url, init);
@@ -37,8 +37,8 @@ function SourceBadge({ source }: { source: string }) {
     <span
       className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${
         isAi
-          ? "border-purple-300/40 bg-purple-400/10 text-purple-100"
-          : "border-blue-300/40 bg-blue-400/10 text-blue-100"
+          ? "border-violet-300 bg-violet-50 text-violet-700 dark:border-violet-400/40 dark:bg-violet-500/10 dark:text-violet-200"
+          : "border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-400/40 dark:bg-blue-500/10 dark:text-blue-200"
       }`}
     >
       {isAi ? <Sparkles className="size-3" /> : <PenLine className="size-3" />}
@@ -99,9 +99,9 @@ function CardEditor({
   }
 
   return (
-    <li className="rounded-xl border border-white/10 bg-white/5 p-4">
+    <li className="border-border bg-card rounded-xl border p-4">
       <div>
-        <label className="mb-1 block text-sm text-blue-100/70">Question</label>
+        <label className="text-muted-foreground mb-1 block text-sm">Question</label>
         <textarea
           className={`h-24 ${fieldClass}`}
           value={question}
@@ -111,14 +111,14 @@ function CardEditor({
           disabled={saving}
         />
         <div className="mt-1 text-right text-xs">
-          <span className={qOver ? "text-red-300" : "text-blue-100/50"}>
+          <span className={qOver ? "text-destructive" : "text-muted-foreground"}>
             {qLen.toLocaleString()} / {QUESTION_MAX.toLocaleString()}
           </span>
         </div>
       </div>
 
       <div className="mt-3">
-        <label className="mb-1 block text-sm text-blue-100/70">Answer</label>
+        <label className="text-muted-foreground mb-1 block text-sm">Answer</label>
         <textarea
           className={`h-32 ${fieldClass}`}
           value={answer}
@@ -128,14 +128,14 @@ function CardEditor({
           disabled={saving}
         />
         <div className="mt-1 text-right text-xs">
-          <span className={aOver ? "text-red-300" : "text-blue-100/50"}>
+          <span className={aOver ? "text-destructive" : "text-muted-foreground"}>
             {aLen.toLocaleString()} / {ANSWER_MAX.toLocaleString()}
           </span>
         </div>
       </div>
 
       {error && (
-        <p className="mt-3 rounded-lg border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
+        <p className="border-destructive/40 bg-destructive/10 text-destructive mt-3 rounded-lg border p-3 text-sm">
           {ERROR_COPY[error]}
         </p>
       )}
@@ -189,17 +189,17 @@ function SavedCard({
   }
 
   return (
-    <li className="rounded-xl border border-white/10 bg-white/5 p-4">
+    <li className="border-border bg-card rounded-xl border p-4">
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs tracking-wide text-blue-100/50 uppercase">Question</span>
+        <span className="text-muted-foreground text-xs tracking-wide uppercase">Question</span>
         <SourceBadge source={card.source} />
       </div>
-      <p className="text-sm whitespace-pre-wrap text-white">{card.question}</p>
-      <div className="mt-3 mb-1 text-xs tracking-wide text-blue-100/50 uppercase">Answer</div>
-      <p className="text-sm whitespace-pre-wrap text-blue-100/80">{card.answer}</p>
+      <p className="text-foreground text-sm whitespace-pre-wrap">{card.question}</p>
+      <div className="text-muted-foreground mt-3 mb-1 text-xs tracking-wide uppercase">Answer</div>
+      <p className="text-muted-foreground text-sm whitespace-pre-wrap">{card.answer}</p>
 
       {error && (
-        <p className="mt-3 rounded-lg border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
+        <p className="border-destructive/40 bg-destructive/10 text-destructive mt-3 rounded-lg border p-3 text-sm">
           {ERROR_COPY[error]}
         </p>
       )}
@@ -234,18 +234,18 @@ function SavedCard({
 
 function EmptyState() {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
-      <p className="text-sm text-blue-100/80">You don&apos;t have any flashcards yet.</p>
+    <div className="border-border bg-card rounded-xl border p-8 text-center">
+      <p className="text-muted-foreground text-sm">You don&apos;t have any flashcards yet.</p>
       <div className="mt-4 flex flex-wrap justify-center gap-3">
         <a
           href="/generate"
-          className="inline-block rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm text-white transition-colors hover:bg-white/20"
+          className="border-border bg-card hover:bg-accent inline-block rounded-lg border px-4 py-2 text-sm transition-colors"
         >
           Generate flashcards
         </a>
         <a
           href="/create"
-          className="inline-block rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm text-white transition-colors hover:bg-white/20"
+          className="border-border bg-card hover:bg-accent inline-block rounded-lg border px-4 py-2 text-sm transition-colors"
         >
           Create flashcard
         </a>

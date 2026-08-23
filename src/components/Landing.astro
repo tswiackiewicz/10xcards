@@ -1,0 +1,152 @@
+---
+import CardMock from "@/components/landing/CardMock.astro";
+import { buttonVariants } from "@/components/ui/button";
+
+const { user } = Astro.locals;
+
+const STEPS = [
+  {
+    title: "Paste your text",
+    body: "Drop in up to 10,000 characters of notes, an article, or a chapter you need to know.",
+  },
+  {
+    title: "Review AI-drafted cards",
+    body: "Accept, edit, or reject each suggestion. Nothing reaches your deck without your say.",
+  },
+  {
+    title: "Study on schedule",
+    body: "FSRS picks what to review and when, so you spend your time on the cards you are about to forget.",
+  },
+];
+
+const FEATURES = [
+  {
+    title: "Human-gated AI",
+    body: "Every generated card is a candidate until you approve it, and each saved card keeps its AI or Manual provenance.",
+  },
+  {
+    title: "Built-in spaced repetition",
+    body: "Grade a card Again, Hard, Good, or Easy and the FSRS scheduler sets the next review date for you.",
+  },
+  {
+    title: "Private by default",
+    body: "Your deck is yours alone. Delete your account any time — with a 30-day recovery window before it is purged.",
+  },
+];
+---
+
+<div class="mx-auto w-full max-w-4xl px-4">
+  <div>
+    <!-- Hero -->
+    <section class="grid items-center gap-12 py-16 sm:py-24 lg:grid-cols-2" aria-labelledby="hero">
+      <div>
+        <h1 id="hero" class="text-foreground text-4xl leading-tight font-semibold tracking-tight sm:text-5xl">
+          Paste your notes. Remember them forever.
+        </h1>
+        {
+          user ? (
+            <>
+              <p class="text-muted-foreground mt-6 text-lg">Welcome back.</p>
+              <div class="mt-8">
+                <a href="/dashboard" class:list={buttonVariants({ size: "lg" })}>
+                  Open dashboard
+                </a>
+              </div>
+            </>
+          ) : (
+            <>
+              <p class="text-muted-foreground mt-6 text-lg">
+                10xCards turns text you already have into AI-drafted flashcards — you accept, edit, or reject each one,
+                then study them on a spaced-repetition schedule. Free.
+              </p>
+              <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+                <a href="/auth/signup" class:list={buttonVariants({ size: "lg" })}>
+                  Start learning free
+                </a>
+                <a href="/auth/signin" class:list={buttonVariants({ variant: "outline", size: "lg" })}>
+                  Log in
+                </a>
+              </div>
+            </>
+          )
+        }
+      </div>
+      <CardMock />
+    </section>
+
+    <!-- How it works -->
+    <section class="border-border border-t py-16" aria-labelledby="how-it-works">
+      <h2 id="how-it-works" class="text-foreground text-2xl font-semibold tracking-tight">How it works</h2>
+      <ol class="mt-8 grid gap-8 sm:grid-cols-3">
+        {
+          STEPS.map((step, i) => (
+            <li>
+              <span
+                class="border-primary/40 bg-primary/10 text-primary inline-flex size-8 items-center justify-center rounded-full border text-sm font-semibold"
+                aria-hidden="true"
+              >
+                {i + 1}
+              </span>
+              <h3 class="text-foreground mt-4 text-base font-semibold">{step.title}</h3>
+              <p class="text-muted-foreground mt-2 text-sm leading-relaxed">{step.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <!-- Features -->
+    <section class="border-border border-t py-16" aria-labelledby="features">
+      <h2 id="features" class="text-foreground text-2xl font-semibold tracking-tight">What you get</h2>
+      <div class="mt-8 grid gap-6 sm:grid-cols-3">
+        {
+          FEATURES.map((feature) => (
+            <div class="bg-card border-border rounded-xl border p-6">
+              <h3 class="text-foreground text-base font-semibold">{feature.title}</h3>
+              <p class="text-muted-foreground mt-2 text-sm leading-relaxed">{feature.body}</p>
+            </div>
+          ))
+        }
+      </div>
+      <p class="text-muted-foreground mt-8 text-sm">
+        Your source text is never shown to other users and never reused beyond your request.
+      </p>
+    </section>
+
+    <!-- Bottom CTA -->
+    <section class="border-border border-t py-16">
+      <div class="bg-card border-border rounded-xl border p-8 text-center sm:p-12">
+        <h2 class="text-foreground text-2xl font-semibold tracking-tight">
+          {user ? "Your deck is waiting." : "Turn your next reading session into a deck."}
+        </h2>
+        <div class="mt-6">
+          {
+            user ? (
+              <a href="/dashboard" class:list={buttonVariants({ size: "lg" })}>
+                Open dashboard
+              </a>
+            ) : (
+              <a href="/auth/signup" class:list={buttonVariants({ size: "lg" })}>
+                Start learning free
+              </a>
+            )
+          }
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer
+    class="border-border text-muted-foreground flex flex-wrap items-center justify-between gap-2 border-t py-8 text-sm"
+  >
+    <span>© 10xCards</span>
+    <a
+      href="https://github.com/tswiackiewicz/10xcards"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="hover:text-foreground transition-colors"
+    >
+      GitHub
+    </a>
+  </footer>
+</div>

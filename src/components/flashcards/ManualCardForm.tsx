@@ -26,7 +26,7 @@ async function postJson(url: string, body: unknown): Promise<{ ok: boolean; data
 }
 
 const fieldClass =
-  "w-full resize-y rounded-lg border border-white/10 bg-white/5 p-3 text-sm text-white outline-none focus:border-purple-300 disabled:opacity-50";
+  "w-full resize-y rounded-lg border border-input bg-transparent p-3 text-sm text-foreground outline-none focus:border-ring disabled:opacity-50";
 
 export default function ManualCardForm() {
   const [question, setQuestion] = useState("");
@@ -66,7 +66,7 @@ export default function ManualCardForm() {
   return (
     <div className="space-y-4">
       <div>
-        <label className="mb-1 block text-sm text-blue-100/70">Question</label>
+        <label className="text-muted-foreground mb-1 block text-sm">Question</label>
         <textarea
           className={`h-24 ${fieldClass}`}
           placeholder="e.g. What does RLS stand for?"
@@ -78,14 +78,14 @@ export default function ManualCardForm() {
           disabled={saving}
         />
         <div className="mt-1 text-right text-xs">
-          <span className={qOver ? "text-red-300" : "text-blue-100/50"}>
+          <span className={qOver ? "text-destructive" : "text-muted-foreground"}>
             {qLen.toLocaleString()} / {QUESTION_MAX.toLocaleString()}
           </span>
         </div>
       </div>
 
       <div>
-        <label className="mb-1 block text-sm text-blue-100/70">Answer</label>
+        <label className="text-muted-foreground mb-1 block text-sm">Answer</label>
         <textarea
           className={`h-32 ${fieldClass}`}
           placeholder="e.g. Row-Level Security."
@@ -97,20 +97,20 @@ export default function ManualCardForm() {
           disabled={saving}
         />
         <div className="mt-1 text-right text-xs">
-          <span className={aOver ? "text-red-300" : "text-blue-100/50"}>
+          <span className={aOver ? "text-destructive" : "text-muted-foreground"}>
             {aLen.toLocaleString()} / {ANSWER_MAX.toLocaleString()}
           </span>
         </div>
       </div>
 
       {error && (
-        <p className="rounded-lg border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
+        <p className="border-destructive/40 bg-destructive/10 text-destructive rounded-lg border p-3 text-sm">
           {ERROR_COPY[error]}
         </p>
       )}
 
       {saved && (
-        <p className="rounded-lg border border-emerald-400/40 bg-emerald-500/10 p-3 text-sm text-emerald-200">
+        <p className="border-primary/40 bg-primary/10 text-primary rounded-lg border p-3 text-sm">
           Card saved to your deck.
         </p>
       )}

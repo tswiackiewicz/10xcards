@@ -6,37 +6,18 @@ interface Props {
 }
 
 const { variant = "info" } = Astro.props;
+
+const VARIANT_CLASSES: Record<Variant, string> = {
+  info: "border-primary/40 bg-primary/10 text-foreground",
+  warning:
+    "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-200",
+  error: "border-destructive/40 bg-destructive/10 text-destructive",
+};
 ---
 
-<div class:list={["banner", `banner--${variant}`]} role={variant === "error" ? "alert" : "status"}>
+<div
+  class:list={["border-b px-4 py-3 text-center text-sm [&_a]:font-semibold [&_a]:underline", VARIANT_CLASSES[variant]]}
+  role={variant === "error" ? "alert" : "status"}
+>
   <slot />
 </div>
-
-<style>
-  .banner {
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
-    text-align: center;
-    border-bottom: 1px solid;
-  }
-  .banner :global(a) {
-    color: inherit;
-    text-decoration: underline;
-    font-weight: 600;
-  }
-  .banner--info {
-    background: #dbeafe;
-    color: #1e3a8a;
-    border-color: #3b82f6;
-  }
-  .banner--warning {
-    background: #fef3c7;
-    color: #78350f;
-    border-color: #f59e0b;
-  }
-  .banner--error {
-    background: #fee2e2;
-    color: #7f1d1d;
-    border-color: #dc2626;
-  }
-</style>

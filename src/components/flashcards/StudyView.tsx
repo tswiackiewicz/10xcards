@@ -11,14 +11,30 @@ const ERROR_COPY: Partial<Record<ApiErrorCode, string>> = {
 
 /** Grade buttons in order, with label + color. Rating values match the FSRS grades (1..4). */
 const GRADE_META: { rating: ReviewRating; text: string; className: string }[] = [
-  { rating: 1, text: "Again", className: "border-red-400/40 bg-red-500/10 text-red-100 hover:bg-red-500/20" },
+  {
+    rating: 1,
+    text: "Again",
+    className:
+      "border-red-300 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-400/40 dark:bg-red-500/10 dark:text-red-200 dark:hover:bg-red-500/20",
+  },
   {
     rating: 2,
     text: "Hard",
-    className: "border-orange-400/40 bg-orange-500/10 text-orange-100 hover:bg-orange-500/20",
+    className:
+      "border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100 dark:border-orange-400/40 dark:bg-orange-500/10 dark:text-orange-200 dark:hover:bg-orange-500/20",
   },
-  { rating: 3, text: "Good", className: "border-blue-400/40 bg-blue-500/10 text-blue-100 hover:bg-blue-500/20" },
-  { rating: 4, text: "Easy", className: "border-green-400/40 bg-green-500/10 text-green-100 hover:bg-green-500/20" },
+  {
+    rating: 3,
+    text: "Good",
+    className:
+      "border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-blue-400/40 dark:bg-blue-500/10 dark:text-blue-200 dark:hover:bg-blue-500/20",
+  },
+  {
+    rating: 4,
+    text: "Easy",
+    className:
+      "border-green-300 bg-green-50 text-green-700 hover:bg-green-100 dark:border-green-400/40 dark:bg-green-500/10 dark:text-green-200 dark:hover:bg-green-500/20",
+  },
 ];
 
 function labelFor(previews: GradePreview[] | null, rating: ReviewRating): string | null {
@@ -95,7 +111,7 @@ export default function StudyView({ initialCard, initialPreviews }: StudyViewPro
 
   if (status === "loading") {
     return (
-      <div className="flex justify-center py-16 text-blue-100/70">
+      <div className="text-muted-foreground flex justify-center py-16">
         <Loader2 className="size-6 animate-spin" />
       </div>
     );
@@ -103,8 +119,8 @@ export default function StudyView({ initialCard, initialPreviews }: StudyViewPro
 
   if (status === "error") {
     return (
-      <div className="rounded-xl border border-red-400/40 bg-red-500/10 p-6 text-center">
-        <p className="text-sm text-red-200">{error ? ERROR_COPY[error] : "Something went wrong."}</p>
+      <div className="border-destructive/40 bg-destructive/10 rounded-xl border p-6 text-center">
+        <p className="text-destructive text-sm">{error ? ERROR_COPY[error] : "Something went wrong."}</p>
         <Button type="button" variant="outline" className="mt-4" onClick={retry}>
           Try again
         </Button>
@@ -114,19 +130,19 @@ export default function StudyView({ initialCard, initialPreviews }: StudyViewPro
 
   if (!card) {
     return (
-      <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
-        <PartyPopper className="mx-auto mb-3 size-8 text-purple-200" />
-        <p className="text-sm text-blue-100/80">All caught up — no cards are due right now.</p>
+      <div className="border-border bg-card rounded-xl border p-8 text-center">
+        <PartyPopper className="text-primary mx-auto mb-3 size-8" />
+        <p className="text-muted-foreground text-sm">All caught up — no cards are due right now.</p>
         <div className="mt-4 flex flex-wrap justify-center gap-3">
           <a
             href="/cards"
-            className="inline-block rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm text-white transition-colors hover:bg-white/20"
+            className="border-border bg-card hover:bg-accent inline-block rounded-lg border px-4 py-2 text-sm transition-colors"
           >
             My flashcards
           </a>
           <a
             href="/dashboard"
-            className="inline-block rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm text-white transition-colors hover:bg-white/20"
+            className="border-border bg-card hover:bg-accent inline-block rounded-lg border px-4 py-2 text-sm transition-colors"
           >
             Dashboard
           </a>
@@ -136,14 +152,14 @@ export default function StudyView({ initialCard, initialPreviews }: StudyViewPro
   }
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-6">
-      <div className="mb-1 text-xs tracking-wide text-blue-100/50 uppercase">Question</div>
-      <p className="text-lg whitespace-pre-wrap text-white">{card.question}</p>
+    <div className="border-border bg-card rounded-xl border p-6">
+      <div className="text-muted-foreground mb-1 text-xs tracking-wide uppercase">Question</div>
+      <p className="text-foreground text-lg whitespace-pre-wrap">{card.question}</p>
 
       {revealed ? (
         <>
-          <div className="mt-5 mb-1 text-xs tracking-wide text-blue-100/50 uppercase">Answer</div>
-          <p className="text-base whitespace-pre-wrap text-blue-100/90">{card.answer}</p>
+          <div className="text-muted-foreground mt-5 mb-1 text-xs tracking-wide uppercase">Answer</div>
+          <p className="text-foreground text-base whitespace-pre-wrap">{card.answer}</p>
 
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {GRADE_META.map(({ rating, text, className }) => {

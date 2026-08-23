@@ -1,0 +1,32 @@
+---
+// Honest, zero-JS hero visual: the front/back pair of one real flashcard, with the
+// same AI provenance badge the app shows on generated cards. Tokens only, so it
+// themes with everything else.
+//
+// Both cards sit in normal flow (the back one pulled up under the front with a
+// negative margin) rather than absolutely positioned: the block keeps an intrinsic
+// height, and the answer stays legible instead of hiding behind the question.
+---
+
+<div class="mx-auto w-full max-w-sm" aria-hidden="true">
+  <!-- front of the card: the question, on top -->
+  <div class="bg-card border-border relative z-10 -rotate-1 rounded-xl border p-5 shadow-md">
+    <div class="mb-3 flex items-center justify-between gap-2">
+      <p class="text-muted-foreground text-xs font-medium tracking-wide uppercase">Question</p>
+      <span
+        class="rounded-full border border-violet-300 bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700 dark:border-violet-400/40 dark:bg-violet-500/10 dark:text-violet-200"
+      >
+        AI
+      </span>
+    </div>
+    <p class="text-foreground text-base font-medium">What does spaced repetition actually optimise for?</p>
+  </div>
+
+  <!-- back of the card: the answer, tucked under and offset to the right -->
+  <div class="bg-card border-border relative z-0 -mt-4 ml-10 rotate-2 rounded-xl border p-5 pt-6 shadow-sm">
+    <p class="text-muted-foreground mb-1 text-xs font-medium tracking-wide uppercase">Answer</p>
+    <p class="text-foreground text-sm">
+      Spacing reviews so each one lands just before you would have forgotten the card.
+    </p>
+  </div>
+</div>
