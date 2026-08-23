@@ -21,13 +21,20 @@ export default defineConfig({
   security: {
     checkOrigin: true,
     // Astro computes sha256 hashes for its own bundled scripts and styles, which is the
-    // only way islands can hydrate under a real CSP — Astro rejects 'unsafe-inline'
-    // alongside a hash. Every route here is SSR, and for non-prerendered routes Astro
-    // ships the policy as a `content-security-policy` HEADER (the <meta http-equiv>
-    // element is the prerendered-page path). src/middleware.ts appends frame-ancestors to
-    // that header and must never overwrite it. Inert under `astro dev`, so the e2e suite
-    // cannot see it — verify against `astro preview`.
-    csp: true,
+    // only way islands can hydrate under a real CSP — a hash makes the browser ignore
+    // 'unsafe-inline' in the same directive. Every route here is SSR, and for
+    // non-prerendered routes Astro ships the policy as a `content-security-policy` HEADER
+    // (the <meta http-equiv> element is the prerendered-page path). Inert under
+    // `astro dev`, so the e2e suite cannot see it — verify against `astro preview`.
+    //
+    // Everything Astro will merge belongs HERE, not in src/middleware.ts: CSP honours the
+    // FIRST occurrence of a directive, so a directive appended to an already-emitted header
+    // is silently dead if Astro ever emits its own copy. The middleware still appends the
+    // two style carve-outs because `style-src*` is the one family Astro's directive
+    // allowlist rejects.
+    csp: {
+      directives: ["frame-ancestors 'none'", "object-src 'none'", "base-uri 'self'"],
+    },
   },
   // The toolbar's Inspect app dumps every island's props into an in-DOM <pre><code>
   // tooltip on init, regardless of whether it's opened. e2e tests run against
