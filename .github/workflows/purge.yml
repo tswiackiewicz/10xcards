@@ -6,6 +6,10 @@ name: Purge deleted accounts
 #   CRON_PURGE_SECRET  — must match the Worker's CRON_PURGE_SECRET secret
 # The route is idempotent, so a missed or double run is safe.
 
+# No GITHUB_TOKEN use at all — the job only POSTs to the production Worker with its
+# own bearer secret — so the token is stripped to nothing.
+permissions: {}
+
 on:
   schedule:
     - cron: "0 3 * * *"

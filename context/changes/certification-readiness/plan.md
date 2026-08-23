@@ -552,37 +552,37 @@ The one thing to watch is the Phase 1 `Cache-Control` work: applying no-store he
 
 #### Automated
 
-- [x] 1.1 `npm ls astro` reports `astro@6.4.8`
-- [x] 1.2 `npm audit --json` no longer reports GHSA-vj59-8hwv-xxmv
-- [x] 1.3 Lint and types pass: `npx astro sync && npm run lint`
-- [x] 1.4 Unit/integration suite passes: `npm test`
-- [x] 1.5 E2E suite passes, including the auth-redirect specs: `npm run test:e2e`
-- [x] 1.6 Build passes: `npm run build`
-- [x] 1.7 `npx wrangler deploy --dry-run` reads from `dist/client` and excludes `.dev.vars`
+- [x] 1.1 `npm ls astro` reports `astro@6.4.8` — 21fa208
+- [x] 1.2 `npm audit --json` no longer reports GHSA-vj59-8hwv-xxmv — 21fa208
+- [x] 1.3 Lint and types pass: `npx astro sync && npm run lint` — 21fa208
+- [x] 1.4 Unit/integration suite passes: `npm test` — 21fa208
+- [x] 1.5 E2E suite passes, including the auth-redirect specs: `npm run test:e2e` — 21fa208
+- [x] 1.6 Build passes: `npm run build` — 21fa208
+- [x] 1.7 `npx wrangler deploy --dry-run` reads from `dist/client` and excludes `.dev.vars` — 21fa208
 
 #### Manual
 
-- [x] 1.8 `Set-Cookie` for `sb-*-auth-token` carries both `HttpOnly` and `Secure`
-- [x] 1.9 `document.cookie` shows no `sb-*-auth-token` entry while signed in
-- [x] 1.10 Sign-in works end to end; pending-deletion diversion to `/account` still fires
-- [x] 1.11 All six protected pages redirect to `/auth/signin` while signed out
+- [x] 1.8 `Set-Cookie` for `sb-*-auth-token` carries both `HttpOnly` and `Secure` — 21fa208
+- [x] 1.9 `document.cookie` shows no `sb-*-auth-token` entry while signed in — 21fa208
+- [x] 1.10 Sign-in works end to end; pending-deletion diversion to `/account` still fires — 21fa208
+- [x] 1.11 All six protected pages redirect to `/auth/signin` while signed out — 21fa208
 
 ### Phase 2: Dependencies and CI Hardening
 
 #### Automated
 
-- [ ] 2.1 `npm audit` residual is only build/dev/CLI advisories plus the three Astro-v7 XSS advisories
-- [ ] 2.2 No new prerelease version string in `package-lock.json`
-- [ ] 2.3 `actionlint` passes
-- [ ] 2.4 Full CI passes on the branch: lint, `npm test`, `npm run test:e2e`, `npm run build`
-- [ ] 2.5 No `pull_request`-triggered job references the production Supabase secrets
-- [ ] 2.6 `supabase start` still applies all five migrations in the `ci` job
+- [x] 2.1 `npm audit` residual is only build/dev/CLI advisories plus the three Astro-v7 XSS advisories
+- [x] 2.2 No new prerelease version string in `package-lock.json`
+- [x] 2.3 `actionlint` passes
+- [x] 2.4 Full CI passes on the branch: lint, `npm test`, `npm run test:e2e`, `npm run build`
+- [x] 2.5 No `pull_request`-triggered job references the production Supabase secrets
+- [x] 2.6 `supabase start` still applies all five migrations in the `ci` job
 
 #### Manual
 
-- [ ] 2.7 Every third-party `uses:` in `ci.yml` shows a 40-char SHA with a version comment
+- [x] 2.7 Every third-party `uses:` in `ci.yml` shows a 40-char SHA with a version comment
 - [ ] 2.8 A push to `master` still deploys: migrations pushed, then `wrangler deploy`
-- [ ] 2.9 `README.md:193` and `AGENTS.md`'s CI section both state that prod-divergence detection is now post-merge
+- [x] 2.9 `README.md:193` and `AGENTS.md`'s CI section both state that prod-divergence detection is now post-merge
 
 ### Phase 3: Provenance Surgery
 
