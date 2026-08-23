@@ -588,40 +588,40 @@ The one thing to watch is the Phase 1 `Cache-Control` work: applying no-store he
 
 #### Automated
 
-- [x] 3.1 `git grep -iE 'przeprogramowani|10xdevs|10x-astro-starter'` (excluding `context/` and the eval corpus) returns nothing
-- [x] 3.2 `node -e "console.log(require('./package-lock.json').name)"` prints `10xcards`
-- [x] 3.3 `git grep -inE 'lesson|module [0-9]'` (same exclusions) returns nothing
-- [x] 3.4 No tracked file references `context/foundation/.claude/` or `context/foundation/CLAUDE.md`
-- [x] 3.5 Lint passes, confirming `includeIgnoreFile()` lint scope is unchanged
-- [x] 3.6 `actionlint` passes after the workflow comment edits
-- [x] 3.7 Local stack comes up under the new project id: `npx supabase stop && npx supabase start`
-- [x] 3.8 `npm test` and `npm run test:e2e` pass against the renamed local stack
-- [x] 3.9 `npm run build` passes
+- [x] 3.1 `git grep -iE 'przeprogramowani|10xdevs|10x-astro-starter'` (excluding `context/` and the eval corpus) returns nothing — 7355a65
+- [x] 3.2 `node -e "console.log(require('./package-lock.json').name)"` prints `10xcards` — 7355a65
+- [x] 3.3 `git grep -inE 'lesson|module [0-9]'` (same exclusions) returns nothing — 7355a65
+- [x] 3.4 No tracked file references `context/foundation/.claude/` or `context/foundation/CLAUDE.md` — 7355a65
+- [x] 3.5 Lint passes, confirming `includeIgnoreFile()` lint scope is unchanged — 7355a65
+- [x] 3.6 `actionlint` passes after the workflow comment edits — 7355a65
+- [x] 3.7 Local stack comes up under the new project id: `npx supabase stop && npx supabase start` — 7355a65
+- [x] 3.8 `npm test` and `npm run test:e2e` pass against the renamed local stack — 7355a65
+- [x] 3.9 `npm run build` passes — 7355a65
 
 #### Manual
 
-- [x] 3.10 `CLAUDE.md` reads as an ordinary agent-instructions file with no course reference
-- [x] 3.11 Every E2E rule from the deleted block is present in `AGENTS.md`
-- [x] 3.12 GitHub's root file listing shows no course reference in rendered markdown
-- [x] 3.13 `context/foundation/README.md` has no dangling reference to the deleted `CLAUDE.md`
+- [x] 3.10 `CLAUDE.md` reads as an ordinary agent-instructions file with no course reference — 7355a65
+- [x] 3.11 Every E2E rule from the deleted block is present in `AGENTS.md` — 7355a65
+- [x] 3.12 GitHub's root file listing shows no course reference in rendered markdown — 7355a65
+- [x] 3.13 `context/foundation/README.md` has no dangling reference to the deleted `CLAUDE.md` — 7355a65
 
 ### Phase 4: Security Headers and Error Hygiene
 
 #### Automated
 
-- [ ] 4.1 Lint and types pass: `npx astro sync && npm run lint`
-- [ ] 4.2 `npm test` passes, including the new auth-error-mapping unit test
-- [ ] 4.3 `npm run test:e2e` passes, in particular every auth spec (says nothing about the CSP — dev server)
-- [ ] 4.4 `npm run build` passes
-- [ ] 4.5 On `astro preview`, HTML carries a `<meta http-equiv="content-security-policy">` with `sha256-` hashes and no `'unsafe-inline'`
-- [ ] 4.6 On `astro preview`, `curl -sI` shows `Strict-Transport-Security`, `X-Content-Type-Options`, `Referrer-Policy`, `frame-ancestors`
+- [x] 4.1 Lint and types pass: `npx astro sync && npm run lint`
+- [x] 4.2 `npm test` passes, including the new auth-error-mapping unit test
+- [x] 4.3 `npm run test:e2e` passes, in particular every auth spec (says nothing about the CSP — dev server)
+- [x] 4.4 `npm run build` passes
+- [x] 4.5 On `astro preview`, HTML carries a `<meta http-equiv="content-security-policy">` with `sha256-` hashes and no `'unsafe-inline'`
+- [x] 4.6 On `astro preview`, `curl -sI` shows `Strict-Transport-Security`, `X-Content-Type-Options`, `Referrer-Policy`, `frame-ancestors`
 
 #### Manual
 
-- [ ] 4.7 Zero CSP violations in the console across all eight pages, on the `astro preview` build
-- [ ] 4.8 All React islands still hydrate and respond to interaction on that preview build
-- [ ] 4.9 Signup with an existing address is indistinguishable from a bad-credentials signin
-- [ ] 4.10 No Supabase error text appears in any URL
+- [x] 4.7 Zero CSP violations in the console across all eight pages, on the `astro preview` build
+- [x] 4.8 All React islands still hydrate and respond to interaction on that preview build
+- [x] 4.9 Signup with an existing address is indistinguishable from a bad-credentials signin
+- [x] 4.10 No Supabase error text appears in any URL
 
 ### Phase 5: Repo Hygiene
 

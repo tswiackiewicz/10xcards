@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
+import { toGenericAuthError } from "@/lib/auth/errors";
 
 export const POST: APIRoute = async (context) => {
   const form = await context.request.formData();
@@ -13,7 +14,8 @@ export const POST: APIRoute = async (context) => {
   const { error } = await supabase.auth.signUp({ email, password });
 
   if (error) {
-    return context.redirect(`/auth/signup?error=${encodeURIComponent(error.message)}`);
+    // "User already registered" must not be distinguishable from any other failure here.
+    return context.redirect(`/auth/signup?error=${encodeURIComponent(toGenericAuthError("signup", error))}`);
   }
 
   return context.redirect("/auth/confirm-email");

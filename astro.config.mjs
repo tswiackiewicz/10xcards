@@ -18,7 +18,17 @@ export default defineConfig({
   site: SITE_URL,
   // Destructive cookie-authed endpoints (POST /api/account/delete) depend on this —
   // pin it explicitly rather than relying on Astro's implicit default (see impl-review F5).
-  security: { checkOrigin: true },
+  security: {
+    checkOrigin: true,
+    // Astro computes sha256 hashes for its own bundled scripts and styles, which is the
+    // only way islands can hydrate under a real CSP — Astro rejects 'unsafe-inline'
+    // alongside a hash. Every route here is SSR, and for non-prerendered routes Astro
+    // ships the policy as a `content-security-policy` HEADER (the <meta http-equiv>
+    // element is the prerendered-page path). src/middleware.ts appends frame-ancestors to
+    // that header and must never overwrite it. Inert under `astro dev`, so the e2e suite
+    // cannot see it — verify against `astro preview`.
+    csp: true,
+  },
   // The toolbar's Inspect app dumps every island's props into an in-DOM <pre><code>
   // tooltip on init, regardless of whether it's opened. e2e tests run against
   // `astro dev` (playwright.config.ts) and assert on visible flashcard text with
