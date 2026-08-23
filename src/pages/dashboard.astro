@@ -1,6 +1,12 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 
+// Defence in depth: the middleware pathname matcher already gates this route,
+// but each protected page re-checks so the gate does not depend on it alone.
+if (!Astro.locals.user) {
+  return Astro.redirect("/auth/signin");
+}
+
 const { user } = Astro.locals;
 
 const TILES = [

@@ -6,12 +6,19 @@ Project onboarding for AI coding agents. This is the source of truth; `CLAUDE.md
 
 Astro 6 (server-first, `output: server` on Cloudflare) · React 19 islands · TypeScript 5.9 (strict) · Tailwind 4 · shadcn/ui (new-york) · Supabase (auth + Postgres) · deploys to Cloudflare Workers via Wrangler. Package manager: **npm**. Node: **24.17.0** (`.nvmrc`) — `type: module` (ESM).
 
+- **`wrangler` is pinned exactly to `4.116.0` — do not widen it to a caret range.** It is the only
+  exact pin in `package.json`, so it reads like an oversight; it is not. From `4.117.0` wrangler
+  declares `miniflare@5.x-alpha` as a hard dependency, which drags a prerelease back into
+  `package-lock.json`. Nothing in CI enforces the no-prerelease invariant, so an "unpin this, it
+  looks like a mistake" cleanup passes every check while undoing the fix. Bump it only after
+  checking that the target version's `miniflare` dependency is stable.
+
 ## Commands
 
 Standard scripts (`dev`, `lint`, `lint:fix`, `format`, `build`): see `@package.json`. The non-obvious ones:
 
 - **`npx astro sync`** — regenerate `.astro/` types after touching `astro.config.mjs`, content collections, or env schema. CI runs this before lint; run it locally if types look stale. (Or `/verify` to mirror CI: sync → lint → build.)
-- `npx wrangler deploy` — ship `./dist` to Cloudflare Workers manually (ad-hoc/local); CI also runs this automatically on every push to `master` (see Git & CI).
+- `npx wrangler deploy` — ship `./dist/client` to Cloudflare Workers manually (ad-hoc/local); CI also runs this automatically on every push to `master` (see Git & CI).
 
 `npm test` runs the Vitest unit/integration suite; `npm run test:e2e` runs the Playwright e2e suite. Both are wired into CI (see Git & CI).
 
@@ -25,6 +32,9 @@ Standard scripts (`dev`, `lint`, `lint:fix`, `format`, `build`): see `@package.j
 - **Tailwind class merging:** use the `cn()` helper from `@/lib/utils` (clsx + tailwind-merge) for conditional/merged class names — don't concatenate class strings manually.
 - **API routes validate input with zod** (e.g. `src/pages/api/flashcards/generate.ts`, `[id].ts`) before touching Supabase.
 - **E2E: navigate via the hydration-safe helpers.** `client:load` islands render server-side first and hydrate asynchronously; clicking before hydration completes can silently no-op. Always call `gotoAndWaitForHydration`/`reloadAndWaitForHydration` from `tests/e2e/navigate.ts` — never call `page.goto()`/`page.reload()` directly in `tests/e2e/**`.
+- **E2E locators are accessibility-first.** `getByRole` / `getByLabel` / `getByText` first; `getByTestId` only when the accessibility attributes are genuinely ambiguous. Never CSS selectors, XPath, or anything keyed on DOM structure — those break on every refactor and assert nothing about what a user can actually reach.
+- **Never `page.waitForTimeout()`.** Wait for state, not for time: `toBeVisible()`, `waitForURL()`, `waitForResponse()`. A sleep is a flake with a delay on it.
+- **Each E2E test stands alone.** Its own setup, action, assertion and cleanup, with unique ids (timestamp suffix) so parallel workers and re-runs cannot collide. `playwright.config.ts` sets `fullyParallel: true`, so a test that leans on another test's leftovers will fail non-deterministically.
 
 ## Architecture notes
 
@@ -41,10 +51,11 @@ Standard scripts (`dev`, `lint`, `lint:fix`, `format`, `build`): see `@package.j
 ## Git & CI
 
 - Pre-commit (`.husky/pre-commit` → lint-staged): `eslint --fix` on `*.{ts,tsx,astro}`, `prettier --write` on `*.{json,css,md}`. A lint failure blocks the commit.
-- CI (`@.github/workflows/ci.yml`) runs on push/PR to **`master`** — which is also the repository's default branch. The `ci` job: `npm ci` → `astro sync` → `actionlint` (validates everything under `.github/workflows/`, and local composite actions transitively through their `uses:`) → lint → start a local Supabase stack → `npm test` (Vitest) → `npm run test:e2e` (Playwright) → build → Supabase migration dry-run (`supabase db push --dry-run`, catches migrations that fail against prod before merge).
-- On push to `master`, the `deploy` job additionally pushes pending Supabase migrations for real (`supabase db push`) before `wrangler deploy`, so prod schema stays in sync with the repo. Requires repo secrets `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_ID`.
+- CI (`@.github/workflows/ci.yml`) runs on push/PR to **`master`** — which is also the repository's default branch. The `ci` job: `npm ci` → `astro sync` → `actionlint` (validates everything under `.github/workflows/`, and local composite actions transitively through their `uses:`) → lint → start a local Supabase stack → `npm test` (Vitest) → `npm run test:e2e` (Playwright) → build. `supabase start` applies every migration to a fresh local stack, so a migration that cannot apply at all fails the PR.
+- **The production migration dry-run is push-only, so prod-divergence is caught post-merge.** `migration-dry-run` (`supabase db push --dry-run` against the real project) runs on push to `master` and never on a `pull_request` — it used to be a step inside `ci`, which put `SUPABASE_ACCESS_TOKEN` / `SUPABASE_DB_PASSWORD` / `SUPABASE_PROJECT_ID` in scope in a job built from the PR branch. The cost of moving it: a migration that conflicts with production's actual schema state now surfaces on `master`, not in the PR.
+- On push to `master`, the `deploy` job (which waits for both `ci` and `migration-dry-run`) additionally pushes pending Supabase migrations for real (`supabase db push`) before `wrangler deploy`, so prod schema stays in sync with the repo. Requires repo secrets `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_ID`.
 - Commit style: Conventional Commits.
-- **CI covers the root app plus one package.** A second job, `code-review-package`, installs `packages/code-review` and runs its lint, typecheck and tests in parallel with `ci`. Nothing else under `packages/` is touched by the pipeline. Two limits worth internalizing: the job is **not a required check** and `deploy` does not depend on it, so a green `ci` — and a merge — still says nothing about the package; and no package is ever *built* by CI (the code-review package runs from source via `tsx`).
+- **CI covers the root app plus one package.** A second job, `code-review-package`, installs `packages/code-review` and runs its lint, typecheck and tests in parallel with `ci`. Nothing else under `packages/` is touched by the pipeline. Two limits worth internalizing: the job is **not a required check** and `deploy` does not depend on it, so a green `ci` — and a merge — still says nothing about the package; and no package is ever _built_ by CI (the code-review package runs from source via `tsx`).
 - AI code review (`@.github/workflows/ai-code-review.yml`) runs on every non-draft, same-repo PR to `master`: it posts one sticky comment and applies exactly one of `ai-cr:passed` / `ai-cr:failed`. It is **advisory** — it never blocks a merge. Re-run it by adding the `ai-cr:review` label. A PR whose reviewable diff is empty, or whose review could not run, gets a comment and **no** verdict label, so a green label never certifies an unreviewed change. Needs the `OPENROUTER_API_KEY` repo secret; the three `ai-cr:*` labels are provisioned by a one-off `workflow_dispatch` run of `ai-review-labels.yml`.
 
 ## Standalone packages
@@ -66,4 +77,4 @@ Consequences worth knowing before you touch one:
 
 ## Don't touch
 
-`CLAUDE.md` lines between `<!-- BEGIN @przeprogramowani/10x-cli -->` and `<!-- END -->` are generated by the 10x-cli and get regenerated — edit `AGENTS.md` instead. Skills must not write to `context/archive/` (immutable).
+Skills must not write to `context/archive/` (immutable).

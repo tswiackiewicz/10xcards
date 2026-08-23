@@ -3,6 +3,12 @@ import Layout from "@/layouts/Layout.astro";
 import AccountView from "@/components/account/AccountView";
 import { createClient } from "@/lib/supabase";
 
+// Defence in depth: the middleware pathname matcher already gates this route,
+// but each protected page re-checks so the gate does not depend on it alone.
+if (!Astro.locals.user) {
+  return Astro.redirect("/auth/signin");
+}
+
 const { user } = Astro.locals;
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 

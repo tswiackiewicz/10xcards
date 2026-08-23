@@ -1,6 +1,6 @@
 name: AI review smoke
 
-# Exercises the composite action without opening a PR. Kept in the repo after Phase 3:
+# Exercises the composite action without opening a PR. Deliberately kept in the repo:
 # it is the cheapest way to reproduce the `error` path on demand.
 on:
   workflow_dispatch:

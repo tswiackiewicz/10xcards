@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
+import { toGenericAuthError } from "@/lib/auth/errors";
 
 export const POST: APIRoute = async (context) => {
   const form = await context.request.formData();
@@ -13,7 +14,9 @@ export const POST: APIRoute = async (context) => {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    return context.redirect(`/auth/signin?error=${encodeURIComponent(error.message)}`);
+    // Never Supabase's verbatim message — it is an account-existence oracle and it ends
+    // up in the URL, Referer headers, history and Cloudflare logs. See @/lib/auth/errors.
+    return context.redirect(`/auth/signin?error=${encodeURIComponent(toGenericAuthError("signin", error))}`);
   }
 
   // S-05: a flagged (pending-deletion) account still signs in — the live session is

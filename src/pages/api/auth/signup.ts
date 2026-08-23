@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
+import { isUserAlreadyExists, toGenericAuthError } from "@/lib/auth/errors";
 
 export const POST: APIRoute = async (context) => {
   const form = await context.request.formData();
@@ -12,9 +13,13 @@ export const POST: APIRoute = async (context) => {
   }
   const { error } = await supabase.auth.signUp({ email, password });
 
-  if (error) {
-    return context.redirect(`/auth/signup?error=${encodeURIComponent(error.message)}`);
+  if (error && !isUserAlreadyExists(error)) {
+    return context.redirect(`/auth/signup?error=${encodeURIComponent(toGenericAuthError("signup", error))}`);
   }
 
+  // An already-registered address lands here too: the observable response must match a fresh
+  // signup, or the redirect target is itself the oracle the generic copy was meant to close.
+  // GoTrue validates the password before it looks the address up (verified against the local
+  // stack), so a weak-password probe still fails on both branches and distinguishes nothing.
   return context.redirect("/auth/confirm-email");
 };

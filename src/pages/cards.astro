@@ -4,6 +4,12 @@ import SavedCardsView from "@/components/flashcards/SavedCardsView";
 import { createClient } from "@/lib/supabase";
 import type { Flashcard } from "@/lib/flashcards/schemas";
 
+// Defence in depth: the middleware pathname matcher already gates this route,
+// but each protected page re-checks so the gate does not depend on it alone.
+if (!Astro.locals.user) {
+  return Astro.redirect("/auth/signin");
+}
+
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 
 let cards: Flashcard[] = [];

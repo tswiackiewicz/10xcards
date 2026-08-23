@@ -67,6 +67,11 @@ cp .env.example .dev.vars
 npm run dev
 ```
 
+> **Reach it as `localhost`, not as a LAN address.** Session cookies are set with `secure: true`,
+> and a browser only treats `localhost` as a secure context — so opening the dev server as
+> `http://192.168.x.x:4321` from a phone or another machine silently drops every auth cookie, with
+> no error to explain it. Put a TLS-terminating tunnel in front if you need real-device testing.
+
 ## Available Scripts
 
 - `npm run dev` - Start development server (Cloudflare workerd runtime)
@@ -81,13 +86,32 @@ npm run dev
 ```md
 .
 ├── src/
-│ ├── layouts/ # Astro layouts
-│ ├── pages/ # Astro pages
+│ ├── pages/ # Astro pages (SSR)
 │ │ └── api/ # API endpoints
-│ ├── components/ # UI components (Astro & React)
-│ └── assets/ # Static assets
-├── public/ # Public assets
-├── wrangler.jsonc # Cloudflare Workers config
+│ ├── layouts/ # Astro layouts
+│ ├── components/ # UI components (Astro & React islands)
+│ │ └── ui/ # shadcn/ui primitives
+│ ├── lib/ # Domain logic, Supabase clients, helpers
+│ ├── db/ # Generated Supabase types
+│ ├── styles/ # Global stylesheet
+│ └── middleware.ts # Auth gate + security headers
+├── supabase/
+│ ├── migrations/ # Schema, applied by `supabase start` and by CI
+│ ├── seed.sql # Local seed data
+│ └── config.toml # Local stack config (never pushed to production)
+├── tests/
+│ ├── unit/ # Vitest, hermetic
+│ ├── integration/ # Vitest, against the local Supabase stack
+│ ├── e2e/ # Playwright
+│ ├── helpers/ # Shared test helpers
+│ └── setup/ # Env population for both runners
+├── packages/
+│ └── code-review/ # Standalone AI code-review tool (own lockfile, not a workspace)
+├── scripts/ # verify-rls.mjs — RLS regression guard
+├── context/ # Planning and research documents
+├── public/ # Static assets served as-is
+├── astro.config.mjs # Astro config, incl. the CSP
+└── wrangler.jsonc # Cloudflare Workers config
 ```
 
 ## Supabase Configuration
@@ -104,26 +128,21 @@ Requires [Docker](https://www.docker.com/) and ~7 GB RAM.
 cp .env.example .env
 ```
 
-2. Initialize the local Supabase project (creates a `supabase/` config folder):
-
-```bash
-npx supabase init
-```
-
-3. Start the local stack (downloads Docker images on first run):
+2. Start the local stack (downloads Docker images on first run, and applies every migration
+   under `supabase/migrations/` to a fresh database):
 
 ```bash
 npx supabase start
 ```
 
-4. Copy the credentials printed by the CLI into your `.env` and `.dev.vars`:
+3. Copy the credentials printed by the CLI into your `.env` and `.dev.vars`:
 
 ```
 SUPABASE_URL=http://127.0.0.1:54321
 SUPABASE_KEY=<anon key from CLI output>
 ```
 
-5. To stop the stack when done:
+4. To stop the stack when done:
 
 ```bash
 npx supabase stop
@@ -131,7 +150,26 @@ npx supabase stop
 
 The local Studio UI is available at `http://localhost:54323`.
 
-No database tables or migrations are required — this project uses Supabase Auth's built-in `auth.users` table only.
+The schema lives in `supabase/migrations/` and is applied for you: `npx supabase start` runs every migration against the fresh local stack, and `npx supabase db reset` re-applies them from scratch. Production schema is **not** applied by a local command — the CI `deploy` job runs `supabase db push` on every push to `master`, so a migration is not live in production until that job has run.
+
+### What `supabase/config.toml` does and does not govern
+
+`supabase/config.toml` configures the **local** stack only. CI pushes `supabase/migrations/**` and
+nothing else, so no value in that file has ever reached production. In particular
+`minimum_password_length`, the empty `password_requirements`, `enable_confirmations = false`, the
+disabled captcha and the whole `[auth.rate_limit]` block describe your laptop, not the deployed app.
+
+Production auth policy lives in the Supabase dashboard (Authentication → Providers / Rate limits) and
+**this repository does not attest to it**. Before treating password strength, email confirmation or
+auth rate limiting as configured in production, read the real values there. If they turn out weaker
+than the local config implies, that is a finding to raise, not something to quietly change — altering
+production auth policy is its own decision.
+
+One related fact that _is_ verified:
+
+- `SITE_URL` is set as a GitHub Actions repository variable and is injected at build time
+  (`ci.yml`, read by `astro.config.mjs` via `loadEnv`). It is what populates the `og:` tags; the guard
+  in `src/layouts/Layout.astro` correctly suppresses them if it is ever unset.
 
 ### Using a cloud Supabase project instead
 
@@ -159,14 +197,14 @@ Users can then sign in immediately after sign-up without clicking a confirmation
 
 ### Auth routes
 
-| Route                 | Description                                                             |
-| --------------------- | ----------------------------------------------------------------------- |
-| `/auth/signin`        | Email/password sign-in form                                             |
-| `/auth/signup`        | Email/password sign-up form                                             |
-| `/auth/confirm-email` | Post-signup "check your inbox" page                                     |
-| `/dashboard`          | Example protected page (redirects to `/auth/signin` if unauthenticated) |
+| Route                 | Description                                                                                                         |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `/auth/signin`        | Email/password sign-in form                                                                                         |
+| `/auth/signup`        | Email/password sign-up form                                                                                         |
+| `/auth/confirm-email` | Post-signup "check your inbox" page                                                                                 |
+| `/dashboard`          | Product hub — links to generate, create, browse, study and account (redirects to `/auth/signin` if unauthenticated) |
 
-Route protection is handled in `src/middleware.ts`. Add paths to the `PROTECTED_ROUTES` array there to require authentication.
+Route protection is enforced twice, deliberately: `src/middleware.ts` gates every path in its `PROTECTED_ROUTES` array, and each protected page independently redirects when `Astro.locals.user` is null. Add a new protected path to both — the middleware array and the page's own guard.
 
 ## Deployment
 
@@ -190,11 +228,12 @@ Set `SUPABASE_URL` and `SUPABASE_KEY` as secrets in your Cloudflare dashboard or
 
 GitHub Actions runs on every push and PR to `master`:
 
-- **`ci`** (the only required check) — `astro sync`, `actionlint`, lint, Vitest and Playwright against a local Supabase stack, build, and a Supabase migration dry-run. `SUPABASE_URL` and `SUPABASE_KEY` are **not** repository secrets: the workflow reads them from `supabase status` into `$GITHUB_ENV`. Repo secrets it does need: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_ID`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
+- **`ci`** (the only required check) — `astro sync`, `actionlint`, lint, Vitest and Playwright against a local Supabase stack, and build. `supabase start` applies every migration to that fresh local stack, so a migration that cannot apply at all still fails the PR. `SUPABASE_URL` and `SUPABASE_KEY` are **not** repository secrets: the workflow reads them from `supabase status` into `$GITHUB_ENV`, so `ci` needs no repository secret of its own.
+- **`migration-dry-run`** — `supabase db push --dry-run` against the **production** project. Runs on push to `master` only, never on a `pull_request`, so the production credentials (`SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_ID`) are never in scope in a job built from a PR branch. **The trade, stated plainly:** divergence against production's actual schema state is now caught _post-merge_ on `master`, not pre-merge in the PR.
 - **`code-review-package`** — lint, typecheck and tests for `packages/code-review`, in parallel with `ci` and not required.
 - **AI code review** (`.github/workflows/ai-code-review.yml`) — reviews every non-draft, same-repo PR against a five-criterion rubric (defined in `packages/code-review/docs/criteria.md`), posts a sticky comment and applies `ai-cr:passed` / `ai-cr:failed`. Advisory; never blocks a merge. Needs the `OPENROUTER_API_KEY` repo secret.
 
-On push to `master`, `deploy` pushes pending Supabase migrations and then `wrangler deploy`.
+On push to `master`, `deploy` waits for both `ci` and `migration-dry-run`, then pushes pending Supabase migrations and runs `wrangler deploy`. It needs `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_ID`, `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
 
 ## License
 

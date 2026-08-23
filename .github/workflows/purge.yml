@@ -1,10 +1,14 @@
 name: Purge deleted accounts
 
-# S-05 Phase 3: daily hard-delete of accounts past the 30-day retention window.
+# Daily hard-delete of accounts past the 30-day retention window.
 # Posts to the bearer-guarded /api/cron/purge route. Requires two repo secrets:
 #   PURGE_URL          — full production URL, e.g. https://<app>/api/cron/purge
 #   CRON_PURGE_SECRET  — must match the Worker's CRON_PURGE_SECRET secret
 # The route is idempotent, so a missed or double run is safe.
+
+# No GITHUB_TOKEN use at all — the job only POSTs to the production Worker with its
+# own bearer secret — so the token is stripped to nothing.
+permissions: {}
 
 on:
   schedule:

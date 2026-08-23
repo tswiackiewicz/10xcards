@@ -5,6 +5,12 @@ import { createClient } from "@/lib/supabase";
 import { getNextCard } from "@/lib/flashcards/study";
 import type { NextCardResponse } from "@/lib/flashcards/schemas";
 
+// Defence in depth: the middleware pathname matcher already gates this route,
+// but each protected page re-checks so the gate does not depend on it alone.
+if (!Astro.locals.user) {
+  return Astro.redirect("/auth/signin");
+}
+
 // Middleware (PROTECTED_ROUTES) already gated this route. Server-load the first card
 // (RLS-scoped) so the island renders it without a mount fetch; it fetches subsequent
 // cards from /api/flashcards/study/next after each grade.
